@@ -1,0 +1,10 @@
+# File produced by AccuTrans 3D
+
+newmtl Object_000
+  Ns 1.0
+  d 1
+  illum 2
+  Kd 0.7843 0.7843 0.7843
+  Ka 0 0 0
+  Ks 0 0 0
+  map_Kd G:\ME\TurboSquid\Crates\WdCrt_c.jpg
