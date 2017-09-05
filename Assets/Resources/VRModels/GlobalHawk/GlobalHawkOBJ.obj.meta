@@ -1,0 +1,217 @@
+fileFormatVersion: 2
+guid: 147d6deec2cd3458b88617e32c459d0d
+timeCreated: 1503886486
+licenseType: Free
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: group28_group29_pCube10
+    100004: group28_group29_pCube12
+    100006: group28_group29_pCube4
+    100008: group28_group29_pCube5
+    100010: group28_group29_pCube6
+    100012: group28_group29_pCube9
+    100014: group28_group29_pCylinder1
+    100016: group28_group29_pCylinder10
+    100018: group28_group29_pCylinder11
+    100020: group28_group29_pCylinder12
+    100022: group28_group29_pCylinder17
+    100024: group28_group29_pCylinder18
+    100026: group28_group29_pCylinder19
+    100028: group28_group29_pCylinder2
+    100030: group28_group29_pCylinder20
+    100032: group28_group29_pCylinder4
+    100034: group28_group29_pCylinder5
+    100036: group28_group29_pCylinder6
+    100038: group28_group29_pCylinder8
+    100040: group28_group29_pCylinder9
+    100042: group28_group29_polySurface25
+    100044: group28_group29_polySurface26
+    100046: group28_group29_pTorus1
+    100048: group28_group29_pTorus2
+    100050: group28_group29_pTorus3
+    100052: group28_group29_pTorus4
+    100054: group28_group29_pTorus5
+    100056: polySurface7_group28_group29
+    400000: //RootNode
+    400002: group28_group29_pCube10
+    400004: group28_group29_pCube12
+    400006: group28_group29_pCube4
+    400008: group28_group29_pCube5
+    400010: group28_group29_pCube6
+    400012: group28_group29_pCube9
+    400014: group28_group29_pCylinder1
+    400016: group28_group29_pCylinder10
+    400018: group28_group29_pCylinder11
+    400020: group28_group29_pCylinder12
+    400022: group28_group29_pCylinder17
+    400024: group28_group29_pCylinder18
+    400026: group28_group29_pCylinder19
+    400028: group28_group29_pCylinder2
+    400030: group28_group29_pCylinder20
+    400032: group28_group29_pCylinder4
+    400034: group28_group29_pCylinder5
+    400036: group28_group29_pCylinder6
+    400038: group28_group29_pCylinder8
+    400040: group28_group29_pCylinder9
+    400042: group28_group29_polySurface25
+    400044: group28_group29_polySurface26
+    400046: group28_group29_pTorus1
+    400048: group28_group29_pTorus2
+    400050: group28_group29_pTorus3
+    400052: group28_group29_pTorus4
+    400054: group28_group29_pTorus5
+    400056: polySurface7_group28_group29
+    2300000: group28_group29_pCube10
+    2300002: group28_group29_pCube12
+    2300004: group28_group29_pCube4
+    2300006: group28_group29_pCube5
+    2300008: group28_group29_pCube6
+    2300010: group28_group29_pCube9
+    2300012: group28_group29_pCylinder1
+    2300014: group28_group29_pCylinder10
+    2300016: group28_group29_pCylinder11
+    2300018: group28_group29_pCylinder12
+    2300020: group28_group29_pCylinder17
+    2300022: group28_group29_pCylinder18
+    2300024: group28_group29_pCylinder19
+    2300026: group28_group29_pCylinder2
+    2300028: group28_group29_pCylinder20
+    2300030: group28_group29_pCylinder4
+    2300032: group28_group29_pCylinder5
+    2300034: group28_group29_pCylinder6
+    2300036: group28_group29_pCylinder8
+    2300038: group28_group29_pCylinder9
+    2300040: group28_group29_polySurface25
+    2300042: group28_group29_polySurface26
+    2300044: group28_group29_pTorus1
+    2300046: group28_group29_pTorus2
+    2300048: group28_group29_pTorus3
+    2300050: group28_group29_pTorus4
+    2300052: group28_group29_pTorus5
+    2300054: polySurface7_group28_group29
+    3300000: group28_group29_pCube10
+    3300002: group28_group29_pCube12
+    3300004: group28_group29_pCube4
+    3300006: group28_group29_pCube5
+    3300008: group28_group29_pCube6
+    3300010: group28_group29_pCube9
+    3300012: group28_group29_pCylinder1
+    3300014: group28_group29_pCylinder10
+    3300016: group28_group29_pCylinder11
+    3300018: group28_group29_pCylinder12
+    3300020: group28_group29_pCylinder17
+    3300022: group28_group29_pCylinder18
+    3300024: group28_group29_pCylinder19
+    3300026: group28_group29_pCylinder2
+    3300028: group28_group29_pCylinder20
+    3300030: group28_group29_pCylinder4
+    3300032: group28_group29_pCylinder5
+    3300034: group28_group29_pCylinder6
+    3300036: group28_group29_pCylinder8
+    3300038: group28_group29_pCylinder9
+    3300040: group28_group29_polySurface25
+    3300042: group28_group29_polySurface26
+    3300044: group28_group29_pTorus1
+    3300046: group28_group29_pTorus2
+    3300048: group28_group29_pTorus3
+    3300050: group28_group29_pTorus4
+    3300052: group28_group29_pTorus5
+    3300054: polySurface7_group28_group29
+    4300000: group28_group29_pCube10
+    4300002: group28_group29_pCube12
+    4300004: group28_group29_pCube4
+    4300006: group28_group29_pCube5
+    4300008: group28_group29_pCube6
+    4300010: group28_group29_pCube9
+    4300012: group28_group29_pCylinder1
+    4300014: group28_group29_pCylinder10
+    4300016: group28_group29_pCylinder11
+    4300018: group28_group29_pCylinder12
+    4300020: group28_group29_pCylinder17
+    4300022: group28_group29_pCylinder18
+    4300024: group28_group29_pCylinder19
+    4300026: group28_group29_pCylinder2
+    4300028: group28_group29_pCylinder20
+    4300030: group28_group29_pCylinder4
+    4300032: group28_group29_pCylinder5
+    4300034: group28_group29_pCylinder6
+    4300036: group28_group29_pCylinder8
+    4300038: group28_group29_pCylinder9
+    4300040: group28_group29_polySurface25
+    4300042: group28_group29_polySurface26
+    4300044: group28_group29_pTorus1
+    4300046: group28_group29_pTorus2
+    4300048: group28_group29_pTorus3
+    4300050: group28_group29_pTorus4
+    4300052: group28_group29_pTorus5
+    4300054: polySurface7_group28_group29
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
