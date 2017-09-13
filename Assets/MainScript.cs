@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -37,7 +37,7 @@ public class MainScript : MonoBehaviour
 				string objPath = loaders[i].getPath();
 				string modelName = objPath.Substring(objPath.LastIndexOf("/") + 1, objPath.LastIndexOf(".obj") - objPath.LastIndexOf("/") - 1);
 
-				debugTextString += loaders[i].getLoadPercentage() + "% , " + modelName + "\n";
+				debugTextString += (int)loaders[i].getLoadPercentage() + "% , " + modelName + "\n";
 
 				loaders[i].Update();
 
@@ -79,14 +79,16 @@ public class MainScript : MonoBehaviour
 
 			//"Bennu Radar",
 			"GlobalHawk/GlobalHawkOBJ",
-			"ACES/acesjustforroomshow",
-			"JunoOBJ/Juno",
-			"Rocket Launcher/rocketlauncher",
-			//"r8_gt_obj/r8_gt_obj",
+			//"ACES/acesjustforroomshow",
+			//"JunoOBJ/Juno",
+			//"Rocket Launcher/rocketlauncher",
+			//“r8_gt_obj/r8_gt_obj",
 			//"Crate1_OBJ/Crate1",
-
+			//"l35two5i0kjk-ModernDesktop/ModernDeskOBJ",
+			//"e8dvd1ke4mps-001/luxury house interior",
+			//"Paris/Paris2010_0"
 		};
-			
+
 		string modelPath = Application.dataPath + "/Resources/VRModels/";
 		//string resourcePath = "VRModels/";
 
@@ -135,23 +137,10 @@ public class MainScript : MonoBehaviour
 		}
 	}
 
-	private Material getMaterialByName(string name, List<Material> materials)
-	{
-		foreach (Material mat in materials)
-		{
-			if (mat.name == name)
-			{
-				return mat;
-			}
-		}
-
-		return new Material(Shader.Find("Standard"));
-	}
-
 	private void processModel(OBJThread loader)
 	{
 		List<List<Mesh>> totalMeshes = loader.getModelData();
-		List<Material> totalMaterials = loader.getTotalMaterials();
+		Dictionary<string, Material> totalMaterials = loader.getTotalMaterials();
 		List<string> objectNames = loader.getObjectNames();
 
 		string objPath = loader.getPath();
@@ -177,13 +166,20 @@ public class MainScript : MonoBehaviour
 				subMesh.AddComponent<MeshFilter>();
 				subMesh.AddComponent<MeshRenderer>();
 				subMesh.GetComponent<MeshFilter>().mesh = totalMeshes[i][j];
-				subMesh.GetComponent<Renderer>().materials = new Material[1] { getMaterialByName(totalMeshes[i][j].name, totalMaterials) };
+
+				Material mat;
+				if (!totalMaterials.TryGetValue(totalMeshes[i][j].name, out mat))
+				{
+					mat = new Material(Shader.Find("Standard"));
+				}
+
+				subMesh.GetComponent<Renderer>().materials = new Material[1] { mat };
 
 				matCount++;
 			}
 		}
 
-		model = MergeMeshes(model);
+		model = MergeMeshes(model, true);
 
 		//============================================================
 
@@ -218,7 +214,7 @@ public class MainScript : MonoBehaviour
 		loaders.Remove(loader);
 	}
 
-	private GameObject MergeMeshes(GameObject parentOfObjectsToCombine)
+	private GameObject MergeMeshes(GameObject parentOfObjectsToCombine, bool useMaterial = true)
 	{
 		if (parentOfObjectsToCombine == null) return null;
 
@@ -276,10 +272,19 @@ public class MainScript : MonoBehaviour
 				var filter = combinedObject.AddComponent<MeshFilter>();
 				filter.sharedMesh = combinedMesh;
 				var renderer = combinedObject.AddComponent<MeshRenderer>();
-				renderer.sharedMaterial = entry.Key;
+
+				if (useMaterial)
+				{
+					renderer.sharedMaterial = entry.Key;
+				}
+				else
+				{
+					renderer.sharedMaterial = new Material(Shader.Find("Standard"));
+				}
+
 				combinedObjects.Add(combinedObject);
 
-				combinedObject.AddComponent<BoxCollider>(); // Add Box Collider for physics
+				//combinedObject.AddComponent<BoxCollider>(); // Add Box Collider for physics
 			}
 		}
 
@@ -297,7 +302,7 @@ public class MainScript : MonoBehaviour
 		parentOfObjectsToCombine.SetActive(false);
 		parentOfObjectsToCombine.transform.position = originalPosition;
 		resultGO.transform.position = originalPosition;
-		resultGO.AddComponent<Rigidbody>(); // Add gravity rules for physics
+		//resultGO.AddComponent<Rigidbody>(); // Add gravity rules for physics
 
 		Destroy(parentOfObjectsToCombine);
 		return resultGO;
