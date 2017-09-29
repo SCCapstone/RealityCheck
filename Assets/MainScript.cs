@@ -16,6 +16,9 @@ public class MainScript : MonoBehaviour
 	private List<OBJThread> loaders;
 	private List<GameObject> sceneModels;
 	private List<Bounds> boundsList;
+	private bool startedLoad = false;
+	private float startTime;
+	private float endTime;
 
 	// Use this for initialization
 	void Start()
@@ -46,11 +49,23 @@ public class MainScript : MonoBehaviour
 					processModel(loaders[i]);
 					i--;
 				}
+			endTime = Time.time;
 			}
+		}
+
+		if (startedLoad) {
+			debugTextString += "Delta (ms) " + (endTime - startTime)*1000;
 		}
 
 		debugText.GetComponent<Text>().text = debugTextString;
 
+
+		// listen for enter key to start loading models
+		if (!startedLoad && Input.GetKeyUp(KeyCode.Return)) {
+			startTime = Time.time;
+			DoStuff();
+			startedLoad = true;
+		}
 		/*
 
 		for (int i = 0; i < sceneModels.Count; i++)
