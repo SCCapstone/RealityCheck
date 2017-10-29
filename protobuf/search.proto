@@ -1,0 +1,24 @@
+syntax="proto3";
+
+package search;
+
+import "asset.proto";
+
+
+message Hit {
+    asset.Asset asset = 1;
+    float score = 2;
+}
+
+message SearchResult {
+    int32 time = 1;
+    int32 count = 2;
+    float max_score = 3;
+    repeated Hit hits = 4;
+}
+
+message SearchRequest {
+    string query = 1;
+    int32 page_number = 2;
+    int32 result_per_page = 3;
+}
