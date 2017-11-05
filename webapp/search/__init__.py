@@ -75,27 +75,27 @@ class Timer:
 
     def reset(self):
         self._running = True
-        self._start = datetime.now()
+        self._start = datetime.datetime.now()
 
     def start(self):
         assert self._running is False
         self._running = True
-        self._start = datetime.now()
+        self._start = datetime.datetime.now()
 
     def stop(self):
         assert self._running is True
-        self._end = datetime.now()
+        self._end = datetime.datetime.now()
         self._running = False
 
     def delta(self) -> datetime:
         if self._running:
-            return (datetime.now() - self._start)
+            return (datetime.datetime.now() - self._start)
         else:
             return (self._end - self._start)
 
     def elapsed_ms(self) -> float:
         if self._running:
-            diff = datetime.now() - self._start
+            diff = datetime.datetime.now() - self._start
         else:
             diff = self._end - self._start
         ms = (diff.days * 86400000) + (diff.seconds * 1000) + (diff.microseconds / 1000)

@@ -9,7 +9,7 @@ from org.apache.lucene.store import SimpleFSDirectory
 
 from search import Timer, AssetFactory
 
-import generated.asset_pb2 as assetpb
+#import generated.asset_pb2 as assetpb
 import generated.search_pb2 as searchpb
 from common import singleton_object, Singleton, Paginator
 
@@ -31,6 +31,7 @@ class SearchService(metaclass=Singleton):
     def search(self, search_request: searchpb.SearchRequest) -> searchpb.SearchResult:
         assert search_request is not None
         assert search_request.query is not None
+        assert len(search_request.query) > 0
 
         query = MultiFieldQueryParser.parse(self.parser, search_request.query)
 
@@ -50,7 +51,7 @@ class SearchService(metaclass=Singleton):
         # bounds for pagination
         bounds = Paginator.calculate(hits.totalHits, page_num, page_size)
 
-        res.max_score = None
+        res.max_score = 0.0
 
         # iterate all hits within bounds
         for i in range(bounds[0] - 1, bounds[1]):
@@ -59,10 +60,10 @@ class SearchService(metaclass=Singleton):
             h = res.hits.add()
             h.score = hit.score
 
-            asset = AssetFactory.from_document(self.searcher.doc(hit.doc))
-            h.asset = asset
+            #asset = AssetFactory.from_document(self.searcher.doc(hit.doc))
+            h.asset.CopyFrom(AssetFactory.from_document(self.searcher.doc(hit.doc)))
 
-            if res.max_score is None or h.score > res.max_score:
+            if res.max_score is 0.0 or h.score > res.max_score:
                 res.max_score = h.score
 
         return res
