@@ -1,0 +1,26 @@
+syntax="proto3";
+
+package asset;
+
+
+message Tag {
+    enum Origin {
+        SCRAPED = 0;
+        VISION = 1;
+        AI = 2;
+        MANUAL = 3;
+    }
+    string value = 1;
+    Origin origin = 2;
+}
+
+message Asset {
+    int32 id = 1;
+
+    string name = 2;
+    string description = 3;
+    string filename = 4;
+
+    repeated Tag tags = 5;
+}
+

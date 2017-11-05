@@ -1,0 +1,159 @@
+{
+  "models": [
+    {
+      "name": "Airbus A310",
+      "tags": [
+        "plane",
+        "airbus",
+        "flying",
+        "transport"
+      ],
+      "filename": "airbus_a310.zip"
+    },
+    {
+      "name": "Bar Stool",
+      "tags": [
+        "bar",
+        "stool",
+        "seating",
+        "counter"
+      ],
+      "filename": "bar_stool.zip"
+    },
+    {
+      "name": "basketball",
+      "tags": [
+        "basket",
+        "ball",
+        "sport",
+        "workout"
+      ],
+      "filename": "basketball.zip"
+    },
+    {
+      "name": "bear",
+      "tags": [
+        "mammal",
+        "bear",
+        "animal",
+        "scary"
+      ],
+      "filename": "bear.zip"
+    },
+    {
+      "name": "campfire",
+      "tags": [
+        "fire",
+        "camp",
+        "outdoors",
+        "light"
+      ],
+      "filename": "campfire.zip"
+    },
+    {
+      "name": "drone",
+      "tags": [
+        "military",
+        "robot",
+        "plane",
+        "UAV"
+      ],
+      "filename": "drone.zip"
+    },
+    {
+      "name": "indoor plant",
+      "tags": [
+        "plant",
+        "indoors",
+        "green",
+        "potted"
+      ],
+      "filename": "indoor_plant.zip"
+    },
+    {
+      "name": "lamp post",
+      "tags": [
+        "outdoor",
+        "light"
+      ],
+      "filename": "lamp_post.zip"
+    },
+    {
+      "name": "low poly tree",
+      "tags": [
+        "outdoor",
+        "plant",
+        "green"
+      ],
+      "filename": "low_poly_tree.zip"
+    },
+    {
+      "name": "microwave",
+      "tags": [
+        "kitchen",
+        "appliance",
+        "cooking"
+      ],
+      "filename": "microwave.zip"
+    },
+    {
+      "name": "pine tree",
+      "tags": [
+        "plant",
+        "indoors",
+        "green"
+      ],
+      "filename": "pine_tree.zip"
+    },
+    {
+      "name": "rocking chair",
+      "tags": [
+        "seating",
+        "porch",
+        "outdoor"
+      ],
+      "filename": "rocking_chair.zip"
+    },
+    {
+      "name": "school chair",
+      "tags": [
+        "seating"
+      ],
+      "filename": "school_chair.zip"
+    },
+    {
+      "name": "soccer ball",
+      "tags": [
+        "sport",
+        "workout"
+      ],
+      "filename": "soccer_ball.zip"
+    },
+    {
+      "name": "sofa",
+      "tags": [
+        "seating",
+        "couch"
+      ],
+      "filename": "sofa.zip"
+    },
+    {
+      "name": "sun chair",
+      "tags": [
+        "seating",
+        "porch",
+        "outdoor"
+      ],
+      "filename": "sun_chair.zip"
+    },
+    {
+      "name": "treadmill",
+      "tags": [
+        "workout",
+        "sport",
+        "run"
+      ],
+      "filename": "treadmill.zip"
+    }
+  ]
+}
