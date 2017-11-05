@@ -1,0 +1,11 @@
+version: '2'
+services:
+
+  flaskserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+
+
