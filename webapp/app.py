@@ -26,7 +26,7 @@ def search():
         return None
 
 
-@app.route('/files/<string:fname>')
+@app.route('/api/v1/files/<string:fname>')
 def return_files_tut(fname: str):
     try:
         return send_file('models/%s' % fname,
