@@ -15,7 +15,7 @@ using Google.Protobuf;
 
 public sealed class SearchService: Singleton<SearchService> {
 
-    private static string HOST = "http://localhost:8001/api/v1/";
+    private static string HOST = "http://45.55.197.39:8001/api/v1/";
     private static string SEARCH_URI = HOST + "search";
     private static string DOWNLOAD_URI = HOST + "files/";
     

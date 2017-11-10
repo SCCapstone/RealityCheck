@@ -7,7 +7,6 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
-using SimpleJSON;
 
 public class MainScript : MonoBehaviour
 {
