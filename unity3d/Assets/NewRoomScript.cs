@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 public class NewRoomScript : MonoBehaviour {
 
     public GameObject PlayerText;
-
+    private bool isHold = false;
     private string pauseText;
 
 	// Use this for initialization
@@ -21,14 +21,19 @@ public class NewRoomScript : MonoBehaviour {
     {
         if (Input.GetButton("Start"))
         {
-            if (PlayerText.GetComponent<Text>().text == pauseText)
+            if (PlayerText.GetComponent<Text>().text == pauseText && isHold == false)
             {
                 PlayerText.GetComponent<Text>().text = "";
             }
             else
             {
+              if(isHold == false)
                 PlayerText.GetComponent<Text>().text = pauseText;
             }
+            isHold = true;
+        }
+        if(!Input.GetButton("Start")) {
+          isHold  = false;
         }
 
         if (Input.GetButton("AButton"))
