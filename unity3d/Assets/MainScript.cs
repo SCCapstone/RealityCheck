@@ -41,9 +41,25 @@ public class MainScript : MonoBehaviour
 		resultsPanel.SetActive(false);
 	}
 
-	// Click Handler for search results
-	// Loads model based on button index
-	void ResultClickHandle(int index) {
+    // Update is called once per frame
+    void Update()
+    {
+        ModelLoaderService.Instance.Update();
+
+        // press tab to show menu
+        if (Input.GetKeyUp(KeyCode.Tab))
+        {
+            var state = fpsController.GetComponent<RigidbodyFirstPersonController>().enabled;
+            fpsController.GetComponent<RigidbodyFirstPersonController>().enabled = !state;
+
+            panel.SetActive(state);
+            resultsPanel.SetActive(state);
+        }
+    }
+
+    // Click Handler for search results
+    // Loads model based on button index
+    void ResultClickHandle(int index) {
 		debugText.GetComponent<Text>().text = "Loading... " + searchResults.Hits[index].Asset.Name + "\n" + Application.temporaryCachePath;
 
 		SearchService.Instance.DownloadModel(searchResults.Hits[index], nm => {
@@ -102,19 +118,8 @@ public class MainScript : MonoBehaviour
 		});
 	}
 
-	// Update is called once per frame
-	void Update()
-	{
-		ModelLoaderService.Instance.Update();
+    public void GoToNewBoxRoom()
+    {
 
-		// press tab to show menu
-		if (Input.GetKeyUp(KeyCode.Tab)) {
-			var state = fpsController.GetComponent<RigidbodyFirstPersonController>().enabled;
-			fpsController.GetComponent<RigidbodyFirstPersonController>().enabled = !state;
-
-			panel.SetActive(state);
-			resultsPanel.SetActive(state);
-		}
-	}
-
+    }
 }
