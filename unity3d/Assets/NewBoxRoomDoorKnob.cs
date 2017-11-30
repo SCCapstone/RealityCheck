@@ -11,6 +11,7 @@ public class NewBoxRoomDoorKnob : MonoBehaviour {
     public GameObject KnobGlow;
     public GameObject PlayerText;
 
+    private GameObject rayCastEndSphere;
     private string onCollidedText;
 
     // Use this for initialization
@@ -21,10 +22,27 @@ public class NewBoxRoomDoorKnob : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+        if (null == rayCastEndSphere)
+        {
+            rayCastEndSphere = GameObject.Find("rayCastEndSphere");
+        }
+
         SphereCollider sphereBox = GetComponent<SphereCollider>();
         Vector3 leftPos = leftHand.transform.position;
         Vector3 rightPos = rightHand.transform.position;
-        if (sphereBox.bounds.Contains(leftPos) || sphereBox.bounds.Contains(rightPos))
+
+        Vector3 rayPos;
+        if (null == rayCastEndSphere)
+        {
+            rayPos = new Vector3(-1000, -1000, -1000);
+        }
+        else
+        {
+            rayPos = rayCastEndSphere.transform.position;
+        }
+        
+        if (sphereBox.bounds.Contains(leftPos) || sphereBox.bounds.Contains(rightPos)
+            || sphereBox.bounds.Contains(rayPos))
         {
             KnobGlow.SetActive(true);
             PlayerText.GetComponent<Text>().text = onCollidedText;

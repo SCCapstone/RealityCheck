@@ -308,8 +308,8 @@ public class OVRPlayerController : MonoBehaviour
 		float rotateInfluence = SimulationRate * Time.deltaTime * RotationAmount * RotationScaleMultiplier;
 
 #if !UNITY_ANDROID || UNITY_EDITOR
-		if (!SkipMouseRotation)
-			euler.y += Input.GetAxis("Mouse X") * rotateInfluence * 3.25f;
+		//if (!SkipMouseRotation)
+			//euler.y += Input.GetAxis("Mouse X") * rotateInfluence * 3.25f;
 #endif
 
 		moveInfluence = Acceleration * 0.1f * MoveScale * MoveScaleMultiplier;
@@ -334,7 +334,7 @@ public class OVRPlayerController : MonoBehaviour
 
 		Vector2 secondaryAxis = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
 
-		euler.y += secondaryAxis.x * rotateInfluence;
+		//euler.y += secondaryAxis.x * rotateInfluence;
 
 		transform.rotation = Quaternion.Euler(euler);
 	}
