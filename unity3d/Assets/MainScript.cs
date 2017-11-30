@@ -22,6 +22,12 @@ public class MainScript : MonoBehaviour
 
 	public GameObject fpsController;
 
+    public GameObject rightHand;
+    public GameObject leftHand;
+
+    private GameObject rayCastEndSphere;
+    private LineRenderer lineRenderer;
+
 	private List<OBJThread> loaders;
 	private List<GameObject> sceneModels;
 	private List<Bounds> boundsList;
@@ -39,7 +45,21 @@ public class MainScript : MonoBehaviour
 
 		panel.SetActive(false);
 		resultsPanel.SetActive(false);
-	}
+
+        lineRenderer = gameObject.AddComponent<LineRenderer>();
+        lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
+        lineRenderer.widthMultiplier = 0.01f;
+        lineRenderer.positionCount = 2;
+
+        lineRenderer.startColor = Color.blue;
+        lineRenderer.endColor = Color.blue;
+
+        rayCastEndSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        rayCastEndSphere.GetComponent<MeshRenderer>().material.color = Color.blue;
+        rayCastEndSphere.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+        rayCastEndSphere.GetComponent<SphereCollider>().enabled = false;
+        rayCastEndSphere.name = "rayCastEndSphere";
+    }
 
     // Update is called once per frame
     void Update()
@@ -55,6 +75,23 @@ public class MainScript : MonoBehaviour
             panel.SetActive(state);
             resultsPanel.SetActive(state);
         }
+
+        RaycastHit hit;
+
+        Vector3 rotation = rightHand.transform.localEulerAngles;
+
+        Vector3 forwardVector = Quaternion.Euler(rotation) * Vector3.forward;
+
+        if(Physics.Raycast(rightHand.transform.position, forwardVector, out hit))
+        {
+            float size = Mathf.Clamp(hit.distance * 0.01f, 0.01f, 1f);
+            rayCastEndSphere.transform.localScale = new Vector3(size, size, size);
+            rayCastEndSphere.transform.position = hit.point;
+            lineRenderer.SetPosition(0, rightHand.transform.position);
+            lineRenderer.SetPosition(1, hit.point);
+        }
+
+
     }
 
     // Click Handler for search results
