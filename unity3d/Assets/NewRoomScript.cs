@@ -126,11 +126,11 @@ public class NewRoomScript : MonoBehaviour {
                 activateMenu();
             }
         }
-        else if (Input.GetButtonDown("XButton"))
+        else if (Input.GetButtonDown("XButton")) //Also Start Button
         {
-            MenuPanel.SetActive(false);
+            MenuPanel.SetActive(true);
             PropertiesPanel.SetActive(false);
-            SearchResultsPanel.SetActive(true);
+            SearchResultsPanel.SetActive(false);
         }
         else if (Input.GetButtonDown("BButton"))
         {
@@ -383,6 +383,11 @@ public class NewRoomScript : MonoBehaviour {
         {
             SceneManager.LoadScene("scene", LoadSceneMode.Single);
         }
+        else if (menuHoverButton == "Add Model")
+        {
+            MenuPanel.SetActive(false);
+            SearchResultsPanel.SetActive(true);
+        }
         else if (menuHoverButton == "Close")
         {
             MenuPanel.SetActive(false);
@@ -549,13 +554,12 @@ public class NewRoomScript : MonoBehaviour {
             lastLoadedModel.GetComponent<userAsset>().ObeyGravity = physicsToggle;
             
             lastLoadedModel.GetComponent<Rigidbody>().isKinematic = false;
-
-            Vector3 v = lastLoadedModel.GetComponent<Rigidbody>().velocity;
-            Vector3 av = lastLoadedModel.GetComponent<Rigidbody>().angularVelocity;
-
+            
             lastLoadedModel.GetComponent<Rigidbody>().velocity = Vector3.zero;
             lastLoadedModel.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
             lastLoadedModel.GetComponent<Rigidbody>().ResetInertiaTensor();
+
+            SearchService.Instance.Flush();
         }
     }
 
