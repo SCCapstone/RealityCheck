@@ -7,6 +7,7 @@ using System;
 public class PropertyController : MonoBehaviour
 {
     public Text _Name;
+    public GameObject MenuPanel;
     public GameObject SearchResultsPanel;
     public GameObject objectOptionsPanel;
     public GameObject positionArrowPanel;
@@ -25,6 +26,16 @@ public class PropertyController : MonoBehaviour
     private bool active;
     private GameObject selected;
     private string inputSelected;
+
+    private bool RTriggerHeld;
+    private bool LTriggerHeld;
+
+    private double LDownTime;
+    private double RDownTime;
+    private double triggerTime = 10.0; // 10 milliseconds
+    private bool RTriggerDown;
+    private bool LTriggerDown;
+
     // Use this for initialization
     void Start()
     {
@@ -42,7 +53,10 @@ public class PropertyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("AButton"))
+        RTriggerDown = getRightTriggerDown();
+        LTriggerDown = getLeftTriggerDown();
+
+        if (Input.GetButtonDown("AButton") || RTriggerDown)
             selectModel();
         else if (Input.GetButtonDown("BButton") && active)
             deSelectModel();
@@ -57,7 +71,11 @@ public class PropertyController : MonoBehaviour
         scale = Object.transform.localScale;
         model = Object.GetComponent<userAsset>();
 
-        if (inputSelected == "xPosition")
+        if (inputSelected == "close")
+        {
+            deSelectModel();
+        }
+        else if (inputSelected == "xPosition")
         {
             _Position[0].gameObject.GetComponent<Image>().color = new Color(0.61f, 0.66f, 0.79f, 1);
             positionArrowPanel.SetActive(true);
@@ -178,18 +196,18 @@ public class PropertyController : MonoBehaviour
 
         RaycastHit seen;
         Ray raydirection = new Ray(transform.position, transform.forward);
-        if (Physics.Raycast(raydirection, out seen))
+        if (Physics.Raycast(raydirection, out seen) && (Input.GetButtonDown("AButton") || RTriggerDown))
         {
-            if (seen.collider.tag == "Button" && Input.GetButtonDown("AButton"))
+            if (seen.collider.tag == "Button")
             {
                 seen.collider.gameObject.GetComponent<Button>().onClick.Invoke();
             }
-            else if (seen.collider.tag == "Input" && Input.GetButtonDown("AButton"))
+            else if (seen.collider.tag == "Input")
             {
                 inputSelected = seen.collider.name;
                 Debug.Log(inputSelected);
             }
-            else if (seen.collider.tag == "Check" && Input.GetButtonDown("AButton"))
+            else if (seen.collider.tag == "Check")
             {
                 seen.collider.gameObject.GetComponent<Toggle>().isOn =
                     !seen.collider.gameObject.GetComponent<Toggle>().isOn;
@@ -499,6 +517,7 @@ public class PropertyController : MonoBehaviour
                 selected = seen.collider.gameObject;
                 objectOptionsPanel.SetActive(true);
                 SearchResultsPanel.SetActive(false);
+                MenuPanel.SetActive(false);
 
                 pos = selected.transform.position;
                 rot = selected.transform.localEulerAngles;
@@ -579,5 +598,74 @@ public class PropertyController : MonoBehaviour
         _Scale[0].onEndEdit.RemoveAllListeners();
         _Scale[1].onEndEdit.RemoveAllListeners();
         _Scale[2].onEndEdit.RemoveAllListeners();
+    }
+
+    private bool getRightTriggerDown()
+    {
+        float pressure = Input.GetAxisRaw("RHandTrigger");
+        bool down = pressure > 0.2f;
+        if (down)
+        {
+            if (RTriggerHeld)
+            {
+                if (NowMilliseconds() - RDownTime < triggerTime)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                RDownTime = NowMilliseconds();
+                RTriggerHeld = true;
+                return true;
+            }
+        }
+        else
+        {
+            RTriggerHeld = false;
+            return false;
+        }
+    }
+
+    private bool getLeftTriggerDown()
+    {
+        float pressure = Input.GetAxisRaw("LHandTrigger");
+        bool down = pressure > 0.2f;
+        if (down)
+        {
+            if (LTriggerHeld)
+            {
+                if (NowMilliseconds() - LDownTime < triggerTime)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                LDownTime = NowMilliseconds();
+                LTriggerHeld = true;
+                return true;
+            }
+        }
+        else
+        {
+            LTriggerHeld = false;
+            return false;
+        }
+    }
+
+    private double NowMilliseconds()
+    {
+        return (System.DateTime.UtcNow -
+                new System.DateTime(1970, 1, 1, 0, 0, 0,
+                    System.DateTimeKind.Utc)).TotalMilliseconds;
     }
 }

@@ -46,7 +46,7 @@ public class NewBoxRoomDoorKnob : MonoBehaviour {
         {
             KnobGlow.SetActive(true);
             PlayerText.GetComponent<Text>().text = onCollidedText;
-            if (Input.GetButton("AButton"))
+            if (Input.GetButtonDown("AButton") || Input.GetAxis("RHandTrigger") > 0.2f)
             {
                 SceneManager.LoadScene("newBoxRoom", LoadSceneMode.Single);
             }

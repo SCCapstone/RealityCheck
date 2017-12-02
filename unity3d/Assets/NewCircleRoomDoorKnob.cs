@@ -46,7 +46,7 @@ public class NewCircleRoomDoorKnob : MonoBehaviour {
         {
             KnobGlow.SetActive(true);
             PlayerText.GetComponent<Text>().text = onCollidedText;
-            if (Input.GetButton("AButton"))
+            if (Input.GetButton("AButton") || Input.GetAxis("RHandTrigger") > 0.2f)
             {
                 SceneManager.LoadScene("newCircleRoom", LoadSceneMode.Single);
             }

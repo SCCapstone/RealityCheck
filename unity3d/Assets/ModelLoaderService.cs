@@ -73,8 +73,8 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 				subMesh.name = totalMeshes[i][j].name;
 				subMesh.transform.parent = bufferObject.transform;
 				subMesh.AddComponent<MeshFilter>();
-				subMesh.AddComponent<MeshRenderer>();
-				subMesh.GetComponent<MeshFilter>().mesh = totalMeshes[i][j];
+                subMesh.AddComponent<MeshRenderer>();
+                subMesh.GetComponent<MeshFilter>().mesh = totalMeshes[i][j];
 
 				Material mat;
 				if (!totalMaterials.TryGetValue(totalMeshes[i][j].name, out mat))
@@ -148,8 +148,10 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 			if (materialToMeshFilterList.ContainsKey(material)) materialToMeshFilterList[material].Add(meshFilters[i]);
 			else materialToMeshFilterList.Add(material, new List<MeshFilter>() { meshFilters[i] });
 		}
-			
-		foreach (var entry in materialToMeshFilterList)
+
+        Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);
+
+        foreach (var entry in materialToMeshFilterList)
 		{
 			List<MeshFilter> meshesWithSameMaterial = entry.Value;
 			string materialName = entry.Key.ToString().Split(' ')[0];
@@ -192,13 +194,15 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 					renderer.sharedMaterial = new Material(Shader.Find("Standard"));
 				}
 
-				combinedObjects.Add(combinedObject);
+                bounds.Encapsulate(renderer.bounds);
+
+                combinedObjects.Add(combinedObject);
 
 				//combinedObject.AddComponent<BoxCollider>(); // Add Box Collider for physics
 			}
 		}
-
-		GameObject resultGO = null;
+        
+        GameObject resultGO = null;
 		if (combinedObjects.Count > 1)
 		{
 			resultGO = new GameObject("CombinedMeshes_" + parentOfObjectsToCombine.name);
@@ -212,9 +216,23 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 		parentOfObjectsToCombine.SetActive(false);
 		parentOfObjectsToCombine.transform.position = originalPosition;
 		resultGO.transform.position = originalPosition;
-		//resultGO.AddComponent<Rigidbody>(); // Add gravity rules for physics
+        
+        resultGO.AddComponent<BoxCollider>(); // Add Box Collider for physics
 
-		Destroy(parentOfObjectsToCombine);
+        BoxCollider collider = resultGO.GetComponent<BoxCollider>();
+        collider.center = bounds.center - resultGO.transform.position;
+        collider.size = bounds.size;
+
+        resultGO.AddComponent<Rigidbody>(); // Add gravity rules for physics
+        resultGO.GetComponent<Rigidbody>().isKinematic = true;
+
+        Vector3 v = resultGO.GetComponent<Rigidbody>().velocity;
+        Vector3 av = resultGO.GetComponent<Rigidbody>().angularVelocity;
+
+        resultGO.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+        resultGO.GetComponent<Rigidbody>().angularVelocity = new Vector3(0, 0, 0);
+
+        Destroy(parentOfObjectsToCombine);
 		return resultGO;
 	}
 }

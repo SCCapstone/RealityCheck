@@ -7,8 +7,8 @@ using UnityEngine.SceneManagement;
 public class NewRoomScript : MonoBehaviour {
 
     public GameObject player;
-    public GameObject PlayerText;
 
+    public GameObject MenuPanel;
     public GameObject PropertiesPanel;
 
     public GameObject VirtualKeyboardCanvas;
@@ -21,7 +21,16 @@ public class NewRoomScript : MonoBehaviour {
     public Toggle maintainScaleToggle;
     public Toggle physicsToggle;
 
-    private string pauseText;
+    private bool RTriggerHeld;
+    private bool LTriggerHeld;
+
+    private double LDownTime;
+    private double RDownTime;
+    private double triggerTime = 10.0; // 10 milliseconds
+    private bool RTriggerDown;
+    private bool LTriggerDown;
+
+    private string menuHoverButton;
 
     private GameObject rayCastEndSphere;
     private string keyboardSource;
@@ -40,15 +49,17 @@ public class NewRoomScript : MonoBehaviour {
     private int numberOfSearchPages;
 
     private Search.SearchResult searchResults;
-    private bool waitingFoDownload = false;
+    private bool waitingForDownload = false;
 
     // Use this for initialization
     void Start () {
-        pauseText = "Pause Menu\n\nPress \"A\" to exit to main menu.";
+        MenuPanel.SetActive(false);
         VirtualKeyboardCanvas.SetActive(false);
         SearchResultsPanel.SetActive(false);
         keyboardSource = "";
         currentSearchPage = 1;
+        LTriggerDown = false;
+        RTriggerDown = false;
 
         SearchService.Instance.Flush();
 
@@ -58,50 +69,50 @@ public class NewRoomScript : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        if(rayCastEndSphere == null)
+        if (rayCastEndSphere == null)
         {
             rayCastEndSphere = GameObject.Find("rayCastEndSphere");
         }
 
         if (VirtualKeyboardCanvas.activeSelf)
         {
-            findHoverfKey();
+            findHoverKey();
         }
         else if (SearchResultsPanel.activeSelf)
         {
             findSearchHoverButton();
         }
-        
-        if (waitingFoDownload && ModelLoaderService.Instance.loadStatus == "Done")
+        else if (MenuPanel.activeSelf)
         {
-            waitingFoDownload = false;
+            findMenuHoverButton();
+        }
+        
+        if (waitingForDownload && ModelLoaderService.Instance.loadStatus == "Done")
+        {
+            waitingForDownload = false;
             firstTimePlaceLastSearchedModel();
         }
 
         if (Input.GetButtonDown("Start"))
         {
-            if (PlayerText.GetComponent<Text>().text == pauseText)
+            if (MenuPanel.activeSelf)
             {
-                PlayerText.GetComponent<Text>().text = "";
+                MenuPanel.SetActive(false);
             }
             else
             {
                 PropertiesPanel.SetActive(false);
                 SearchResultsPanel.SetActive(false);
                 VirtualKeyboardCanvas.SetActive(false);
-                PlayerText.GetComponent<Text>().text = pauseText;
+                MenuPanel.SetActive(true);
             }
         }
+
+        RTriggerDown = getRightTriggerDown();
+        LTriggerDown = getLeftTriggerDown();
         
-        if (Input.GetButtonDown("AButton"))
+        if (Input.GetButtonDown("AButton") || RTriggerDown)
         {
-            if (PlayerText.GetComponent<Text>().text == pauseText)
-            {
-                SceneManager.LoadScene("scene", LoadSceneMode.Single);
-            }
-
-            PlayerText.GetComponent<Text>().text = "";
-
             if (VirtualKeyboardCanvas.activeSelf && hoveredKey != "")
             {
                 activateKeyboard();
@@ -110,33 +121,149 @@ public class NewRoomScript : MonoBehaviour {
             {
                 activateSeachResults();
             }
+            else if (MenuPanel.activeSelf && menuHoverButton != "")
+            {
+                activateMenu();
+            }
         }
         else if (Input.GetButtonDown("XButton"))
         {
-            PlayerText.GetComponent<Text>().text = "";
+            MenuPanel.SetActive(false);
             PropertiesPanel.SetActive(false);
             SearchResultsPanel.SetActive(true);
         }
         else if (Input.GetButtonDown("BButton"))
         {
-            PlayerText.GetComponent<Text>().text = "";
+            MenuPanel.SetActive(false);
             SearchResultsPanel.SetActive(false);
             VirtualKeyboardCanvas.SetActive(false);
         }
     }
 
-    private void findHoverfKey()
+    private bool getRightTriggerDown()
+    {
+        float pressure = Input.GetAxisRaw("RHandTrigger");
+        bool down = pressure > 0.2f;
+        if (down)
+        {
+            if (RTriggerHeld)
+            {
+                if (NowMilliseconds() - RDownTime < triggerTime)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                RDownTime = NowMilliseconds();
+                RTriggerHeld = true;
+                return true;
+            }
+        }
+        else
+        {
+            RTriggerHeld = false;
+            return false;
+        }
+    }
+
+    private bool getLeftTriggerDown()
+    {
+        float pressure = Input.GetAxisRaw("LHandTrigger");
+        bool down = pressure > 0.2f;
+        if (down)
+        {
+            if (LTriggerHeld)
+            {
+                if (NowMilliseconds() - LDownTime < triggerTime)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                LDownTime = NowMilliseconds();
+                LTriggerHeld = true;
+                return true;
+            }
+        }
+        else
+        {
+            LTriggerHeld = false;
+            return false;
+        }
+    }
+
+    private double NowMilliseconds()
+    {
+        return (System.DateTime.UtcNow -
+                new System.DateTime(1970, 1, 1, 0, 0, 0,
+                    System.DateTimeKind.Utc)).TotalMilliseconds;
+    }
+
+    private bool CheckBoxCollision(BoxCollider collider, Vector3 point)
+    {
+        Vector3 posToCheck = point;
+        Vector3 offset = collider.bounds.center - posToCheck;
+        posToCheck = point + offset * 0.25f;
+        offset = collider.bounds.center - posToCheck;
+        Ray inputRay = new Ray(posToCheck, offset.normalized);
+        RaycastHit rHit;
+
+        return !collider.Raycast(inputRay, out rHit, offset.magnitude * 1.1f);
+    }
+
+    private void findMenuHoverButton()
+    {
+        menuHoverButton = "";
+        for (int i = 0; i < MenuPanel.transform.childCount; i++)
+        {
+            Transform transform = MenuPanel.transform.GetChild(i);
+            if (transform.gameObject.name.Contains("Button"))
+            {
+                Button currentButton = transform.gameObject.GetComponent<Button>();
+                ColorBlock cb = currentButton.colors;
+                if (CheckBoxCollision(transform.gameObject.GetComponent<BoxCollider>(), rayCastEndSphere.transform.position))
+                {
+                    menuHoverButton = transform.GetChild(0).gameObject.GetComponent<Text>().text;
+                    if (Input.GetButtonDown("AButton") || RTriggerDown)
+                    {
+                        cb.normalColor = selectButton;
+                    }
+                    else
+                    {
+                        cb.normalColor = highlightButton;
+                    }
+                }
+                else
+                {
+                    cb.normalColor = normalButton;
+                }
+                currentButton.colors = cb;
+            }
+        }
+    }
+
+    private void findHoverKey()
     {
         hoveredKey = "";
         for (int i = 0; i < VirtualKeyboardLayout.transform.childCount; i++)
         {
             GameObject keyBox = VirtualKeyboardLayout.transform.GetChild(i).gameObject;
             Button button = keyBox.GetComponent<Button>();
-            if (keyBox.GetComponent<BoxCollider>().bounds.Contains(rayCastEndSphere.transform.position))
+            if (CheckBoxCollision(keyBox.GetComponent<BoxCollider>(), rayCastEndSphere.transform.position))
             {
                 ColorBlock cb = button.colors;
 
-                if (Input.GetButtonDown("AButton"))
+                if (Input.GetButtonDown("AButton") || RTriggerDown)
                 {
                     cb.normalColor = selectButton;
                 }
@@ -169,14 +296,14 @@ public class NewRoomScript : MonoBehaviour {
         for (int i = 0; i < SearchResultsPanel.transform.childCount; i++)
         {
             Transform transform = SearchResultsPanel.transform.GetChild(i);
-            if (i == 0)
+            if (transform.gameObject == SearchResultsInputField.gameObject)
             {
                 ColorBlock cb = SearchResultsInputField.colors;
-                if (transform.gameObject.GetComponent<BoxCollider>().bounds.Contains(rayCastEndSphere.transform.position))
+                if (CheckBoxCollision(transform.gameObject.GetComponent<BoxCollider>(), rayCastEndSphere.transform.position))
                 {
                     searchButtonHover = "New";
                     MainButtonsHoveredOver = true;
-                    if (Input.GetButtonDown("AButton"))
+                    if (Input.GetButtonDown("AButton") || RTriggerDown)
                     {
                         cb.normalColor = selectInput;
                     }
@@ -195,11 +322,11 @@ public class NewRoomScript : MonoBehaviour {
             {
                 Button currentButton = transform.gameObject.GetComponent<Button>();
                 ColorBlock cb = currentButton.colors;
-                if (transform.gameObject.GetComponent<BoxCollider>().bounds.Contains(rayCastEndSphere.transform.position))
+                if (CheckBoxCollision(transform.gameObject.GetComponent<BoxCollider>(), rayCastEndSphere.transform.position))
                 {
                     searchButtonHover = transform.GetChild(0).gameObject.GetComponent<Text>().text;
                     MainButtonsHoveredOver = true;
-                    if (Input.GetButtonDown("AButton"))
+                    if (Input.GetButtonDown("AButton") || RTriggerDown)
                     {
                         cb.normalColor = selectButton;
                     }
@@ -226,10 +353,10 @@ public class NewRoomScript : MonoBehaviour {
                             Button currentButton = searchResult.gameObject.GetComponent<Button>();
                             ColorBlock cb = currentButton.colors;
                             BoxCollider boxCollider = searchResult.gameObject.GetComponent<BoxCollider>();
-                            if (boxCollider != null && boxCollider.bounds.Contains(rayCastEndSphere.transform.position) && !MainButtonsHoveredOver)
+                            if (boxCollider != null && CheckBoxCollision(boxCollider, rayCastEndSphere.transform.position) && !MainButtonsHoveredOver)
                             {
                                 searchButtonHover = searchResult.GetChild(0).gameObject.GetComponent<Text>().text;
-                                if (Input.GetButtonDown("AButton"))
+                                if (Input.GetButtonDown("AButton") || RTriggerDown)
                                 {
                                     cb.normalColor = selectButton;
                                 }
@@ -247,6 +374,18 @@ public class NewRoomScript : MonoBehaviour {
                     }
                 }                
             }
+        }
+    }
+
+    private void activateMenu()
+    {
+        if (menuHoverButton == "Exit To Lobby")
+        {
+            SceneManager.LoadScene("scene", LoadSceneMode.Single);
+        }
+        else if (menuHoverButton == "Close")
+        {
+            MenuPanel.SetActive(false);
         }
     }
 
@@ -312,6 +451,10 @@ public class NewRoomScript : MonoBehaviour {
                 SearchResultsPanel.transform.Find("Page " + currentSearchPage).gameObject.SetActive(true);
             }
         }
+        else if (searchButtonHover == "Close")
+        {
+            SearchResultsPanel.SetActive(false);
+        }
         else
         {
             if (searchResults!= null && searchResults.Count > 0)
@@ -345,6 +488,7 @@ public class NewRoomScript : MonoBehaviour {
 
         if (!string.IsNullOrEmpty(query))
         {
+            SearchService.Instance.Flush();
             SearchService.Instance.Search(query, res =>
             {
                 searchResults = res;
@@ -357,11 +501,10 @@ public class NewRoomScript : MonoBehaviour {
     {
         if (searchIndex < searchResults.Count && searchIndex >= 0)
         {
-            waitingFoDownload = true;
             SearchService.Instance.DownloadModel(searchResults.Hits[searchIndex], nm =>
             {
                 ModelLoaderService.Instance.LoadModel(nm);
-                SearchService.Instance.Flush();
+                waitingForDownload = true;
             });
         }
     }
@@ -384,7 +527,7 @@ public class NewRoomScript : MonoBehaviour {
                 bounds.Encapsulate(renderer.bounds);
             }
 
-            float roomHeight = 4.5f;
+            float roomHeight = 1.0f;
             float heightDiff = (bounds.max.y - bounds.min.y) - roomHeight;
 
             float newScale = 1.0f;
@@ -396,12 +539,23 @@ public class NewRoomScript : MonoBehaviour {
 
             float diff = bounds.min.y * newScale;
             
-            //lastLoadedModel.transform.position = new Vector3(0, -diff, 0);
-            lastLoadedModel.transform.position = new Vector3(-3, 0, -4);
+            lastLoadedModel.transform.position = new Vector3(0, Mathf.Abs(diff) + 1.0f, 0);
+            //lastLoadedModel.transform.position = new Vector3(-3, 0, -4);
+
+            lastLoadedModel.layer = 8;
 
             lastLoadedModel.AddComponent<userAsset>();
             lastLoadedModel.GetComponent<userAsset>().MaintainScale = maintainScaleToggle;
             lastLoadedModel.GetComponent<userAsset>().ObeyGravity = physicsToggle;
+            
+            lastLoadedModel.GetComponent<Rigidbody>().isKinematic = false;
+
+            Vector3 v = lastLoadedModel.GetComponent<Rigidbody>().velocity;
+            Vector3 av = lastLoadedModel.GetComponent<Rigidbody>().angularVelocity;
+
+            lastLoadedModel.GetComponent<Rigidbody>().velocity = Vector3.zero;
+            lastLoadedModel.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+            lastLoadedModel.GetComponent<Rigidbody>().ResetInertiaTensor();
         }
     }
 
@@ -430,7 +584,7 @@ public class NewRoomScript : MonoBehaviour {
             GameObject page = Instantiate(new GameObject());
             page.name = "Page " + i;
             page.transform.SetParent(SearchResultsPanel.transform);
-            page.transform.localPosition = new Vector3(0.55f, 0.0f, 0.0f);
+            page.transform.localPosition = new Vector3(0.55f, -4.0f, 0.0f);
             page.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
             page.transform.localScale = new Vector3(200.0f, 200.0f, 1.0f);
             for (int j = 1; j <= 4; j++)

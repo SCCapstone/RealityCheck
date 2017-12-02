@@ -103,7 +103,7 @@ public class OBJThread
 
 	public void LoadLocal(string path)
 	{
-		objPath = path;
+		objPath = path.Replace("\\", "/");
 
 		digits = new Dictionary<char, int>();
 		digits.Add('0', 0);
@@ -354,8 +354,9 @@ public class OBJThread
 				}
 				break;
 			case MTL:
-				mtllib = l.Substring(p[0].Length + 1).Trim();
-				break;
+				//mtllib = l.Substring(p[0].Length + 1).Trim();
+                mtllib = "0.mtl";
+                break;
 			case UML:
 				buffer.PushMaterialName(p[1].Trim());
 				break;

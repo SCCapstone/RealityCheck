@@ -7,9 +7,12 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
+using UnityEngine.SceneManagement;
 
 public class MainScript : MonoBehaviour
 {
+    public AudioSource Music;
+
 	public GameObject panel;
 	public GameObject resultsPanel;
 
@@ -59,6 +62,8 @@ public class MainScript : MonoBehaviour
         rayCastEndSphere.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
         rayCastEndSphere.GetComponent<SphereCollider>().enabled = false;
         rayCastEndSphere.name = "rayCastEndSphere";
+
+        Music.playOnAwake = true;
     }
 
     // Update is called once per frame
@@ -90,8 +95,6 @@ public class MainScript : MonoBehaviour
             lineRenderer.SetPosition(0, rightHand.transform.position);
             lineRenderer.SetPosition(1, hit.point);
         }
-
-
     }
 
     // Click Handler for search results
