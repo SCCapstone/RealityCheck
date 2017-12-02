@@ -7,6 +7,7 @@ using System;
 public class PropertyController : MonoBehaviour
 {
     public Text _Name;
+    public GameObject SearchResultsPanel;
     public GameObject objectOptionsPanel;
     public GameObject positionArrowPanel;
     public GameObject rotationArrowPanel;
@@ -30,6 +31,7 @@ public class PropertyController : MonoBehaviour
         active = false;
         inputSelected = "";
         selected = null;
+
         objectOptionsPanel.SetActive(false);
         positionArrowPanel.SetActive(false);
         rotationArrowPanel.SetActive(false);
@@ -496,6 +498,7 @@ public class PropertyController : MonoBehaviour
                 active = true;
                 selected = seen.collider.gameObject;
                 objectOptionsPanel.SetActive(true);
+                SearchResultsPanel.SetActive(false);
 
                 pos = selected.transform.position;
                 rot = selected.transform.localEulerAngles;

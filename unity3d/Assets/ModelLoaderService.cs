@@ -11,8 +11,9 @@ using UnityEngine.UI;
 public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 
     private List<OBJThread> loaders;
-	private List<GameObject> sceneModels;
+	public List<GameObject> sceneModels;
 	private List<Bounds> boundsList;
+    public string loadStatus = "Done";
 
     protected ModelLoaderService() {
         loaders = new List<OBJThread>();
@@ -22,6 +23,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 
     public void LoadModel(NetModel nm)
     {
+        loadStatus = "InProgress";
         loaders.Add(new OBJThread());
 		loaders[loaders.Count - 1].LoadLocal(nm.obj);
     }
@@ -119,7 +121,8 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 		boundsList.Add(bounds);
 		sceneModels.Add(model);
 		loaders.Remove(loader);
-	}
+        loadStatus = "Done";
+    }
 
 	private GameObject MergeMeshes(GameObject parentOfObjectsToCombine, bool useMaterial = true)
 	{

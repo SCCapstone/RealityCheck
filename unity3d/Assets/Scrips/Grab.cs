@@ -38,7 +38,17 @@ public class Grab : MonoBehaviour {
         if(grabbingObject != null)
         {
             grabbingObject.transform.parent = null;
-            grabbingObject.GetComponent<userAsset>().Physics();
+
+            userAsset assest = grabbingObject.GetComponent<userAsset>();
+            if (assest != null)
+            {
+                assest.Physics();
+            }
+            else
+            {
+                grabbingObject.GetComponent<Rigidbody>().isKinematic = false;
+            }
+            
             grabbingObject.GetComponent<Rigidbody>().velocity = OVRInput.GetLocalControllerVelocity(controller);
             grabbingObject.GetComponent<Rigidbody>().angularVelocity = OVRInput.GetLocalControllerAngularVelocity(controller);
             grabbingObject = null;
