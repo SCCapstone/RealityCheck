@@ -127,7 +127,7 @@ public class OBJThread
 		loadOBJFileJob.setPath(objPath);
 		loadOBJFileJob.setThis(this);
 		loadOBJFileJob.Start();
-	}
+    }
 
 	private Texture2D GetTextureLoaderLocal(MaterialData m, string texpath)
 	{

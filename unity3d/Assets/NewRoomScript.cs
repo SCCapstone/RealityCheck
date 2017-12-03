@@ -37,6 +37,10 @@ public class NewRoomScript : MonoBehaviour {
     private GameObject rayCastEndSphere;
     private string keyboardSource;
     private string hoveredKey;
+    private double keyHoldTime = 500.0; // 500 milliseconds
+    private double keyStepTime = 200.0; // 200 milliseconds
+    private double keyLastStepTime;
+    private double keyDownStartTime;
 
     private Color normalButton = new Color(0.3f, 0.3f, 0.3f);
     private Color highlightButton = new Color(0.6f, 0.6f, 0.6f);
@@ -49,6 +53,7 @@ public class NewRoomScript : MonoBehaviour {
     private string searchButtonHover;
     private int currentSearchPage;
     private int numberOfSearchPages;
+    private string downloadModelName;
 
     private Search.SearchResult searchResults;
     private bool waitingForDownload = false;
@@ -101,11 +106,25 @@ public class NewRoomScript : MonoBehaviour {
         
         RTriggerDown = getRightTriggerDown();
         LTriggerDown = getLeftTriggerDown();
-        
+        bool keyButtonOverride = false;
+
+        if (Input.GetButton("AButton") || Input.GetAxisRaw("RHandTrigger") > 0.2f)
+        {
+            if (NowMilliseconds() - keyDownStartTime > keyHoldTime)
+            {
+                keyButtonOverride = true;
+            }
+        }
+        else
+        {
+            keyDownStartTime = 0;
+        }
+
         if (Input.GetButtonDown("AButton") || RTriggerDown)
         {
             if (VirtualKeyboardCanvas.activeSelf && hoveredKey != "")
             {
+                keyDownStartTime = NowMilliseconds();
                 activateKeyboard();
             }
             else if (SearchResultsPanel.activeSelf && searchButtonHover != "")
@@ -115,6 +134,14 @@ public class NewRoomScript : MonoBehaviour {
             else if (MenuPanel.activeSelf && menuHoverButton != "")
             {
                 activateMenu();
+            }
+        }
+        else if (keyButtonOverride && VirtualKeyboardCanvas.activeSelf && hoveredKey == "Back")
+        {
+            if (NowMilliseconds() - keyLastStepTime > keyStepTime)
+            {
+                keyLastStepTime = NowMilliseconds();
+                activateKeyboard();
             }
         }
         else if (Input.GetButtonDown("XButton")) //Also Start button for Vive
@@ -252,10 +279,11 @@ public class NewRoomScript : MonoBehaviour {
         {
             GameObject keyBox = VirtualKeyboardLayout.transform.GetChild(i).gameObject;
             Button button = keyBox.GetComponent<Button>();
+            ColorBlock cb = button.colors;
             if (CheckBoxCollision(keyBox.GetComponent<BoxCollider>(), rayCastEndSphere.transform.position))
             {
-                ColorBlock cb = button.colors;
-
+                hoveredKey = keyBox.transform.GetChild(0).gameObject.GetComponent<Text>().text;
+                
                 if (Input.GetButtonDown("AButton") || RTriggerDown)
                 {
                     cb.normalColor = selectButton;
@@ -264,16 +292,12 @@ public class NewRoomScript : MonoBehaviour {
                 {
                     cb.normalColor = highlightButton;
                 }
-
-                button.colors = cb;
-                hoveredKey = keyBox.transform.GetChild(0).gameObject.GetComponent<Text>().text;
             }
             else
             {
-                ColorBlock cb = button.colors;
                 cb.normalColor = normalButton;
-                button.colors = cb;
             }
+            button.colors = cb;
         }
     }
 
@@ -400,6 +424,10 @@ public class NewRoomScript : MonoBehaviour {
                 keyboardInputField.text = keyboardInputField.text.Substring(0, keyboardInputField.text.Length - 1);
             }
         }
+        else if (hoveredKey == "Clear")
+        {
+            keyboardInputField.text = "";
+        }
         else if (hoveredKey == "Done")
         {
             if (keyboardSource == "NewSearch")
@@ -522,6 +550,7 @@ public class NewRoomScript : MonoBehaviour {
     {
         if (searchIndex < searchResults.Count && searchIndex >= 0)
         {
+            downloadModelName = searchResults.Hits[searchIndex].Asset.Name;
             SearchService.Instance.DownloadModel(searchResults.Hits[searchIndex], nm =>
             {
                 ModelLoaderService.Instance.LoadModel(nm);
@@ -573,7 +602,8 @@ public class NewRoomScript : MonoBehaviour {
             yield return new WaitForSeconds(0.1f);
 
             lastLoadedModel.GetComponent<Rigidbody>().isKinematic = false;
-
+            lastLoadedModel.name = downloadModelName;
+            
             SearchService.Instance.Flush();
         }
     }
@@ -622,7 +652,7 @@ public class NewRoomScript : MonoBehaviour {
                     item.transform.localScale = new Vector3(0.005f, 0.005f, 1.0f);
 
                     item.transform.GetChild(0).gameObject.GetComponent<Text>().text = (modelIndex) + "";
-                    item.transform.GetChild(1).gameObject.GetComponent<Text>().text = searchResults.Hits[modelIndex] + "";
+                    item.transform.GetChild(1).gameObject.GetComponent<Text>().text = searchResults.Hits[modelIndex].Asset.Name + "";
 
                     modelIndex++;
                 }

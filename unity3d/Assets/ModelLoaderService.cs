@@ -53,14 +53,18 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 
     private void processModel(OBJThread loader)
 	{
-		List<List<Mesh>> totalMeshes = loader.getModelData();
+        List<List<Mesh>> totalMeshes = loader.getModelData();
 		Dictionary<string, Material> totalMaterials = loader.getTotalMaterials();
 		List<string> objectNames = loader.getObjectNames();
 
 		string objPath = loader.getPath();
-		string modelName = objPath.Substring(objPath.LastIndexOf("/") + 1, objPath.LastIndexOf(".obj") - objPath.LastIndexOf("/") - 1);
+		//string modelName = objPath.Substring(objPath.LastIndexOf("/") + 1, objPath.LastIndexOf(".obj") - objPath.LastIndexOf("/") - 1);
 
-		GameObject model = new GameObject();
+        //Correct for the 0 name
+        string modelPath = objPath.Replace("/0.obj", "");
+        string modelName = modelPath.Substring(modelPath.LastIndexOf("/") + 1, modelPath.Length - (modelPath.LastIndexOf("/") + 1));
+
+        GameObject model = new GameObject();
 		model.name = modelName;
 		//model.AddComponent<Rigidbody>();
 
@@ -123,7 +127,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 			              model.transform.position.z);
 
 		model.transform.position = pos + new Vector3(0, -diff, newZPos);
-
+        
 		boundsList.Add(bounds);
 		sceneModels.Add(model);
 		loaders.Remove(loader);
@@ -211,7 +215,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
         GameObject resultGO = null;
 		if (combinedObjects.Count > 1)
 		{
-			resultGO = new GameObject("CombinedMeshes_" + parentOfObjectsToCombine.name);
+			resultGO = new GameObject(parentOfObjectsToCombine.name);
 			foreach (var combinedObject in combinedObjects) combinedObject.transform.parent = resultGO.transform;
 		}
 		else
