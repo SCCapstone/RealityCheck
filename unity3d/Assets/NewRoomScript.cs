@@ -18,8 +18,10 @@ public class NewRoomScript : MonoBehaviour {
     public GameObject SearchResultsPanel;
     public InputField SearchResultsInputField;
     public Button SearchButtonPrefab;
-    public Toggle maintainScaleToggle;
-    public Toggle physicsToggle;
+
+    public Shader Standard;
+    public Shader BumpedDiffuse;
+    public Shader BumpedSpecular;
 
     private bool RTriggerHeld;
     private bool LTriggerHeld;
@@ -63,6 +65,10 @@ public class NewRoomScript : MonoBehaviour {
 
         SearchService.Instance.Flush();
 
+        ModelLoaderService.Instance.BumpedSpecular = BumpedSpecular;
+        ModelLoaderService.Instance.BumpedDiffuse = BumpedDiffuse;
+        ModelLoaderService.Instance.Standard = Standard;
+
         updateNumberOfSearchPages();
     }
 
@@ -90,24 +96,9 @@ public class NewRoomScript : MonoBehaviour {
         if (waitingForDownload && ModelLoaderService.Instance.loadStatus == "Done")
         {
             waitingForDownload = false;
-            firstTimePlaceLastSearchedModel();
+            StartCoroutine(firstTimePlaceLastSearchedModel());
         }
-
-        if (Input.GetButtonDown("Start"))
-        {
-            if (MenuPanel.activeSelf)
-            {
-                MenuPanel.SetActive(false);
-            }
-            else
-            {
-                PropertiesPanel.SetActive(false);
-                SearchResultsPanel.SetActive(false);
-                VirtualKeyboardCanvas.SetActive(false);
-                MenuPanel.SetActive(true);
-            }
-        }
-
+        
         RTriggerDown = getRightTriggerDown();
         LTriggerDown = getLeftTriggerDown();
         
@@ -126,15 +117,17 @@ public class NewRoomScript : MonoBehaviour {
                 activateMenu();
             }
         }
-        else if (Input.GetButtonDown("XButton")) //Also Start Button
+        else if (Input.GetButtonDown("XButton")) //Also Start button for Vive
         {
             MenuPanel.SetActive(true);
             PropertiesPanel.SetActive(false);
             SearchResultsPanel.SetActive(false);
+            VirtualKeyboardCanvas.SetActive(false);
         }
         else if (Input.GetButtonDown("BButton"))
         {
             MenuPanel.SetActive(false);
+            PropertiesPanel.SetActive(false);
             SearchResultsPanel.SetActive(false);
             VirtualKeyboardCanvas.SetActive(false);
         }
@@ -428,6 +421,8 @@ public class NewRoomScript : MonoBehaviour {
     {
         if (searchButtonHover == "New")
         {
+            updateKeyboardPosition();
+
             keyboardSource = "NewSearch";
             keyboardInputField.text = SearchResultsInputField.text;
             SearchResultsPanel.SetActive(false);
@@ -473,6 +468,27 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    private void updateKeyboardPosition()
+    {
+        GameObject localPlayer = player.transform.Find("OVRCameraRig").Find("TrackingSpace").Find("CenterEyeAnchor").gameObject;
+        Vector3 playerRot = localPlayer.transform.localRotation.eulerAngles;
+        Vector3 playerPos = localPlayer.transform.localPosition;
+
+        Vector3 defaultLocalKeyboardRot = new Vector3(30.0f, 0.0f, 0.0f); // In degrees
+        Vector3 defaultLocalKeyboardPos = new Vector3(-0.327f, 1.0f, -0.02f);
+
+        Vector3 newRot = new Vector3(0.0f, playerRot.y, 0.0f) + defaultLocalKeyboardRot;
+        VirtualKeyboardCanvas.transform.localRotation = Quaternion.Euler(newRot.x, newRot.y, newRot.z);
+
+        float radius = 1.0f;
+        float angle = Mathf.Deg2Rad * newRot.y;
+        float x = radius * Mathf.Sin(angle);
+        float z = radius * Mathf.Cos(angle);
+
+        Vector3 newPos = new Vector3(playerPos.x, 1.0f, playerPos.z) + new Vector3(x, 0.0f, z);
+        VirtualKeyboardCanvas.transform.localPosition = newPos;
+    }
+
     private void updateSearchInput()
     {
         SearchResultsInputField.text = keyboardInputField.text;
@@ -514,7 +530,7 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
-    private void firstTimePlaceLastSearchedModel()
+    private IEnumerator firstTimePlaceLastSearchedModel()
     {
         int index = ModelLoaderService.Instance.sceneModels.Count - 1;
         if (index < 0)
@@ -545,19 +561,18 @@ public class NewRoomScript : MonoBehaviour {
             float diff = bounds.min.y * newScale;
             
             lastLoadedModel.transform.position = new Vector3(0, Mathf.Abs(diff) + 1.0f, 0);
-            //lastLoadedModel.transform.position = new Vector3(-3, 0, -4);
 
             lastLoadedModel.layer = 8;
 
             lastLoadedModel.AddComponent<userAsset>();
-            lastLoadedModel.GetComponent<userAsset>().MaintainScale = maintainScaleToggle;
-            lastLoadedModel.GetComponent<userAsset>().ObeyGravity = physicsToggle;
             
-            lastLoadedModel.GetComponent<Rigidbody>().isKinematic = false;
-            
+            lastLoadedModel.GetComponent<Rigidbody>().mass = 1000;
             lastLoadedModel.GetComponent<Rigidbody>().velocity = Vector3.zero;
             lastLoadedModel.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
-            lastLoadedModel.GetComponent<Rigidbody>().ResetInertiaTensor();
+
+            yield return new WaitForSeconds(0.1f);
+
+            lastLoadedModel.GetComponent<Rigidbody>().isKinematic = false;
 
             SearchService.Instance.Flush();
         }

@@ -10,6 +10,10 @@ using UnityEngine.UI;
 
 public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 
+    public Shader Standard;
+    public Shader BumpedDiffuse;
+    public Shader BumpedSpecular;
+
     private List<OBJThread> loaders;
 	public List<GameObject> sceneModels;
 	private List<Bounds> boundsList;
@@ -25,7 +29,10 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
     {
         loadStatus = "InProgress";
         loaders.Add(new OBJThread());
-		loaders[loaders.Count - 1].LoadLocal(nm.obj);
+        loaders[loaders.Count - 1].BumpedSpecular = BumpedSpecular;
+        loaders[loaders.Count - 1].BumpedDiffuse = BumpedDiffuse;
+        loaders[loaders.Count - 1].Standard = Standard;
+        loaders[loaders.Count - 1].LoadLocal(nm.obj);
     }
 
     public void Update()
@@ -79,7 +86,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 				Material mat;
 				if (!totalMaterials.TryGetValue(totalMeshes[i][j].name, out mat))
 				{
-					mat = new Material(Shader.Find("Standard"));
+					mat = new Material(Standard);
 				}
 
 				subMesh.GetComponent<Renderer>().materials = new Material[1] { mat };
@@ -91,8 +98,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 		model = MergeMeshes(model, true);
 
 		//============================================================
-
-		Quaternion currentRotation = model.transform.rotation;
+        
 		model.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
 		Bounds bounds = new Bounds(model.transform.position, Vector3.zero);
 		foreach (Renderer renderer in model.GetComponentsInChildren<Renderer>())
@@ -191,7 +197,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 				}
 				else
 				{
-					renderer.sharedMaterial = new Material(Shader.Find("Standard"));
+					renderer.sharedMaterial = new Material(Standard);
 				}
 
                 bounds.Encapsulate(renderer.bounds);

@@ -8,7 +8,11 @@ using System.IO;
 
 public class OBJThread
 {
-	public string objPath;
+    public Shader Standard;
+    public Shader BumpedDiffuse;
+    public Shader BumpedSpecular;
+
+    public string objPath;
 
 	/* OBJ file tags */
 	private const string O = "o";
@@ -193,7 +197,7 @@ public class OBJThread
 		}
 		else
 		{
-			materials.Add("default", new Material(Shader.Find("Standard")));
+			materials.Add("default", new Material(Standard));
 		}
 	}
 
@@ -505,16 +509,29 @@ public class OBJThread
 
 		if (md.illumType == 2)
 		{
-			string shaderName = (md.bumpTex != null) ? "Bumped Specular" : "Standard";
-			m = new Material(Shader.Find(shaderName));
+            if (md.bumpTex != null)
+            {
+                m = new Material(BumpedSpecular);
+            }
+            else
+            {
+                m = new Material(Standard);
+            }
+            
 			m.SetColor("_SpecColor", md.specular);
 			m.SetFloat("_Shininess", md.shininess);
 		}
 		else
 		{
-			string shaderName = (md.bumpTex != null) ? "Bumped Diffuse" : "Standard";
-			m = new Material(Shader.Find(shaderName));
-		}
+            if (md.bumpTex != null)
+            {
+                m = new Material(BumpedDiffuse);
+            }
+            else
+            {
+                m = new Material(Standard);
+            }
+        }
 
 		if (md.diffuseTex != null)
 		{

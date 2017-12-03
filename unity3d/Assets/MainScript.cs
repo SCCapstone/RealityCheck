@@ -11,7 +11,7 @@ using UnityEngine.SceneManagement;
 
 public class MainScript : MonoBehaviour
 {
-    public AudioSource Music;
+    public Shader lineShader;
 
 	public GameObject panel;
 	public GameObject resultsPanel;
@@ -50,7 +50,7 @@ public class MainScript : MonoBehaviour
 		resultsPanel.SetActive(false);
 
         lineRenderer = gameObject.AddComponent<LineRenderer>();
-        lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
+        lineRenderer.material = new Material(lineShader);
         lineRenderer.widthMultiplier = 0.01f;
         lineRenderer.positionCount = 2;
 
@@ -62,8 +62,6 @@ public class MainScript : MonoBehaviour
         rayCastEndSphere.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
         rayCastEndSphere.GetComponent<SphereCollider>().enabled = false;
         rayCastEndSphere.name = "rayCastEndSphere";
-
-        Music.playOnAwake = true;
     }
 
     // Update is called once per frame
@@ -157,9 +155,4 @@ public class MainScript : MonoBehaviour
 			UpdateResultsUI();
 		});
 	}
-
-    public void GoToNewBoxRoom()
-    {
-
-    }
 }
