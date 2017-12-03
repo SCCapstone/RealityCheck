@@ -7,6 +7,8 @@ using System;
 public class PropertyController : MonoBehaviour
 {
     public Text _Name;
+    public GameObject MenuPanel;
+    public GameObject SearchResultsPanel;
     public GameObject objectOptionsPanel;
     public GameObject positionArrowPanel;
     public GameObject rotationArrowPanel;
@@ -24,28 +26,54 @@ public class PropertyController : MonoBehaviour
     private bool active;
     private GameObject selected;
     private string inputSelected;
+
+    private bool RTriggerHeld;
+    private bool LTriggerHeld;
+
+    private double LDownTime;
+    private double RDownTime;
+    private double triggerTime = 10.0; // 10 milliseconds
+    private bool RTriggerDown;
+    private bool LTriggerDown;
+
+    private Vector3 rayHitPoint;
+
+    private Color normalButton = new Color(0.3f, 0.3f, 0.3f);
+    private Color highlightButton = new Color(0.6f, 0.6f, 0.6f);
+    private Color selectButton = new Color(0.6f, 0.6f, 10f);
+
+    private Color normalInput = new Color(1.0f, 1.0f, 1.0f);
+    private Color highlightInput = new Color(0.8f, 0.8f, 0.8f);
+    private Color selectInput = new Color(0.6f, 0.6f, 10f);
+
     // Use this for initialization
     void Start()
     {
         active = false;
         inputSelected = "";
         selected = null;
+
         objectOptionsPanel.SetActive(false);
         positionArrowPanel.SetActive(false);
         rotationArrowPanel.SetActive(false);
         scaleArrowPanel.SetActive(false);
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("AButton"))
+        RTriggerDown = getRightTriggerDown();
+        LTriggerDown = getLeftTriggerDown();
+
+        if (Input.GetButtonDown("AButton") || RTriggerDown)
             selectModel();
         else if (Input.GetButtonDown("BButton") && active)
             deSelectModel();
         if (selected != null)
+        {
+            updateButtonColors(objectOptionsPanel.transform);
             updateFields(selected);
+        }
     }
 
     void updateFields(GameObject Object)
@@ -54,7 +82,7 @@ public class PropertyController : MonoBehaviour
         rot = Object.transform.localEulerAngles;
         scale = Object.transform.localScale;
         model = Object.GetComponent<userAsset>();
-
+                
         if (inputSelected == "xPosition")
         {
             _Position[0].gameObject.GetComponent<Image>().color = new Color(0.61f, 0.66f, 0.79f, 1);
@@ -178,28 +206,33 @@ public class PropertyController : MonoBehaviour
         Ray raydirection = new Ray(transform.position, transform.forward);
         if (Physics.Raycast(raydirection, out seen))
         {
-            if (seen.collider.tag == "Button" && Input.GetButtonDown("AButton"))
-            {
-                seen.collider.gameObject.GetComponent<Button>().onClick.Invoke();
-            }
-            else if (seen.collider.tag == "Input" && Input.GetButtonDown("AButton"))
-            {
-                inputSelected = seen.collider.name;
-                Debug.Log(inputSelected);
-            }
-            else if (seen.collider.tag == "Check" && Input.GetButtonDown("AButton"))
-            {
-                seen.collider.gameObject.GetComponent<Toggle>().isOn =
-                    !seen.collider.gameObject.GetComponent<Toggle>().isOn;
+            rayHitPoint = seen.point;
 
-                if(seen.collider.gameObject.name == "Gravity")
+            if ((Input.GetButtonDown("AButton") || RTriggerDown))
+            {
+                if (seen.collider.tag == "Button")
                 {
-                    model.Gravity = seen.collider.gameObject.GetComponent<Toggle>().isOn;
-                    model.Physics();
+                    seen.collider.gameObject.GetComponent<Button>().onClick.Invoke();
                 }
-                if(seen.collider.gameObject.name == "Maintain")
+                else if (seen.collider.tag == "Input")
                 {
-                    model.Maintain = seen.collider.gameObject.GetComponent<Toggle>().isOn;
+                    inputSelected = seen.collider.name;
+                    Debug.Log(inputSelected);
+                }
+                else if (seen.collider.tag == "Check")
+                {
+                    seen.collider.gameObject.GetComponent<Toggle>().isOn =
+                        !seen.collider.gameObject.GetComponent<Toggle>().isOn;
+
+                    if (seen.collider.gameObject.name == "Gravity")
+                    {
+                        model.Gravity = seen.collider.gameObject.GetComponent<Toggle>().isOn;
+                        model.Physics();
+                    }
+                    if (seen.collider.gameObject.name == "Maintain")
+                    {
+                        model.Maintain = seen.collider.gameObject.GetComponent<Toggle>().isOn;
+                    }
                 }
             }
         }
@@ -480,6 +513,98 @@ public class PropertyController : MonoBehaviour
         });
     }
 
+    private bool CheckBoxCollision(BoxCollider collider, Vector3 point)
+    {
+        Vector3 posToCheck = point;
+        Vector3 offset = collider.bounds.center - posToCheck;
+        posToCheck = point + offset * 0.25f;
+        offset = collider.bounds.center - posToCheck;
+        Ray inputRay = new Ray(posToCheck, offset.normalized);
+        RaycastHit rHit;
+
+        return !collider.Raycast(inputRay, out rHit, offset.magnitude * 1.1f);
+    }
+
+    private void updateButtonColors(Transform parent)
+    {
+        for (int i = 0; i < parent.childCount; i++)
+        {
+            Transform element = parent.GetChild(i);
+            updateButtonColorsInChildren(element);
+            updateButtonColors(element);
+        }
+    }
+
+    private void updateButtonColorsInChildren(Transform parent)
+    {
+        GameObject element = parent.gameObject;
+        if (element.tag == "Input")
+        {
+            InputField input = element.GetComponent<InputField>();
+
+            ColorBlock cb = input.colors;
+            if (CheckBoxCollision(input.GetComponent<BoxCollider>(), rayHitPoint))
+            {
+                if (Input.GetButtonDown("AButton") || RTriggerDown)
+                {
+                    cb.normalColor = selectInput;
+                }
+                else
+                {
+                    cb.normalColor = highlightInput;
+                }
+            }
+            else
+            {
+                cb.normalColor = normalInput;
+            }
+            input.colors = cb;
+        }
+        else if (element.tag == "Button")
+        {
+            Button currentButton = element.GetComponent<Button>();
+            ColorBlock cb = currentButton.colors;
+            if (CheckBoxCollision(currentButton.GetComponent<BoxCollider>(), rayHitPoint))
+            {
+                if (Input.GetButtonDown("AButton") || RTriggerDown)
+                {
+                    cb.normalColor = selectButton;
+                }
+                else
+                {
+                    cb.normalColor = highlightButton;
+                }
+            }
+            else
+            {
+                cb.normalColor = normalButton;
+            }
+            currentButton.colors = cb;
+        }
+        if (element.tag == "Check")
+        {
+            Toggle toggle = element.GetComponent<Toggle>();
+
+            ColorBlock cb = toggle.colors;
+            if (CheckBoxCollision(toggle.GetComponent<BoxCollider>(), rayHitPoint))
+            {
+                if (Input.GetButtonDown("AButton") || RTriggerDown)
+                {
+                    cb.normalColor = selectInput;
+                }
+                else
+                {
+                    cb.normalColor = highlightInput;
+                }
+            }
+            else
+            {
+                cb.normalColor = normalInput;
+            }
+            toggle.colors = cb;
+        }
+    }
+
     void selectModel()
     {
         RaycastHit seen;
@@ -496,6 +621,8 @@ public class PropertyController : MonoBehaviour
                 active = true;
                 selected = seen.collider.gameObject;
                 objectOptionsPanel.SetActive(true);
+                SearchResultsPanel.SetActive(false);
+                MenuPanel.SetActive(false);
 
                 pos = selected.transform.position;
                 rot = selected.transform.localEulerAngles;
@@ -557,7 +684,7 @@ public class PropertyController : MonoBehaviour
         }
     }
 
-    void deSelectModel()
+    public void deSelectModel()
     {
         selected = null;
         inputSelected = "";
@@ -576,5 +703,74 @@ public class PropertyController : MonoBehaviour
         _Scale[0].onEndEdit.RemoveAllListeners();
         _Scale[1].onEndEdit.RemoveAllListeners();
         _Scale[2].onEndEdit.RemoveAllListeners();
+    }
+
+    private bool getRightTriggerDown()
+    {
+        float pressure = Input.GetAxisRaw("RHandTrigger");
+        bool down = pressure > 0.2f;
+        if (down)
+        {
+            if (RTriggerHeld)
+            {
+                if (NowMilliseconds() - RDownTime < triggerTime)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                RDownTime = NowMilliseconds();
+                RTriggerHeld = true;
+                return true;
+            }
+        }
+        else
+        {
+            RTriggerHeld = false;
+            return false;
+        }
+    }
+
+    private bool getLeftTriggerDown()
+    {
+        float pressure = Input.GetAxisRaw("LHandTrigger");
+        bool down = pressure > 0.2f;
+        if (down)
+        {
+            if (LTriggerHeld)
+            {
+                if (NowMilliseconds() - LDownTime < triggerTime)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                LDownTime = NowMilliseconds();
+                LTriggerHeld = true;
+                return true;
+            }
+        }
+        else
+        {
+            LTriggerHeld = false;
+            return false;
+        }
+    }
+
+    private double NowMilliseconds()
+    {
+        return (System.DateTime.UtcNow -
+                new System.DateTime(1970, 1, 1, 0, 0, 0,
+                    System.DateTimeKind.Utc)).TotalMilliseconds;
     }
 }

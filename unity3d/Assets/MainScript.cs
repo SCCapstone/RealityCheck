@@ -7,9 +7,12 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
+using UnityEngine.SceneManagement;
 
 public class MainScript : MonoBehaviour
 {
+    public Shader lineShader;
+
 	public GameObject panel;
 	public GameObject resultsPanel;
 
@@ -47,7 +50,7 @@ public class MainScript : MonoBehaviour
 		resultsPanel.SetActive(false);
 
         lineRenderer = gameObject.AddComponent<LineRenderer>();
-        lineRenderer.material = new Material(Shader.Find("Particles/Additive"));
+        lineRenderer.material = new Material(lineShader);
         lineRenderer.widthMultiplier = 0.01f;
         lineRenderer.positionCount = 2;
 
@@ -90,8 +93,6 @@ public class MainScript : MonoBehaviour
             lineRenderer.SetPosition(0, rightHand.transform.position);
             lineRenderer.SetPosition(1, hit.point);
         }
-
-
     }
 
     // Click Handler for search results
@@ -154,9 +155,4 @@ public class MainScript : MonoBehaviour
 			UpdateResultsUI();
 		});
 	}
-
-    public void GoToNewBoxRoom()
-    {
-
-    }
 }

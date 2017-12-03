@@ -12,8 +12,6 @@ public class userAsset : MonoBehaviour {
     private float zToY = 1.0f;
     private bool maintain = true;
     private bool gravity = true;
-    public Toggle MaintainScale;
-    public Toggle ObeyGravity;
 
 
     public bool Maintain

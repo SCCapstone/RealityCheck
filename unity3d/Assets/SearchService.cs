@@ -121,22 +121,27 @@ public sealed class SearchService: Singleton<SearchService> {
             debugText.text = "Extracting " + filePath + " as " + extractPath;
             Debug.Log("Extracting " + filePath + " as " + extractPath);
 
+            ZipConstants.DefaultCodePage = 0;
+            
             fastZip.ExtractZip(filePath, extractPath, null);
-
+            
             try {
                 File.Move(extractPath + Path.DirectorySeparatorChar + noExt + "\\0.obj", extractPath + Path.DirectorySeparatorChar + "0.obj");
                 File.Move(extractPath + Path.DirectorySeparatorChar + noExt + "\\0.mtl", extractPath + Path.DirectorySeparatorChar + "0.mtl");
-            }   catch (UnityException ex) {
+            }
+            catch (UnityException ex)
+            {
                 debugText.text = ex.Message;
+                Debug.LogError(ex.Message);
                 Debug.Log(ex.Message);
             }
-
+            
             var nm = new NetModel();
             
             nm.obj = extractPath + Path.DirectorySeparatorChar + "0.obj";
             nm.mtl = extractPath + Path.DirectorySeparatorChar + "0.mtl";
             Debug.Log("DL: " + nm.obj);
-
+            
             callBack(nm);
         } catch (UnityException ex) {
             debugText.text = ex.Message;

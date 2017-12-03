@@ -9,7 +9,6 @@ public class NewCircleRoomDoorKnob : MonoBehaviour {
     public GameObject leftHand;
     public GameObject rightHand;
     public GameObject KnobGlow;
-    public GameObject PlayerText;
 
     private GameObject rayCastEndSphere;
     private string onCollidedText;
@@ -45,19 +44,13 @@ public class NewCircleRoomDoorKnob : MonoBehaviour {
             || sphereBox.bounds.Contains(rayPos))
         {
             KnobGlow.SetActive(true);
-            PlayerText.GetComponent<Text>().text = onCollidedText;
-            if (Input.GetButton("AButton"))
+            if (Input.GetButton("AButton") || Input.GetAxis("RHandTrigger") > 0.2f)
             {
                 SceneManager.LoadScene("newCircleRoom", LoadSceneMode.Single);
             }
         }
         else
         {
-            if (PlayerText.GetComponent<Text>().text == onCollidedText)
-            {
-                PlayerText.GetComponent<Text>().text = "";
-            }
-            
             KnobGlow.SetActive(false);
         }
 

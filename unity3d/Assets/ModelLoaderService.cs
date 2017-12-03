@@ -10,9 +10,14 @@ using UnityEngine.UI;
 
 public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 
+    public Shader Standard;
+    public Shader BumpedDiffuse;
+    public Shader BumpedSpecular;
+
     private List<OBJThread> loaders;
-	private List<GameObject> sceneModels;
+	public List<GameObject> sceneModels;
 	private List<Bounds> boundsList;
+    public string loadStatus = "Done";
 
     protected ModelLoaderService() {
         loaders = new List<OBJThread>();
@@ -22,8 +27,12 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 
     public void LoadModel(NetModel nm)
     {
+        loadStatus = "InProgress";
         loaders.Add(new OBJThread());
-		loaders[loaders.Count - 1].LoadLocal(nm.obj);
+        loaders[loaders.Count - 1].BumpedSpecular = BumpedSpecular;
+        loaders[loaders.Count - 1].BumpedDiffuse = BumpedDiffuse;
+        loaders[loaders.Count - 1].Standard = Standard;
+        loaders[loaders.Count - 1].LoadLocal(nm.obj);
     }
 
     public void Update()
@@ -44,14 +53,18 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 
     private void processModel(OBJThread loader)
 	{
-		List<List<Mesh>> totalMeshes = loader.getModelData();
+        List<List<Mesh>> totalMeshes = loader.getModelData();
 		Dictionary<string, Material> totalMaterials = loader.getTotalMaterials();
 		List<string> objectNames = loader.getObjectNames();
 
 		string objPath = loader.getPath();
-		string modelName = objPath.Substring(objPath.LastIndexOf("/") + 1, objPath.LastIndexOf(".obj") - objPath.LastIndexOf("/") - 1);
+		//string modelName = objPath.Substring(objPath.LastIndexOf("/") + 1, objPath.LastIndexOf(".obj") - objPath.LastIndexOf("/") - 1);
 
-		GameObject model = new GameObject();
+        //Correct for the 0 name
+        string modelPath = objPath.Replace("/0.obj", "");
+        string modelName = modelPath.Substring(modelPath.LastIndexOf("/") + 1, modelPath.Length - (modelPath.LastIndexOf("/") + 1));
+
+        GameObject model = new GameObject();
 		model.name = modelName;
 		//model.AddComponent<Rigidbody>();
 
@@ -71,13 +84,13 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 				subMesh.name = totalMeshes[i][j].name;
 				subMesh.transform.parent = bufferObject.transform;
 				subMesh.AddComponent<MeshFilter>();
-				subMesh.AddComponent<MeshRenderer>();
-				subMesh.GetComponent<MeshFilter>().mesh = totalMeshes[i][j];
+                subMesh.AddComponent<MeshRenderer>();
+                subMesh.GetComponent<MeshFilter>().mesh = totalMeshes[i][j];
 
 				Material mat;
 				if (!totalMaterials.TryGetValue(totalMeshes[i][j].name, out mat))
 				{
-					mat = new Material(Shader.Find("Standard"));
+					mat = new Material(Standard);
 				}
 
 				subMesh.GetComponent<Renderer>().materials = new Material[1] { mat };
@@ -89,8 +102,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 		model = MergeMeshes(model, true);
 
 		//============================================================
-
-		Quaternion currentRotation = model.transform.rotation;
+        
 		model.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
 		Bounds bounds = new Bounds(model.transform.position, Vector3.zero);
 		foreach (Renderer renderer in model.GetComponentsInChildren<Renderer>())
@@ -115,11 +127,12 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 			              model.transform.position.z);
 
 		model.transform.position = pos + new Vector3(0, -diff, newZPos);
-
+        
 		boundsList.Add(bounds);
 		sceneModels.Add(model);
 		loaders.Remove(loader);
-	}
+        loadStatus = "Done";
+    }
 
 	private GameObject MergeMeshes(GameObject parentOfObjectsToCombine, bool useMaterial = true)
 	{
@@ -145,8 +158,10 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 			if (materialToMeshFilterList.ContainsKey(material)) materialToMeshFilterList[material].Add(meshFilters[i]);
 			else materialToMeshFilterList.Add(material, new List<MeshFilter>() { meshFilters[i] });
 		}
-			
-		foreach (var entry in materialToMeshFilterList)
+
+        Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);
+
+        foreach (var entry in materialToMeshFilterList)
 		{
 			List<MeshFilter> meshesWithSameMaterial = entry.Value;
 			string materialName = entry.Key.ToString().Split(' ')[0];
@@ -186,19 +201,21 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 				}
 				else
 				{
-					renderer.sharedMaterial = new Material(Shader.Find("Standard"));
+					renderer.sharedMaterial = new Material(Standard);
 				}
 
-				combinedObjects.Add(combinedObject);
+                bounds.Encapsulate(renderer.bounds);
+
+                combinedObjects.Add(combinedObject);
 
 				//combinedObject.AddComponent<BoxCollider>(); // Add Box Collider for physics
 			}
 		}
-
-		GameObject resultGO = null;
+        
+        GameObject resultGO = null;
 		if (combinedObjects.Count > 1)
 		{
-			resultGO = new GameObject("CombinedMeshes_" + parentOfObjectsToCombine.name);
+			resultGO = new GameObject(parentOfObjectsToCombine.name);
 			foreach (var combinedObject in combinedObjects) combinedObject.transform.parent = resultGO.transform;
 		}
 		else
@@ -209,9 +226,23 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 		parentOfObjectsToCombine.SetActive(false);
 		parentOfObjectsToCombine.transform.position = originalPosition;
 		resultGO.transform.position = originalPosition;
-		//resultGO.AddComponent<Rigidbody>(); // Add gravity rules for physics
+        
+        resultGO.AddComponent<BoxCollider>(); // Add Box Collider for physics
 
-		Destroy(parentOfObjectsToCombine);
+        BoxCollider collider = resultGO.GetComponent<BoxCollider>();
+        collider.center = bounds.center - resultGO.transform.position;
+        collider.size = bounds.size;
+
+        resultGO.AddComponent<Rigidbody>(); // Add gravity rules for physics
+        resultGO.GetComponent<Rigidbody>().isKinematic = true;
+
+        Vector3 v = resultGO.GetComponent<Rigidbody>().velocity;
+        Vector3 av = resultGO.GetComponent<Rigidbody>().angularVelocity;
+
+        resultGO.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
+        resultGO.GetComponent<Rigidbody>().angularVelocity = new Vector3(0, 0, 0);
+
+        Destroy(parentOfObjectsToCombine);
 		return resultGO;
 	}
 }

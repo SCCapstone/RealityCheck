@@ -1,11 +1,14 @@
 fileFormatVersion: 2
 guid: 9887b93b7959a42efb3045f92c1dc821
-timeCreated: 1510266427
+timeCreated: 1512268341
 licenseType: Free
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - Standard: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
+  - BumpedDiffuse: {fileID: 31, guid: 0000000000000000f000000000000000, type: 0}
+  - BumpedSpecular: {fileID: 33, guid: 0000000000000000f000000000000000, type: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
