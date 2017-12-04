@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using System.Text;
+using SimpleJSON;
 
 public class RecordingService : Singleton<RecordingService> {
 
@@ -151,7 +152,8 @@ public class RecordingService : Singleton<RecordingService> {
 
         try
         {
-            textAction(www.text);
+            var j = JSON.Parse(www.text);
+            textAction(j["results"][0]["alternatives"]["transcript"]);
         } catch(UnityException ex)
         {
             Debug.LogError(ex);
