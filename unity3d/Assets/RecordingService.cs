@@ -27,7 +27,7 @@ public class RecordingService : Singleton<RecordingService> {
         audioSource = GetComponent<AudioSource>();
         //set up recording to last a max of 1 seconds and loop over and over
         audioSource.clip = Microphone.Start(null, true, 1, 44100);
-        audioSource.Play();
+        //audioSource.Play();
         //resize our temporary vector every second
         Invoke("ResizeRecording", 1);
     }
@@ -61,6 +61,36 @@ public class RecordingService : Singleton<RecordingService> {
         
         this.textAction = textAction;
         StartCoroutine("Timeout");
+    }
+
+    public float GetMicVolume()
+    {
+        if (isRecording && audioSource.clip != null)
+        {
+            int dec = 128;
+            float[] waveData = new float[dec];
+            int micPosition = Microphone.GetPosition(null) - (dec + 1); // null means the first microphone
+            if (micPosition > 0)
+            {
+                audioSource.clip.GetData(waveData, micPosition);
+
+                // Getting a peak on the last 128 samples
+                float levelMax = 0;
+                for (int i = 0; i < dec; i++)
+                {
+                    float wavePeak = waveData[i] * waveData[i];
+                    if (levelMax < wavePeak)
+                    {
+                        levelMax = wavePeak;
+                    }
+                }
+                // levelMax equals to the highest normalized value power 2, a small number because < 1
+                // use it like:
+                return Mathf.Sqrt(levelMax);
+            }
+        }
+
+        return 0.0f;
     }
 
     IEnumerator Timeout()
@@ -130,7 +160,7 @@ public class RecordingService : Singleton<RecordingService> {
         var filepath = Path.Combine(Application.persistentDataPath, filename);
 
         audioSource.loop = false;
-        audioSource.Play();
+        //audioSource.Play();
 
         var headers = new Dictionary<string, string>();
         headers.Add("Content-Type", "application/x-protobuf");
@@ -149,11 +179,12 @@ public class RecordingService : Singleton<RecordingService> {
     IEnumerator TranscribeRequest(WWW www)
     {
         yield return www;
-
+        
         try
         {
-            var j = JSON.Parse(www.text);
-            textAction(j["results"][0]["alternatives"]["transcript"]);
+            JSONNode j = JSONNode.Parse(www.text);
+            String yes = j["results"][0]["alternatives"][0]["transcript"];
+            textAction(yes);
         } catch(UnityException ex)
         {
             Debug.LogError(ex);
