@@ -46,7 +46,7 @@ public class NewOutdoorsRoomDoorKnob : MonoBehaviour {
             KnobGlow.SetActive(true);
             if (Input.GetButton("AButton") || Input.GetAxis("RHandTrigger") > 0.2f)
             {
-                SceneManager.LoadScene("newOutdoorsRoom", LoadSceneMode.Single);
+                SceneManager.LoadScene("newOutsideRoom", LoadSceneMode.Single);
             }
         }
         else
