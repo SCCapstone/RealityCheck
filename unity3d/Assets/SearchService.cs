@@ -17,7 +17,7 @@ public sealed class SearchService: Singleton<SearchService> {
 
     private static string HOST = "http://45.55.197.39:8001/api/v1/";
     private static string SEARCH_URI = HOST + "search";
-    private static string DOWNLOAD_URI = HOST + "files/";
+    private static string DOWNLOAD_URI = "https://storage.googleapis.com/realitycheck/";
     
     private FastZip fastZip = new FastZip();
 
@@ -57,7 +57,8 @@ public sealed class SearchService: Singleton<SearchService> {
     // Download model from server
     public void DownloadModel(Search.Hit hit, Action<NetModel> callBack) {
         try {
-            StartCoroutine(DownloadRequest(DOWNLOAD_URI + hit.Asset.Filename, hit, callBack));
+            var fp = DOWNLOAD_URI + hit.Asset.Filename;
+            StartCoroutine(DownloadRequest(new WWW(fp), fp, hit, callBack));
         } catch (UnityException ex) {
             debugText.text = ex.Message;
             Debug.Log(ex.Message);
@@ -71,7 +72,7 @@ public sealed class SearchService: Singleton<SearchService> {
 		string payload = "";
 
 		if (string.IsNullOrEmpty(www.error)) {
-            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(www.text);
+            byte[] bytes = Convert.FromBase64String(www.text);
 
             var res = new Search.SearchResult();
             res.MergeFrom(bytes);
@@ -102,21 +103,19 @@ public sealed class SearchService: Singleton<SearchService> {
 
     // Download the compressed model files from the server
     // Extract the files
-    private IEnumerator DownloadRequest(string path, Search.Hit hit, Action<NetModel> callBack) {
-        yield return null;
+    private IEnumerator DownloadRequest(WWW www, string path, Search.Hit hit, Action<NetModel> callBack) {
+        yield return www;
 
         try {
             string noExt = hit.Asset.Filename.Substring(0, hit.Asset.Filename.Length-4);
 
             string filePath = Application.temporaryCachePath + Path.DirectorySeparatorChar + hit.Asset.Filename;
             string extractPath = Application.temporaryCachePath + Path.DirectorySeparatorChar + noExt;        
-
-            WebClient client = new WebClient();
             
             debugText.text = "Downloading " + path + " as " + filePath;
             Debug.Log("Downloading " + path + " as " + filePath);
 
-            client.DownloadFile(path, filePath);
+            File.WriteAllBytes(filePath, www.bytes);
             
             debugText.text = "Extracting " + filePath + " as " + extractPath;
             Debug.Log("Extracting " + filePath + " as " + extractPath);

@@ -19,6 +19,9 @@ public class NewRoomScript : MonoBehaviour {
     public InputField SearchResultsInputField;
     public Button SearchButtonPrefab;
 
+    public Button MicButton;
+    public AudioSource SpeechToTextAudioSource;
+
     public Shader Standard;
     public Shader BumpedDiffuse;
     public Shader BumpedSpecular;
@@ -57,6 +60,9 @@ public class NewRoomScript : MonoBehaviour {
 
     private Search.SearchResult searchResults;
     private bool waitingForDownload = false;
+    
+    private RecordingService recordingService;
+    private bool voiceRecordingInProgress;
 
     // Use this for initialization
     void Start () {
@@ -67,12 +73,15 @@ public class NewRoomScript : MonoBehaviour {
         currentSearchPage = 1;
         LTriggerDown = false;
         RTriggerDown = false;
+        voiceRecordingInProgress = false;
 
         SearchService.Instance.Flush();
 
         ModelLoaderService.Instance.BumpedSpecular = BumpedSpecular;
         ModelLoaderService.Instance.BumpedDiffuse = BumpedDiffuse;
         ModelLoaderService.Instance.Standard = Standard;
+
+        recordingService = SpeechToTextAudioSource.GetComponent<RecordingService>();
 
         updateNumberOfSearchPages();
     }
@@ -274,6 +283,16 @@ public class NewRoomScript : MonoBehaviour {
 
     private void findHoverKey()
     {
+        if (voiceRecordingInProgress)
+        {
+            ColorBlock cb = MicButton.colors;
+            float volume = recordingService.GetMicVolume();
+            volume = Mathf.Clamp(volume * 50.0f, 0.25f, 1.0f);
+            Color newColor = new Color(1.0f, 0.0f, 0.0f, volume);
+            cb.normalColor = newColor;
+            MicButton.colors = cb;
+        }
+
         hoveredKey = "";
         for (int i = 0; i < VirtualKeyboardLayout.transform.childCount; i++)
         {
@@ -283,7 +302,12 @@ public class NewRoomScript : MonoBehaviour {
             if (CheckBoxCollision(keyBox.GetComponent<BoxCollider>(), rayCastEndSphere.transform.position))
             {
                 hoveredKey = keyBox.transform.GetChild(0).gameObject.GetComponent<Text>().text;
-                
+
+                //if (hoveredKey == "Mic" && voiceRecordingInProgress)
+                //{
+                 //   continue;
+                //}
+
                 if (Input.GetButtonDown("AButton") || RTriggerDown)
                 {
                     cb.normalColor = selectButton;
@@ -413,35 +437,45 @@ public class NewRoomScript : MonoBehaviour {
 
     private void activateKeyboard()
     {
-        if (hoveredKey == "Space")
+        if (voiceRecordingInProgress)
         {
-            keyboardInputField.text += " ";
-        }
-        else if (hoveredKey == "Back")
-        {
-            if (keyboardInputField.text.Length > 0)
+            if (hoveredKey == "Mic")
             {
-                keyboardInputField.text = keyboardInputField.text.Substring(0, keyboardInputField.text.Length - 1);
+                toggleVoiceRecording();
             }
-        }
-        else if (hoveredKey == "Clear")
-        {
-            keyboardInputField.text = "";
-        }
-        else if (hoveredKey == "Done")
-        {
-            if (keyboardSource == "NewSearch")
-            {
-                updateSearchInput();
-            }
-        }
-        else if (hoveredKey == "Mic")
-        {
-            //TODO
         }
         else
         {
-            keyboardInputField.text += hoveredKey.ToLower();
+            if (hoveredKey == "Space")
+            {
+                keyboardInputField.text += " ";
+            }
+            else if (hoveredKey == "Back")
+            {
+                if (keyboardInputField.text.Length > 0)
+                {
+                    keyboardInputField.text = keyboardInputField.text.Substring(0, keyboardInputField.text.Length - 1);
+                }
+            }
+            else if (hoveredKey == "Clear")
+            {
+                keyboardInputField.text = "";
+            }
+            else if (hoveredKey == "Done")
+            {
+                if (keyboardSource == "NewSearch")
+                {
+                    updateSearchInput();
+                }
+            }
+            else if (hoveredKey == "Mic")
+            {
+                toggleVoiceRecording();
+            }
+            else
+            {
+                keyboardInputField.text += hoveredKey.ToLower();
+            }
         }
     }
 
@@ -680,4 +714,36 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    private void toggleVoiceRecording()
+    {
+        if (recordingService.IsRecording())
+        {
+            voiceRecordingInProgress = false;
+            ColorBlock cb = MicButton.colors;
+            cb.normalColor = normalButton;
+            MicButton.colors = cb;
+            recordingService.Transcribe();
+        }
+        else
+        {
+            voiceRecordingInProgress = true;
+
+            ColorBlock cb = MicButton.colors;
+            cb.normalColor = Color.red;
+            MicButton.colors = cb;
+
+            recordingService.Record(text =>
+            {
+                voiceRecordingInProgress = false;
+                if (keyboardInputField.text.LastIndexOf(" ") == keyboardInputField.text.Length - 1)
+                {
+                    keyboardInputField.text += text;
+                }
+                else
+                {
+                    keyboardInputField.text += " " + text;
+                }
+            });
+        }
+    }
 }
