@@ -29,7 +29,7 @@ _To create a virtual reality room design application where the user is able to q
    - Example: An ambiguous query for a chair will show multiple options of varying styles of chairs.
 * The user can move and resize objects around the virtual reality environment
  using motion controls.
-* The physics and textures of the models can be adjusted by the user.
+* The physics of the models can be adjusted by the user.
 * The user can query and manipulate multiple objects to form a scene, such as an office design, home interior decorating, or workshop layout.
 
 **Platforms**
