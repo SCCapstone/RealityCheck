@@ -82,7 +82,7 @@ public class PropertyController : MonoBehaviour
         rot = Object.transform.localEulerAngles;
         scale = Object.transform.localScale;
         model = Object.GetComponent<userAsset>();
-                
+
         if (inputSelected == "xPosition")
         {
             _Position[0].gameObject.GetComponent<Image>().color = new Color(0.61f, 0.66f, 0.79f, 1);
@@ -707,7 +707,7 @@ public class PropertyController : MonoBehaviour
 
     private bool getRightTriggerDown()
     {
-        float pressure = Input.GetAxisRaw("RHandTrigger");
+        float pressure = Input.GetAxisRaw("RightTrigger");
         bool down = pressure > 0.2f;
         if (down)
         {
@@ -738,7 +738,7 @@ public class PropertyController : MonoBehaviour
 
     private bool getLeftTriggerDown()
     {
-        float pressure = Input.GetAxisRaw("LHandTrigger");
+        float pressure = Input.GetAxisRaw("LeftTrigger");
         bool down = pressure > 0.2f;
         if (down)
         {

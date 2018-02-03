@@ -60,7 +60,7 @@ public class NewRoomScript : MonoBehaviour {
 
     private Search.SearchResult searchResults;
     private bool waitingForDownload = false;
-    
+
     private RecordingService recordingService;
     private bool voiceRecordingInProgress;
 
@@ -106,18 +106,18 @@ public class NewRoomScript : MonoBehaviour {
         {
             findMenuHoverButton();
         }
-        
+
         if (waitingForDownload && ModelLoaderService.Instance.loadStatus == "Done")
         {
             waitingForDownload = false;
             StartCoroutine(firstTimePlaceLastSearchedModel());
         }
-        
+
         RTriggerDown = getRightTriggerDown();
         LTriggerDown = getLeftTriggerDown();
         bool keyButtonOverride = false;
 
-        if (Input.GetButton("AButton") || Input.GetAxisRaw("RHandTrigger") > 0.2f)
+        if (Input.GetButton("AButton") || Input.GetAxisRaw("RightTrigger") > 0.2f)
         {
             if (NowMilliseconds() - keyDownStartTime > keyHoldTime)
             {
@@ -171,7 +171,7 @@ public class NewRoomScript : MonoBehaviour {
 
     private bool getRightTriggerDown()
     {
-        float pressure = Input.GetAxisRaw("RHandTrigger");
+        float pressure = Input.GetAxisRaw("RightTrigger");
         bool down = pressure > 0.2f;
         if (down)
         {
@@ -202,7 +202,7 @@ public class NewRoomScript : MonoBehaviour {
 
     private bool getLeftTriggerDown()
     {
-        float pressure = Input.GetAxisRaw("LHandTrigger");
+        float pressure = Input.GetAxisRaw("LeftTrigger");
         bool down = pressure > 0.2f;
         if (down)
         {
@@ -413,7 +413,7 @@ public class NewRoomScript : MonoBehaviour {
                             currentButton.colors = cb;
                         }
                     }
-                }                
+                }
             }
         }
     }
@@ -622,13 +622,13 @@ public class NewRoomScript : MonoBehaviour {
             }
 
             float diff = bounds.min.y * newScale;
-            
+
             lastLoadedModel.transform.position = new Vector3(0, Mathf.Abs(diff) + 1.0f, 0);
 
             lastLoadedModel.layer = 8;
 
             lastLoadedModel.AddComponent<userAsset>();
-            
+
             lastLoadedModel.GetComponent<Rigidbody>().mass = 1000;
             lastLoadedModel.GetComponent<Rigidbody>().velocity = Vector3.zero;
             lastLoadedModel.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
@@ -637,7 +637,7 @@ public class NewRoomScript : MonoBehaviour {
 
             lastLoadedModel.GetComponent<Rigidbody>().isKinematic = false;
             lastLoadedModel.name = downloadModelName;
-            
+
             SearchService.Instance.Flush();
         }
     }

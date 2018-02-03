@@ -23,7 +23,7 @@ public class MainScript : MonoBehaviour
 
 	public Text searchDebugText;
 
-	public GameObject fpsController;
+	//public GameObject fpsController;
 
     public GameObject rightHand;
     public GameObject leftHand;
@@ -70,14 +70,14 @@ public class MainScript : MonoBehaviour
         ModelLoaderService.Instance.Update();
 
         // press tab to show menu
-        if (Input.GetKeyUp(KeyCode.Tab))
-        {
-            var state = fpsController.GetComponent<RigidbodyFirstPersonController>().enabled;
-            fpsController.GetComponent<RigidbodyFirstPersonController>().enabled = !state;
+        //if (Input.GetKeyUp(KeyCode.Tab))
+        //{
+            //var state = fpsController.GetComponent<RigidbodyFirstPersonController>().enabled;
+            //fpsController.GetComponent<RigidbodyFirstPersonController>().enabled = !state;
 
-            panel.SetActive(state);
-            resultsPanel.SetActive(state);
-        }
+        //    panel.SetActive(state);
+        //    resultsPanel.SetActive(state);
+        //}
 
         RaycastHit hit;
 

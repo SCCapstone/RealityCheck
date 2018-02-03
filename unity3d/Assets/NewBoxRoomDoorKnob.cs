@@ -17,7 +17,7 @@ public class NewBoxRoomDoorKnob : MonoBehaviour {
     void Start () {
         onCollidedText = "Press \"A\" to create a new box room";
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
 
@@ -39,12 +39,12 @@ public class NewBoxRoomDoorKnob : MonoBehaviour {
         {
             rayPos = rayCastEndSphere.transform.position;
         }
-        
+
         if (sphereBox.bounds.Contains(leftPos) || sphereBox.bounds.Contains(rightPos)
             || sphereBox.bounds.Contains(rayPos))
         {
             KnobGlow.SetActive(true);
-            if (Input.GetButtonDown("AButton") || Input.GetAxis("RHandTrigger") > 0.2f)
+            if (Input.GetButtonDown("AButton") || Input.GetAxis("RightTrigger") > 0.2f)
             {
                 SceneManager.LoadScene("newBoxRoom", LoadSceneMode.Single);
             }
@@ -55,6 +55,6 @@ public class NewBoxRoomDoorKnob : MonoBehaviour {
         }
 
     }
-    
+
 
 }
