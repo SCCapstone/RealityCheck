@@ -42,4 +42,9 @@ _To create a virtual reality room design application where the user is able to q
 ----------------------
 
 * Oculus Rift
+* HTC Vive
+
+**Tests**
+----------------------
+Unit tests for the Unity3D application can be run within Unity3D, open Window > Test Runner in the top menu, select the PlayMode and then Run All.
 
