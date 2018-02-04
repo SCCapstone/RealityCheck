@@ -11,6 +11,8 @@ public class NewRoomScript : MonoBehaviour {
     public GameObject MenuPanel;
     public GameObject PropertiesPanel;
 
+    public GameObject LocalPlayer;
+
     public GameObject VirtualKeyboardCanvas;
     public GameObject VirtualKeyboardLayout;
     public InputField keyboardInputField;
@@ -532,9 +534,8 @@ public class NewRoomScript : MonoBehaviour {
 
     private void updateKeyboardPosition()
     {
-        GameObject localPlayer = player.transform.Find("OVRCameraRig").Find("TrackingSpace").Find("CenterEyeAnchor").gameObject;
-        Vector3 playerRot = localPlayer.transform.localRotation.eulerAngles;
-        Vector3 playerPos = localPlayer.transform.localPosition;
+        Vector3 playerRot = LocalPlayer.transform.localRotation.eulerAngles;
+        Vector3 playerPos = LocalPlayer.transform.localPosition;
 
         Vector3 defaultLocalKeyboardRot = new Vector3(30.0f, 0.0f, 0.0f); // In degrees
         Vector3 defaultLocalKeyboardPos = new Vector3(-0.327f, 1.0f, -0.02f);

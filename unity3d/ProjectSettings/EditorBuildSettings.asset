@@ -4,4 +4,16 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/scene.unity
+    guid: c6a38d49a72d147949f3b1e44069d85f
+  - enabled: 1
+    path: Assets/newBoxRoom.unity
+    guid: f34eb67ea5b4545449c9e296de035fcf
+  - enabled: 1
+    path: Assets/newCircleRoom.unity
+    guid: 32a4e9f2cf24e4d4ca4bc2a6aab1cbca
+  - enabled: 1
+    path: Assets/newOutsideRoom.unity
+    guid: 51e05f05cfe47a2448a19972c20ea0c6

@@ -82,6 +82,7 @@ public class MainScript : MonoBehaviour
         RaycastHit hit;
 
         Vector3 rotation = rightHand.transform.localEulerAngles;
+        rotation.x += 15;
 
         Vector3 forwardVector = Quaternion.Euler(rotation) * Vector3.forward;
 

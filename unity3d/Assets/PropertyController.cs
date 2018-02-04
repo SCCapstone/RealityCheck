@@ -202,8 +202,15 @@ public class PropertyController : MonoBehaviour
             _Scale[2].gameObject.GetComponent<Image>().color = Color.white;
         }
 
+
         RaycastHit seen;
-        Ray raydirection = new Ray(transform.position, transform.forward);
+
+        Vector3 rotation = transform.localEulerAngles;
+        rotation.x += 15;
+
+        Vector3 forwardVector = Quaternion.Euler(rotation) * Vector3.forward;
+
+        Ray raydirection = new Ray(transform.position, forwardVector);
         if (Physics.Raycast(raydirection, out seen))
         {
             rayHitPoint = seen.point;
@@ -608,7 +615,13 @@ public class PropertyController : MonoBehaviour
     void selectModel()
     {
         RaycastHit seen;
-        Ray raydirection = new Ray(transform.position, transform.forward);
+
+        Vector3 rotation = transform.localEulerAngles;
+        rotation.x += 15;
+
+        Vector3 forwardVector = Quaternion.Euler(rotation) * Vector3.forward;
+
+        Ray raydirection = new Ray(transform.position, forwardVector);
         if (Physics.Raycast(raydirection, out seen))
         {
             Debug.Log(seen.collider.name);
