@@ -65,7 +65,7 @@ public class PropertyController : MonoBehaviour
         RTriggerDown = getRightTriggerDown();
         LTriggerDown = getLeftTriggerDown();
 
-        if (Input.GetButtonDown("AButton") || RTriggerDown)
+        if (RTriggerDown)
             selectModel();
         else if (Input.GetButtonDown("BButton") && active)
             deSelectModel();
@@ -215,7 +215,7 @@ public class PropertyController : MonoBehaviour
         {
             rayHitPoint = seen.point;
 
-            if ((Input.GetButtonDown("AButton") || RTriggerDown))
+            if ((RTriggerDown))
             {
                 if (seen.collider.tag == "Button")
                 {
@@ -552,7 +552,7 @@ public class PropertyController : MonoBehaviour
             ColorBlock cb = input.colors;
             if (CheckBoxCollision(input.GetComponent<BoxCollider>(), rayHitPoint))
             {
-                if (Input.GetButtonDown("AButton") || RTriggerDown)
+                if (RTriggerDown)
                 {
                     cb.normalColor = selectInput;
                 }
@@ -573,7 +573,7 @@ public class PropertyController : MonoBehaviour
             ColorBlock cb = currentButton.colors;
             if (CheckBoxCollision(currentButton.GetComponent<BoxCollider>(), rayHitPoint))
             {
-                if (Input.GetButtonDown("AButton") || RTriggerDown)
+                if (RTriggerDown)
                 {
                     cb.normalColor = selectButton;
                 }
@@ -595,7 +595,7 @@ public class PropertyController : MonoBehaviour
             ColorBlock cb = toggle.colors;
             if (CheckBoxCollision(toggle.GetComponent<BoxCollider>(), rayHitPoint))
             {
-                if (Input.GetButtonDown("AButton") || RTriggerDown)
+                if (RTriggerDown)
                 {
                     cb.normalColor = selectInput;
                 }

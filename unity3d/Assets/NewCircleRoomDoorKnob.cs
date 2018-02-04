@@ -44,7 +44,7 @@ public class NewCircleRoomDoorKnob : MonoBehaviour {
             || sphereBox.bounds.Contains(rayPos))
         {
             KnobGlow.SetActive(true);
-            if (Input.GetButton("AButton") || Input.GetAxis("RightTrigger") > 0.2f)
+            if (Input.GetAxis("RightTrigger") > 0.2f)
             {
                 SceneManager.LoadScene("newCircleRoom", LoadSceneMode.Single);
             }

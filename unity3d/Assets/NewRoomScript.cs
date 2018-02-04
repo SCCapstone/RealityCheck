@@ -119,7 +119,7 @@ public class NewRoomScript : MonoBehaviour {
         LTriggerDown = getLeftTriggerDown();
         bool keyButtonOverride = false;
 
-        if (Input.GetButton("AButton") || Input.GetAxisRaw("RightTrigger") > 0.2f)
+        if (Input.GetAxisRaw("RightTrigger") > 0.2f)
         {
             if (NowMilliseconds() - keyDownStartTime > keyHoldTime)
             {
@@ -131,7 +131,7 @@ public class NewRoomScript : MonoBehaviour {
             keyDownStartTime = 0;
         }
 
-        if (Input.GetButtonDown("AButton") || RTriggerDown)
+        if (RTriggerDown)
         {
             if (VirtualKeyboardCanvas.activeSelf && hoveredKey != "")
             {
@@ -155,7 +155,7 @@ public class NewRoomScript : MonoBehaviour {
                 activateKeyboard();
             }
         }
-        else if (Input.GetButtonDown("XButton")) //Also Start button for Vive
+        else if (Input.GetButtonDown("YButton")) //Also Start button for Vive
         {
             MenuPanel.SetActive(true);
             PropertiesPanel.SetActive(false);
@@ -265,7 +265,7 @@ public class NewRoomScript : MonoBehaviour {
                 if (CheckBoxCollision(transform.gameObject.GetComponent<BoxCollider>(), rayCastEndSphere.transform.position))
                 {
                     menuHoverButton = transform.GetChild(0).gameObject.GetComponent<Text>().text;
-                    if (Input.GetButtonDown("AButton") || RTriggerDown)
+                    if (RTriggerDown)
                     {
                         cb.normalColor = selectButton;
                     }
@@ -310,7 +310,7 @@ public class NewRoomScript : MonoBehaviour {
                  //   continue;
                 //}
 
-                if (Input.GetButtonDown("AButton") || RTriggerDown)
+                if (RTriggerDown)
                 {
                     cb.normalColor = selectButton;
                 }
@@ -346,7 +346,7 @@ public class NewRoomScript : MonoBehaviour {
                 {
                     searchButtonHover = "New";
                     MainButtonsHoveredOver = true;
-                    if (Input.GetButtonDown("AButton") || RTriggerDown)
+                    if (RTriggerDown)
                     {
                         cb.normalColor = selectInput;
                     }
@@ -369,7 +369,7 @@ public class NewRoomScript : MonoBehaviour {
                 {
                     searchButtonHover = transform.GetChild(0).gameObject.GetComponent<Text>().text;
                     MainButtonsHoveredOver = true;
-                    if (Input.GetButtonDown("AButton") || RTriggerDown)
+                    if (RTriggerDown)
                     {
                         cb.normalColor = selectButton;
                     }
@@ -399,7 +399,7 @@ public class NewRoomScript : MonoBehaviour {
                             if (boxCollider != null && CheckBoxCollision(boxCollider, rayCastEndSphere.transform.position) && !MainButtonsHoveredOver)
                             {
                                 searchButtonHover = searchResult.GetChild(0).gameObject.GetComponent<Text>().text;
-                                if (Input.GetButtonDown("AButton") || RTriggerDown)
+                                if (RTriggerDown)
                                 {
                                     cb.normalColor = selectButton;
                                 }

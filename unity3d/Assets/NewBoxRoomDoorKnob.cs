@@ -44,7 +44,7 @@ public class NewBoxRoomDoorKnob : MonoBehaviour {
             || sphereBox.bounds.Contains(rayPos))
         {
             KnobGlow.SetActive(true);
-            if (Input.GetButtonDown("AButton") || Input.GetAxis("RightTrigger") > 0.2f)
+            if (Input.GetAxis("RightTrigger") > 0.2f)
             {
                 SceneManager.LoadScene("newBoxRoom", LoadSceneMode.Single);
             }
