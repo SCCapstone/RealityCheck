@@ -17,17 +17,19 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
     private List<OBJThread> loaders;
 	public List<GameObject> sceneModels;
 	private List<Bounds> boundsList;
-    public string loadStatus = "Done";
 
-    protected ModelLoaderService() {
+    Action<GameObject> processFinishedCallBack;
+
+    protected ModelLoaderService()
+    {
         loaders = new List<OBJThread>();
 		sceneModels = new List<GameObject>();
 		boundsList = new List<Bounds>();
     }
 
-    public void LoadModel(NetModel nm)
+    public void LoadModel(NetModel nm, Action<GameObject> callBack)
     {
-        loadStatus = "InProgress";
+        processFinishedCallBack = callBack;
         loaders.Add(new OBJThread());
         loaders[loaders.Count - 1].BumpedSpecular = BumpedSpecular;
         loaders[loaders.Count - 1].BumpedDiffuse = BumpedDiffuse;
@@ -102,36 +104,14 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 		model = MergeMeshes(model, true);
 
 		//============================================================
-        
-		model.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-		Bounds bounds = new Bounds(model.transform.position, Vector3.zero);
-		foreach (Renderer renderer in model.GetComponentsInChildren<Renderer>())
-		{
-			bounds.Encapsulate(renderer.bounds);
-		}
-
-		float diff = bounds.min.y;
-
-		float newZPos = 0;
-
-		if (boundsList.Count > 0)
-		{
-			newZPos = boundsList[boundsList.Count - 1].max.z +
-			sceneModels[boundsList.Count - 1].transform.position.z +
-			(bounds.size.z / 2.0f);
-		}
-
-		Vector3 pos = new Vector3(
-			              model.transform.position.x, 
-			              model.transform.position.y, 
-			              model.transform.position.z);
-
-		model.transform.position = pos + new Vector3(0, -diff, newZPos);
-        
-		boundsList.Add(bounds);
+                
 		sceneModels.Add(model);
 		loaders.Remove(loader);
-        loadStatus = "Done";
+
+        if (processFinishedCallBack != null)
+        {
+            processFinishedCallBack(model);
+        }
     }
 
 	private GameObject MergeMeshes(GameObject parentOfObjectsToCombine, bool useMaterial = true)
@@ -226,21 +206,12 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 		parentOfObjectsToCombine.SetActive(false);
 		parentOfObjectsToCombine.transform.position = originalPosition;
 		resultGO.transform.position = originalPosition;
-        
+
         resultGO.AddComponent<BoxCollider>(); // Add Box Collider for physics
 
         BoxCollider collider = resultGO.GetComponent<BoxCollider>();
         collider.center = bounds.center - resultGO.transform.position;
         collider.size = bounds.size;
-
-        resultGO.AddComponent<Rigidbody>(); // Add gravity rules for physics
-        resultGO.GetComponent<Rigidbody>().isKinematic = true;
-
-        Vector3 v = resultGO.GetComponent<Rigidbody>().velocity;
-        Vector3 av = resultGO.GetComponent<Rigidbody>().angularVelocity;
-
-        resultGO.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
-        resultGO.GetComponent<Rigidbody>().angularVelocity = new Vector3(0, 0, 0);
 
         Destroy(parentOfObjectsToCombine);
 		return resultGO;

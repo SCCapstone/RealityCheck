@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,6 +11,8 @@ public class NewRoomScript : MonoBehaviour {
 
     public GameObject MenuPanel;
     public GameObject PropertiesPanel;
+
+    public GameObject LocalPlayer;
 
     public GameObject VirtualKeyboardCanvas;
     public GameObject VirtualKeyboardLayout;
@@ -59,8 +62,7 @@ public class NewRoomScript : MonoBehaviour {
     private string downloadModelName;
 
     private Search.SearchResult searchResults;
-    private bool waitingForDownload = false;
-    
+
     private RecordingService recordingService;
     private bool voiceRecordingInProgress;
 
@@ -107,17 +109,11 @@ public class NewRoomScript : MonoBehaviour {
             findMenuHoverButton();
         }
         
-        if (waitingForDownload && ModelLoaderService.Instance.loadStatus == "Done")
-        {
-            waitingForDownload = false;
-            StartCoroutine(firstTimePlaceLastSearchedModel());
-        }
-        
         RTriggerDown = getRightTriggerDown();
         LTriggerDown = getLeftTriggerDown();
         bool keyButtonOverride = false;
 
-        if (Input.GetButton("AButton") || Input.GetAxisRaw("RHandTrigger") > 0.2f)
+        if (Input.GetAxisRaw("RightTrigger") > 0.2f)
         {
             if (NowMilliseconds() - keyDownStartTime > keyHoldTime)
             {
@@ -129,7 +125,7 @@ public class NewRoomScript : MonoBehaviour {
             keyDownStartTime = 0;
         }
 
-        if (Input.GetButtonDown("AButton") || RTriggerDown)
+        if (RTriggerDown)
         {
             if (VirtualKeyboardCanvas.activeSelf && hoveredKey != "")
             {
@@ -153,25 +149,28 @@ public class NewRoomScript : MonoBehaviour {
                 activateKeyboard();
             }
         }
-        else if (Input.GetButtonDown("XButton")) //Also Start button for Vive
+        else if (Input.GetButtonDown("YButton") || Input.GetButtonDown("BButton")) //Also Start button for Vive
         {
-            MenuPanel.SetActive(true);
-            PropertiesPanel.SetActive(false);
-            SearchResultsPanel.SetActive(false);
-            VirtualKeyboardCanvas.SetActive(false);
-        }
-        else if (Input.GetButtonDown("BButton"))
-        {
-            MenuPanel.SetActive(false);
-            PropertiesPanel.SetActive(false);
-            SearchResultsPanel.SetActive(false);
-            VirtualKeyboardCanvas.SetActive(false);
+            if (MenuPanel.activeSelf)
+            {
+                MenuPanel.SetActive(false);
+                PropertiesPanel.SetActive(false);
+                SearchResultsPanel.SetActive(false);
+                VirtualKeyboardCanvas.SetActive(false);
+            }
+            else
+            {
+                MenuPanel.SetActive(true);
+                PropertiesPanel.SetActive(false);
+                SearchResultsPanel.SetActive(false);
+                VirtualKeyboardCanvas.SetActive(false);
+            }
         }
     }
 
     private bool getRightTriggerDown()
     {
-        float pressure = Input.GetAxisRaw("RHandTrigger");
+        float pressure = Input.GetAxisRaw("RightTrigger");
         bool down = pressure > 0.2f;
         if (down)
         {
@@ -202,7 +201,7 @@ public class NewRoomScript : MonoBehaviour {
 
     private bool getLeftTriggerDown()
     {
-        float pressure = Input.GetAxisRaw("LHandTrigger");
+        float pressure = Input.GetAxisRaw("LeftTrigger");
         bool down = pressure > 0.2f;
         if (down)
         {
@@ -263,7 +262,7 @@ public class NewRoomScript : MonoBehaviour {
                 if (CheckBoxCollision(transform.gameObject.GetComponent<BoxCollider>(), rayCastEndSphere.transform.position))
                 {
                     menuHoverButton = transform.GetChild(0).gameObject.GetComponent<Text>().text;
-                    if (Input.GetButtonDown("AButton") || RTriggerDown)
+                    if (RTriggerDown)
                     {
                         cb.normalColor = selectButton;
                     }
@@ -308,7 +307,7 @@ public class NewRoomScript : MonoBehaviour {
                  //   continue;
                 //}
 
-                if (Input.GetButtonDown("AButton") || RTriggerDown)
+                if (RTriggerDown)
                 {
                     cb.normalColor = selectButton;
                 }
@@ -344,7 +343,7 @@ public class NewRoomScript : MonoBehaviour {
                 {
                     searchButtonHover = "New";
                     MainButtonsHoveredOver = true;
-                    if (Input.GetButtonDown("AButton") || RTriggerDown)
+                    if (RTriggerDown)
                     {
                         cb.normalColor = selectInput;
                     }
@@ -367,7 +366,7 @@ public class NewRoomScript : MonoBehaviour {
                 {
                     searchButtonHover = transform.GetChild(0).gameObject.GetComponent<Text>().text;
                     MainButtonsHoveredOver = true;
-                    if (Input.GetButtonDown("AButton") || RTriggerDown)
+                    if (RTriggerDown)
                     {
                         cb.normalColor = selectButton;
                     }
@@ -397,7 +396,7 @@ public class NewRoomScript : MonoBehaviour {
                             if (boxCollider != null && CheckBoxCollision(boxCollider, rayCastEndSphere.transform.position) && !MainButtonsHoveredOver)
                             {
                                 searchButtonHover = searchResult.GetChild(0).gameObject.GetComponent<Text>().text;
-                                if (Input.GetButtonDown("AButton") || RTriggerDown)
+                                if (RTriggerDown)
                                 {
                                     cb.normalColor = selectButton;
                                 }
@@ -413,7 +412,7 @@ public class NewRoomScript : MonoBehaviour {
                             currentButton.colors = cb;
                         }
                     }
-                }                
+                }
             }
         }
     }
@@ -532,9 +531,8 @@ public class NewRoomScript : MonoBehaviour {
 
     private void updateKeyboardPosition()
     {
-        GameObject localPlayer = player.transform.Find("OVRCameraRig").Find("TrackingSpace").Find("CenterEyeAnchor").gameObject;
-        Vector3 playerRot = localPlayer.transform.localRotation.eulerAngles;
-        Vector3 playerPos = localPlayer.transform.localPosition;
+        Vector3 playerRot = LocalPlayer.transform.localRotation.eulerAngles;
+        Vector3 playerPos = LocalPlayer.transform.localPosition;
 
         Vector3 defaultLocalKeyboardRot = new Vector3(30.0f, 0.0f, 0.0f); // In degrees
         Vector3 defaultLocalKeyboardPos = new Vector3(-0.327f, 1.0f, -0.02f);
@@ -587,22 +585,24 @@ public class NewRoomScript : MonoBehaviour {
             downloadModelName = searchResults.Hits[searchIndex].Asset.Name;
             SearchService.Instance.DownloadModel(searchResults.Hits[searchIndex], nm =>
             {
-                ModelLoaderService.Instance.LoadModel(nm);
-                waitingForDownload = true;
+                ModelLoaderService.Instance.LoadModel(nm, modelDoneLoadingCallback);
             });
         }
     }
 
-    private IEnumerator firstTimePlaceLastSearchedModel()
+    public void modelDoneLoadingCallback(GameObject lastLoadedModel)
     {
-        int index = ModelLoaderService.Instance.sceneModels.Count - 1;
-        if (index < 0)
-        {
-            index = 0;
-        }
-        GameObject lastLoadedModel = ModelLoaderService.Instance.sceneModels[index];
+        StartCoroutine(finishUpModelLoad(lastLoadedModel));
+    }
+
+    public IEnumerator finishUpModelLoad(GameObject lastLoadedModel)
+    {
         if (lastLoadedModel != null)
         {
+            lastLoadedModel.layer = 8;
+            
+            lastLoadedModel.name = downloadModelName;
+            
             Quaternion currentRotation = lastLoadedModel.transform.rotation;
             lastLoadedModel.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
             Bounds bounds = new Bounds(lastLoadedModel.transform.position, Vector3.zero);
@@ -622,22 +622,36 @@ public class NewRoomScript : MonoBehaviour {
             }
 
             float diff = bounds.min.y * newScale;
+
+            lastLoadedModel.transform.position = new Vector3(0, Mathf.Abs(diff), 0);
+
+            GameObject parentObject = new GameObject();
+            parentObject.name = downloadModelName + "parent";
+            lastLoadedModel.transform.parent = parentObject.transform;
+
+            parentObject.AddComponent<Valve.VR.InteractionSystem.VelocityEstimator>();
+            parentObject.AddComponent<Valve.VR.InteractionSystem.Interactable>();
+            //parentObject.AddComponent<Valve.VR.InteractionSystem.InteractableHoverEvents>();
+            parentObject.AddComponent<Valve.VR.InteractionSystem.Throwable>();
+
+            Valve.VR.InteractionSystem.Throwable throwable = parentObject.GetComponent<Valve.VR.InteractionSystem.Throwable>();
+            throwable.onPickUp = new UnityEngine.Events.UnityEvent();
+            throwable.onDetachFromHand = new UnityEngine.Events.UnityEvent();
+
+            parentObject.AddComponent<userAsset>();
+
+            parentObject.AddComponent<Rigidbody>(); // Add gravity rules for physics
+            Rigidbody rigidBody = parentObject.GetComponent<Rigidbody>();
+            rigidBody.isKinematic = true;
+
+            rigidBody.mass = 1000;
+            rigidBody.velocity = Vector3.zero;
+            rigidBody.angularVelocity = Vector3.zero;
             
-            lastLoadedModel.transform.position = new Vector3(0, Mathf.Abs(diff) + 1.0f, 0);
-
-            lastLoadedModel.layer = 8;
-
-            lastLoadedModel.AddComponent<userAsset>();
-            
-            lastLoadedModel.GetComponent<Rigidbody>().mass = 1000;
-            lastLoadedModel.GetComponent<Rigidbody>().velocity = Vector3.zero;
-            lastLoadedModel.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
-
             yield return new WaitForSeconds(0.1f);
 
-            lastLoadedModel.GetComponent<Rigidbody>().isKinematic = false;
-            lastLoadedModel.name = downloadModelName;
-            
+            rigidBody.isKinematic = false;
+
             SearchService.Instance.Flush();
         }
     }

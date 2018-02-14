@@ -65,9 +65,9 @@ public class PropertyController : MonoBehaviour
         RTriggerDown = getRightTriggerDown();
         LTriggerDown = getLeftTriggerDown();
 
-        if (Input.GetButtonDown("AButton") || RTriggerDown)
+        if (RTriggerDown)
             selectModel();
-        else if (Input.GetButtonDown("BButton") && active)
+        else if ((Input.GetButtonDown("BButton") || Input.GetButtonDown("YButton")) && active)
             deSelectModel();
         if (selected != null)
         {
@@ -82,7 +82,7 @@ public class PropertyController : MonoBehaviour
         rot = Object.transform.localEulerAngles;
         scale = Object.transform.localScale;
         model = Object.GetComponent<userAsset>();
-                
+
         if (inputSelected == "xPosition")
         {
             _Position[0].gameObject.GetComponent<Image>().color = new Color(0.61f, 0.66f, 0.79f, 1);
@@ -202,13 +202,20 @@ public class PropertyController : MonoBehaviour
             _Scale[2].gameObject.GetComponent<Image>().color = Color.white;
         }
 
+
         RaycastHit seen;
-        Ray raydirection = new Ray(transform.position, transform.forward);
+
+        Vector3 rotation = transform.localEulerAngles;
+        rotation.x += 15;
+
+        Vector3 forwardVector = Quaternion.Euler(rotation) * Vector3.forward;
+
+        Ray raydirection = new Ray(transform.position, forwardVector);
         if (Physics.Raycast(raydirection, out seen))
         {
             rayHitPoint = seen.point;
 
-            if ((Input.GetButtonDown("AButton") || RTriggerDown))
+            if ((RTriggerDown))
             {
                 if (seen.collider.tag == "Button")
                 {
@@ -545,7 +552,7 @@ public class PropertyController : MonoBehaviour
             ColorBlock cb = input.colors;
             if (CheckBoxCollision(input.GetComponent<BoxCollider>(), rayHitPoint))
             {
-                if (Input.GetButtonDown("AButton") || RTriggerDown)
+                if (RTriggerDown)
                 {
                     cb.normalColor = selectInput;
                 }
@@ -566,7 +573,7 @@ public class PropertyController : MonoBehaviour
             ColorBlock cb = currentButton.colors;
             if (CheckBoxCollision(currentButton.GetComponent<BoxCollider>(), rayHitPoint))
             {
-                if (Input.GetButtonDown("AButton") || RTriggerDown)
+                if (RTriggerDown)
                 {
                     cb.normalColor = selectButton;
                 }
@@ -588,7 +595,7 @@ public class PropertyController : MonoBehaviour
             ColorBlock cb = toggle.colors;
             if (CheckBoxCollision(toggle.GetComponent<BoxCollider>(), rayHitPoint))
             {
-                if (Input.GetButtonDown("AButton") || RTriggerDown)
+                if (RTriggerDown)
                 {
                     cb.normalColor = selectInput;
                 }
@@ -608,18 +615,24 @@ public class PropertyController : MonoBehaviour
     void selectModel()
     {
         RaycastHit seen;
-        Ray raydirection = new Ray(transform.position, transform.forward);
+
+        Vector3 rotation = transform.localEulerAngles;
+        rotation.x += 15;
+
+        Vector3 forwardVector = Quaternion.Euler(rotation) * Vector3.forward;
+
+        Ray raydirection = new Ray(transform.position, forwardVector);
         if (Physics.Raycast(raydirection, out seen))
         {
             Debug.Log(seen.collider.name);
-            if (seen.collider.gameObject.GetComponent<userAsset>() != null)
+            if (seen.collider.gameObject.transform.parent.gameObject.GetComponent<userAsset>() != null)
             {
                 if (active)
                 {
                     deSelectModel();
                 }
                 active = true;
-                selected = seen.collider.gameObject;
+                selected = seen.collider.gameObject.transform.parent.gameObject;
                 objectOptionsPanel.SetActive(true);
                 SearchResultsPanel.SetActive(false);
                 MenuPanel.SetActive(false);
@@ -707,7 +720,7 @@ public class PropertyController : MonoBehaviour
 
     private bool getRightTriggerDown()
     {
-        float pressure = Input.GetAxisRaw("RHandTrigger");
+        float pressure = Input.GetAxisRaw("RightTrigger");
         bool down = pressure > 0.2f;
         if (down)
         {
@@ -738,7 +751,7 @@ public class PropertyController : MonoBehaviour
 
     private bool getLeftTriggerDown()
     {
-        float pressure = Input.GetAxisRaw("LHandTrigger");
+        float pressure = Input.GetAxisRaw("LeftTrigger");
         bool down = pressure > 0.2f;
         if (down)
         {

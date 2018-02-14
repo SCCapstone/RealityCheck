@@ -17,7 +17,7 @@ public class NewCircleRoomDoorKnob : MonoBehaviour {
     void Start () {
         onCollidedText = "Press \"A\" to create a new circle room";
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
 
@@ -44,7 +44,7 @@ public class NewCircleRoomDoorKnob : MonoBehaviour {
             || sphereBox.bounds.Contains(rayPos))
         {
             KnobGlow.SetActive(true);
-            if (Input.GetButton("AButton") || Input.GetAxis("RHandTrigger") > 0.2f)
+            if (Input.GetAxis("RightTrigger") > 0.2f)
             {
                 SceneManager.LoadScene("newCircleRoom", LoadSceneMode.Single);
             }
@@ -55,6 +55,6 @@ public class NewCircleRoomDoorKnob : MonoBehaviour {
         }
 
     }
-    
+
 
 }

@@ -44,7 +44,7 @@ public sealed class SearchService: Singleton<SearchService> {
             var req = new Search.SearchRequest{
                 Query = query
             };
-
+            
             WWW api = new WWW(SEARCH_URI, req.ToByteArray(), headers);
 
             StartCoroutine(SearchRequest(api, callBack));
