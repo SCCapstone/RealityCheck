@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -61,7 +62,6 @@ public class NewRoomScript : MonoBehaviour {
     private string downloadModelName;
 
     private Search.SearchResult searchResults;
-    private bool waitingForDownload = false;
 
     private RecordingService recordingService;
     private bool voiceRecordingInProgress;
@@ -108,13 +108,7 @@ public class NewRoomScript : MonoBehaviour {
         {
             findMenuHoverButton();
         }
-
-        if (waitingForDownload && ModelLoaderService.Instance.loadStatus == "Done")
-        {
-            waitingForDownload = false;
-            StartCoroutine(firstTimePlaceLastSearchedModel());
-        }
-
+        
         RTriggerDown = getRightTriggerDown();
         LTriggerDown = getLeftTriggerDown();
         bool keyButtonOverride = false;
@@ -155,19 +149,22 @@ public class NewRoomScript : MonoBehaviour {
                 activateKeyboard();
             }
         }
-        else if (Input.GetButtonDown("YButton")) //Also Start button for Vive
+        else if (Input.GetButtonDown("YButton") || Input.GetButtonDown("BButton")) //Also Start button for Vive
         {
-            MenuPanel.SetActive(true);
-            PropertiesPanel.SetActive(false);
-            SearchResultsPanel.SetActive(false);
-            VirtualKeyboardCanvas.SetActive(false);
-        }
-        else if (Input.GetButtonDown("BButton"))
-        {
-            MenuPanel.SetActive(false);
-            PropertiesPanel.SetActive(false);
-            SearchResultsPanel.SetActive(false);
-            VirtualKeyboardCanvas.SetActive(false);
+            if (MenuPanel.activeSelf)
+            {
+                MenuPanel.SetActive(false);
+                PropertiesPanel.SetActive(false);
+                SearchResultsPanel.SetActive(false);
+                VirtualKeyboardCanvas.SetActive(false);
+            }
+            else
+            {
+                MenuPanel.SetActive(true);
+                PropertiesPanel.SetActive(false);
+                SearchResultsPanel.SetActive(false);
+                VirtualKeyboardCanvas.SetActive(false);
+            }
         }
     }
 
@@ -588,22 +585,24 @@ public class NewRoomScript : MonoBehaviour {
             downloadModelName = searchResults.Hits[searchIndex].Asset.Name;
             SearchService.Instance.DownloadModel(searchResults.Hits[searchIndex], nm =>
             {
-                ModelLoaderService.Instance.LoadModel(nm);
-                waitingForDownload = true;
+                ModelLoaderService.Instance.LoadModel(nm, modelDoneLoadingCallback);
             });
         }
     }
 
-    private IEnumerator firstTimePlaceLastSearchedModel()
+    public void modelDoneLoadingCallback(GameObject lastLoadedModel)
     {
-        int index = ModelLoaderService.Instance.sceneModels.Count - 1;
-        if (index < 0)
-        {
-            index = 0;
-        }
-        GameObject lastLoadedModel = ModelLoaderService.Instance.sceneModels[index];
+        StartCoroutine(finishUpModelLoad(lastLoadedModel));
+    }
+
+    public IEnumerator finishUpModelLoad(GameObject lastLoadedModel)
+    {
         if (lastLoadedModel != null)
         {
+            lastLoadedModel.layer = 8;
+            
+            lastLoadedModel.name = downloadModelName;
+            
             Quaternion currentRotation = lastLoadedModel.transform.rotation;
             lastLoadedModel.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
             Bounds bounds = new Bounds(lastLoadedModel.transform.position, Vector3.zero);
@@ -624,20 +623,34 @@ public class NewRoomScript : MonoBehaviour {
 
             float diff = bounds.min.y * newScale;
 
-            lastLoadedModel.transform.position = new Vector3(0, Mathf.Abs(diff) + 1.0f, 0);
+            lastLoadedModel.transform.position = new Vector3(0, Mathf.Abs(diff), 0);
 
-            lastLoadedModel.layer = 8;
+            GameObject parentObject = new GameObject();
+            parentObject.name = downloadModelName + "parent";
+            lastLoadedModel.transform.parent = parentObject.transform;
 
-            lastLoadedModel.AddComponent<userAsset>();
+            parentObject.AddComponent<Valve.VR.InteractionSystem.VelocityEstimator>();
+            parentObject.AddComponent<Valve.VR.InteractionSystem.Interactable>();
+            //parentObject.AddComponent<Valve.VR.InteractionSystem.InteractableHoverEvents>();
+            parentObject.AddComponent<Valve.VR.InteractionSystem.Throwable>();
 
-            lastLoadedModel.GetComponent<Rigidbody>().mass = 1000;
-            lastLoadedModel.GetComponent<Rigidbody>().velocity = Vector3.zero;
-            lastLoadedModel.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+            Valve.VR.InteractionSystem.Throwable throwable = parentObject.GetComponent<Valve.VR.InteractionSystem.Throwable>();
+            throwable.onPickUp = new UnityEngine.Events.UnityEvent();
+            throwable.onDetachFromHand = new UnityEngine.Events.UnityEvent();
 
+            parentObject.AddComponent<userAsset>();
+
+            parentObject.AddComponent<Rigidbody>(); // Add gravity rules for physics
+            Rigidbody rigidBody = parentObject.GetComponent<Rigidbody>();
+            rigidBody.isKinematic = true;
+
+            rigidBody.mass = 1000;
+            rigidBody.velocity = Vector3.zero;
+            rigidBody.angularVelocity = Vector3.zero;
+            
             yield return new WaitForSeconds(0.1f);
 
-            lastLoadedModel.GetComponent<Rigidbody>().isKinematic = false;
-            lastLoadedModel.name = downloadModelName;
+            rigidBody.isKinematic = false;
 
             SearchService.Instance.Flush();
         }

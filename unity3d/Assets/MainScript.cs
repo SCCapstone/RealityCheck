@@ -25,6 +25,8 @@ public class MainScript : MonoBehaviour
 
 	//public GameObject fpsController;
 
+    private GameObject pointerHand;
+
     public GameObject rightHand;
     public GameObject leftHand;
 
@@ -37,9 +39,9 @@ public class MainScript : MonoBehaviour
 
 	private List<GameObject> resultsButtons;
 	private Search.SearchResult searchResults;
-
-	// Use this for initialization
-	void Start()
+    
+    // Use this for initialization
+    void Start()
 	{
 		resultsButtons = new List<GameObject>();
 
@@ -62,6 +64,8 @@ public class MainScript : MonoBehaviour
         rayCastEndSphere.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
         rayCastEndSphere.GetComponent<SphereCollider>().enabled = false;
         rayCastEndSphere.name = "rayCastEndSphere";
+        
+        pointerHand = rightHand;
     }
 
     // Update is called once per frame
@@ -72,37 +76,37 @@ public class MainScript : MonoBehaviour
         // press tab to show menu
         //if (Input.GetKeyUp(KeyCode.Tab))
         //{
-            //var state = fpsController.GetComponent<RigidbodyFirstPersonController>().enabled;
-            //fpsController.GetComponent<RigidbodyFirstPersonController>().enabled = !state;
+        //var state = fpsController.GetComponent<RigidbodyFirstPersonController>().enabled;
+        //fpsController.GetComponent<RigidbodyFirstPersonController>().enabled = !state;
 
         //    panel.SetActive(state);
         //    resultsPanel.SetActive(state);
         //}
-
+        
         RaycastHit hit;
 
-        Vector3 rotation = rightHand.transform.localEulerAngles;
+        Vector3 rotation = pointerHand.transform.localEulerAngles;
         rotation.x += 15;
 
         Vector3 forwardVector = Quaternion.Euler(rotation) * Vector3.forward;
-
-        if(Physics.Raycast(rightHand.transform.position, forwardVector, out hit))
+        
+        if (Physics.Raycast(pointerHand.transform.position, forwardVector, out hit))
         {
             float size = Mathf.Clamp(hit.distance * 0.01f, 0.01f, 1f);
             rayCastEndSphere.transform.localScale = new Vector3(size, size, size);
             rayCastEndSphere.transform.position = hit.point;
-            lineRenderer.SetPosition(0, rightHand.transform.position);
+            lineRenderer.SetPosition(0, pointerHand.transform.position);
             lineRenderer.SetPosition(1, hit.point);
         }
     }
-
+    
     // Click Handler for search results
     // Loads model based on button index
     void ResultClickHandle(int index) {
 		debugText.GetComponent<Text>().text = "Loading... " + searchResults.Hits[index].Asset.Name + "\n" + Application.temporaryCachePath;
 
 		SearchService.Instance.DownloadModel(searchResults.Hits[index], nm => {
-			ModelLoaderService.Instance.LoadModel(nm);
+			ModelLoaderService.Instance.LoadModel(nm, null);
 			debugText.GetComponent<Text>().text = "Added " + searchResults.Hits[index].Asset.Name;
 			SearchService.Instance.Flush();
 		});

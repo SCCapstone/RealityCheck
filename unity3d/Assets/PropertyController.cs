@@ -67,7 +67,7 @@ public class PropertyController : MonoBehaviour
 
         if (RTriggerDown)
             selectModel();
-        else if (Input.GetButtonDown("BButton") && active)
+        else if ((Input.GetButtonDown("BButton") || Input.GetButtonDown("YButton")) && active)
             deSelectModel();
         if (selected != null)
         {
@@ -625,14 +625,14 @@ public class PropertyController : MonoBehaviour
         if (Physics.Raycast(raydirection, out seen))
         {
             Debug.Log(seen.collider.name);
-            if (seen.collider.gameObject.GetComponent<userAsset>() != null)
+            if (seen.collider.gameObject.transform.parent.gameObject.GetComponent<userAsset>() != null)
             {
                 if (active)
                 {
                     deSelectModel();
                 }
                 active = true;
-                selected = seen.collider.gameObject;
+                selected = seen.collider.gameObject.transform.parent.gameObject;
                 objectOptionsPanel.SetActive(true);
                 SearchResultsPanel.SetActive(false);
                 MenuPanel.SetActive(false);
