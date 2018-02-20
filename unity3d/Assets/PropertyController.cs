@@ -233,12 +233,16 @@ public class PropertyController : MonoBehaviour
 
                     if (seen.collider.gameObject.name == "Gravity")
                     {
-                        model.Gravity = seen.collider.gameObject.GetComponent<Toggle>().isOn;
+                        model.Gravity = ! model.Gravity;
                         model.Physics();
                     }
                     if (seen.collider.gameObject.name == "Maintain")
                     {
-                        model.Maintain = seen.collider.gameObject.GetComponent<Toggle>().isOn;
+                        model.Maintain = !model.Maintain;
+                        if(model.Maintain)
+                            seen.collider.gameObject.GetComponent<Image>().color = new Color(0, 191, 0);
+                        else
+                            seen.collider.gameObject.GetComponent<Image>().color = new Color(191, 0, 0);
                     }
                 }
             }
