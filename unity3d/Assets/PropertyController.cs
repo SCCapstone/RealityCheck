@@ -15,6 +15,8 @@ public class PropertyController : MonoBehaviour
     public GameObject scaleArrowPanel;
     public InputField[] _Position;
     public InputField[] _Rotation;
+    public Button[] _RotSnapButtons;
+    public Text _RotationSnap;
     public InputField[] _Scale;
     public Toggle MaintainScale;
     public Toggle ObeyGravity;
@@ -220,6 +222,7 @@ public class PropertyController : MonoBehaviour
                 if (seen.collider.tag == "Button")
                 {
                     seen.collider.gameObject.GetComponent<Button>().onClick.Invoke();
+                    _RotationSnap.text = model.GetRotationSnap() + "°";
                 }
                 else if (seen.collider.tag == "Input")
                 {
@@ -228,11 +231,13 @@ public class PropertyController : MonoBehaviour
                 }
                 else if (seen.collider.tag == "Check")
                 {
-                    seen.collider.gameObject.GetComponent<Toggle>().isOn =
-                        !seen.collider.gameObject.GetComponent<Toggle>().isOn;
+                    
 
                     if (seen.collider.gameObject.name == "Gravity")
                     {
+                        seen.collider.gameObject.GetComponent<Toggle>().isOn =
+                            !seen.collider.gameObject.GetComponent<Toggle>().isOn;
+
                         model.Gravity = ! model.Gravity;
                         model.Physics();
                     }
@@ -257,10 +262,10 @@ public class PropertyController : MonoBehaviour
         model = selected.GetComponent<userAsset>();
         Button[] buttons = panel.transform.GetComponentsInChildren<Button>();
 
-        buttons[0].onClick.RemoveAllListeners();
-        buttons[1].onClick.RemoveAllListeners();
-        buttons[2].onClick.RemoveAllListeners();
-        buttons[3].onClick.RemoveAllListeners();
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            buttons[i].onClick.RemoveAllListeners();
+        }
 
         buttons[0].onClick.AddListener(delegate {
             if (type == "position")
@@ -288,19 +293,19 @@ public class PropertyController : MonoBehaviour
             {
                 if (index == 0)
                 {
-                    rot.x = selected.transform.localEulerAngles.x - 1.0f;
+                    rot.x = selected.transform.localEulerAngles.x - model.GetRotationSnap();
                     model.Rotation(rot);
                     _Rotation[index].text = selected.transform.localEulerAngles.x.ToString("0.00");
                 }
                 else if (index == 1)
                 {
-                    rot.y = selected.transform.localEulerAngles.y - 1.0f;
+                    rot.y = selected.transform.localEulerAngles.y - model.GetRotationSnap();
                     model.Rotation(rot);
                     _Rotation[index].text = selected.transform.localEulerAngles.y.ToString("0.00");
                 }
                 else if (index == 2)
                 {
-                    rot.z = selected.transform.localEulerAngles.z - 1.0f;
+                    rot.z = selected.transform.localEulerAngles.z - model.GetRotationSnap();
                     model.Rotation(rot);
                     _Rotation[index].text = selected.transform.localEulerAngles.z.ToString("0.00");
                 }
@@ -353,19 +358,19 @@ public class PropertyController : MonoBehaviour
             {
                 if (index == 0)
                 {
-                    rot.x = selected.transform.localEulerAngles.x - 0.1f;
+                    rot.x = selected.transform.localEulerAngles.x + model.GetRotationSnap();
                     model.Rotation(rot);
                     _Rotation[index].text = selected.transform.localEulerAngles.x.ToString("0.00");
                 }
                 else if (index == 1)
                 {
-                    rot.y = selected.transform.localEulerAngles.y - 0.1f;
+                    rot.y = selected.transform.localEulerAngles.y + model.GetRotationSnap();
                     model.Rotation(rot);
                     _Rotation[index].text = selected.transform.localEulerAngles.y.ToString("0.00");
                 }
                 else if (index == 2)
                 {
-                    rot.z = selected.transform.localEulerAngles.z - 0.1f;
+                    rot.z = selected.transform.localEulerAngles.z + model.GetRotationSnap();
                     model.Rotation(rot);
                     _Rotation[index].text = selected.transform.localEulerAngles.z.ToString("0.00");
                 }
@@ -392,136 +397,99 @@ public class PropertyController : MonoBehaviour
                 }
             }
         });
-        buttons[2].onClick.AddListener(delegate {
-            if (type == "position")
+        if (type != "rotation")
+        {
+            buttons[2].onClick.AddListener(delegate
             {
-                if (index == 0)
+                if (type == "position")
                 {
-                    pos.x = selected.transform.position.x + 0.1f;
-                    model.Position(pos);
-                    _Position[index].text = selected.transform.position.x.ToString("0.00");
+                    if (index == 0)
+                    {
+                        pos.x = selected.transform.position.x + 0.1f;
+                        model.Position(pos);
+                        _Position[index].text = selected.transform.position.x.ToString("0.00");
+                    }
+                    else if (index == 1)
+                    {
+                        pos.y = selected.transform.position.y + 0.1f;
+                        model.Position(pos);
+                        _Position[index].text = selected.transform.position.y.ToString("0.00");
+                    }
+                    else if (index == 2)
+                    {
+                        pos.z = selected.transform.position.z + 0.1f;
+                        model.Position(pos);
+                        _Position[index].text = selected.transform.position.z.ToString("0.00");
+                    }
                 }
-                else if (index == 1)
+                else if (type == "scale")
                 {
-                    pos.y = selected.transform.position.y + 0.1f;
-                    model.Position(pos);
-                    _Position[index].text = selected.transform.position.y.ToString("0.00");
+                    if (index == 0)
+                    {
+                        scale.x = selected.transform.localScale.x + 0.1f;
+                        model.Scale(scale);
+                        _Scale[index].text = selected.transform.localScale.x.ToString("0.00");
+                    }
+                    else if (index == 1)
+                    {
+                        scale.y = selected.transform.localScale.y + 0.1f;
+                        model.Scale(scale);
+                        _Scale[index].text = selected.transform.localScale.y.ToString("0.00");
+                    }
+                    else if (index == 2)
+                    {
+                        scale.z = selected.transform.localScale.z + 0.1f;
+                        model.Scale(scale);
+                        _Scale[index].text = selected.transform.localScale.z.ToString("0.00");
+                    }
                 }
-                else if (index == 2)
-                {
-                    pos.z = selected.transform.position.z + 0.1f;
-                    model.Position(pos);
-                    _Position[index].text = selected.transform.position.z.ToString("0.00");
-                }
-            }
-            else if (type == "rotation")
+            });
+            buttons[3].onClick.AddListener(delegate
             {
-                if (index == 0)
+                if (type == "position")
                 {
-                    rot.x = selected.transform.localEulerAngles.x + 0.1f;
-                    model.Rotation(rot);
-                    _Rotation[index].text = selected.transform.localEulerAngles.x.ToString("0.00");
+                    if (index == 0)
+                    {
+                        pos.x = selected.transform.position.x + 1.0f;
+                        model.Position(pos);
+                        _Position[index].text = selected.transform.position.x.ToString("0.00");
+                    }
+                    else if (index == 1)
+                    {
+                        pos.y = selected.transform.position.y + 1.0f;
+                        model.Position(pos);
+                        _Position[index].text = selected.transform.position.y.ToString("0.00");
+                    }
+                    else if (index == 2)
+                    {
+                        pos.z = selected.transform.position.z + 1.0f;
+                        model.Position(pos);
+                        _Position[index].text = selected.transform.position.z.ToString("0.00");
+                    }
                 }
-                else if (index == 1)
+                else if (type == "scale")
                 {
-                    rot.y = selected.transform.localEulerAngles.y + 0.1f;
-                    model.Rotation(rot);
-                    _Rotation[index].text = selected.transform.localEulerAngles.y.ToString("0.00");
+                    if (index == 0)
+                    {
+                        scale.x = selected.transform.localScale.x + 1.0f;
+                        model.Scale(scale);
+                        _Scale[index].text = selected.transform.localScale.x.ToString("0.00");
+                    }
+                    else if (index == 1)
+                    {
+                        scale.y = selected.transform.localScale.y + 1.0f;
+                        model.Scale(scale);
+                        _Scale[index].text = selected.transform.localScale.y.ToString("0.00");
+                    }
+                    else if (index == 2)
+                    {
+                        scale.z = selected.transform.localScale.z + 1.0f;
+                        model.Scale(scale);
+                        _Scale[index].text = selected.transform.localScale.z.ToString("0.00");
+                    }
                 }
-                else if (index == 2)
-                {
-                    rot.z = selected.transform.localEulerAngles.z + 0.1f;
-                    model.Rotation(rot);
-                    _Rotation[index].text = selected.transform.localEulerAngles.z.ToString("0.00");
-                }
-            }
-            else if (type == "scale")
-            {
-                if (index == 0)
-                {
-                    scale.x = selected.transform.localScale.x + 0.1f;
-                    model.Scale(scale);
-                    _Scale[index].text = selected.transform.localScale.x.ToString("0.00");
-                }
-                else if (index == 1)
-                {
-                    scale.y = selected.transform.localScale.y + 0.1f;
-                    model.Scale(scale);
-                    _Scale[index].text = selected.transform.localScale.y.ToString("0.00");
-                }
-                else if (index == 2)
-                {
-                    scale.z = selected.transform.localScale.z + 0.1f;
-                    model.Scale(scale);
-                    _Scale[index].text = selected.transform.localScale.z.ToString("0.00");
-                }
-            }
-        });
-        buttons[3].onClick.AddListener(delegate {
-            if (type == "position")
-            {
-                if (index == 0)
-                {
-                    pos.x = selected.transform.position.x + 1.0f;
-                    model.Position(pos);
-                    _Position[index].text = selected.transform.position.x.ToString("0.00");
-                }
-                else if (index == 1)
-                {
-                    pos.y = selected.transform.position.y + 1.0f;
-                    model.Position(pos);
-                    _Position[index].text = selected.transform.position.y.ToString("0.00");
-                }
-                else if (index == 2)
-                {
-                    pos.z = selected.transform.position.z + 1.0f;
-                    model.Position(pos);
-                    _Position[index].text = selected.transform.position.z.ToString("0.00");
-                }
-            }
-            else if (type == "rotation")
-            {
-                if (index == 0)
-                {
-                    rot.x = selected.transform.localEulerAngles.x + 1.0f;
-                    model.Rotation(rot);
-                    _Rotation[index].text = selected.transform.localEulerAngles.x.ToString("0.00");
-                }
-                else if (index == 1)
-                {
-                    rot.y = selected.transform.localEulerAngles.y + 1.0f;
-                    model.Rotation(rot);
-                    _Rotation[index].text = selected.transform.localEulerAngles.y.ToString("0.00");
-                }
-                else if (index == 2)
-                {
-                    rot.z = selected.transform.localEulerAngles.z + 1.0f;
-                    model.Rotation(rot);
-                    _Rotation[index].text = selected.transform.localEulerAngles.z.ToString("0.00");
-                }
-            }
-            else if (type == "scale")
-            {
-                if (index == 0)
-                {
-                    scale.x = selected.transform.localScale.x + 1.0f;
-                    model.Scale(scale);
-                    _Scale[index].text = selected.transform.localScale.x.ToString("0.00");
-                }
-                else if (index == 1)
-                {
-                    scale.y = selected.transform.localScale.y + 1.0f;
-                    model.Scale(scale);
-                    _Scale[index].text = selected.transform.localScale.y.ToString("0.00");
-                }
-                else if (index == 2)
-                {
-                    scale.z = selected.transform.localScale.z + 1.0f;
-                    model.Scale(scale);
-                    _Scale[index].text = selected.transform.localScale.z.ToString("0.00");
-                }
-            }
-        });
+            });
+        }
     }
 
     private bool CheckBoxCollision(BoxCollider collider, Vector3 point)
@@ -595,24 +563,26 @@ public class PropertyController : MonoBehaviour
         if (element.tag == "Check")
         {
             Toggle toggle = element.GetComponent<Toggle>();
-
-            ColorBlock cb = toggle.colors;
-            if (CheckBoxCollision(toggle.GetComponent<BoxCollider>(), rayHitPoint))
+            if (toggle != null)
             {
-                if (RTriggerDown)
+                ColorBlock cb = toggle.colors;
+                if (CheckBoxCollision(toggle.GetComponent<BoxCollider>(), rayHitPoint))
                 {
-                    cb.normalColor = selectInput;
+                    if (RTriggerDown)
+                    {
+                        cb.normalColor = selectInput;
+                    }
+                    else
+                    {
+                        cb.normalColor = highlightInput;
+                    }
                 }
                 else
                 {
-                    cb.normalColor = highlightInput;
+                    cb.normalColor = normalInput;
                 }
+                toggle.colors = cb;
             }
-            else
-            {
-                cb.normalColor = normalInput;
-            }
-            toggle.colors = cb;
         }
     }
 
@@ -651,7 +621,14 @@ public class PropertyController : MonoBehaviour
                 _Name.text = "Name: " + seen.collider.name;
 
                 model.Physics();
-
+                _RotSnapButtons[0].onClick.AddListener(delegate
+                {
+                    model.RotationSnapDec();
+                });
+                _RotSnapButtons[1].onClick.AddListener(delegate
+                {
+                    model.RotationSnapInc();
+                });
                 _Position[0].onEndEdit.AddListener(delegate
                 {
                     float.TryParse(_Position[0].text, out pos.x);
