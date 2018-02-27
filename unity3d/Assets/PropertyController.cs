@@ -20,6 +20,8 @@ public class PropertyController : MonoBehaviour
     public InputField[] _Scale;
     public Toggle MaintainScale;
     public Toggle ObeyGravity;
+    public Button _Delete;
+    public GameObject[] _DeleteConfirmation;
 
     private Vector3 pos;
     private Vector3 rot;
@@ -620,6 +622,23 @@ public class PropertyController : MonoBehaviour
                 ObeyGravity.isOn = model.Gravity;
                 _Name.text = "Name: " + seen.collider.name;
 
+                _Delete.onClick.AddListener(delegate
+                {
+                    objectOptionsPanel.SetActive(false);
+                    _DeleteConfirmation[0].SetActive(true);
+                    _DeleteConfirmation[1].GetComponent<Text>().text = model.name;
+                    _DeleteConfirmation[2].GetComponent<Button>().onClick.AddListener(delegate
+                    {
+                        Destroy(selected);
+                        _DeleteConfirmation[0].SetActive(false);
+                    });
+                    _DeleteConfirmation[3].GetComponent<Button>().onClick.AddListener(delegate
+                    {
+                        _DeleteConfirmation[0].SetActive(false);
+                        objectOptionsPanel.SetActive(true);
+                    });
+                });
+
                 model.Physics();
                 _RotSnapButtons[0].onClick.AddListener(delegate
                 {
@@ -686,6 +705,7 @@ public class PropertyController : MonoBehaviour
         positionArrowPanel.SetActive(false);
         rotationArrowPanel.SetActive(false);
         scaleArrowPanel.SetActive(false);
+        _DeleteConfirmation[0].SetActive(false);
 
         active = false;
         _Position[0].onEndEdit.RemoveAllListeners();
