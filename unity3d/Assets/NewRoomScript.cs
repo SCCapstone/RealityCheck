@@ -29,6 +29,13 @@ public class NewRoomScript : MonoBehaviour {
     public Shader BumpedDiffuse;
     public Shader BumpedSpecular;
 
+    public GameObject musicVolumeSliderArea;
+    public GameObject musicVolumeSlider;
+    public GameObject musicVolumeText;
+    public GameObject maxVolumePos;
+    public GameObject minVolumePos;
+    public AudioSource music;
+    
     private bool RTriggerHeld;
     private bool LTriggerHeld;
 
@@ -86,6 +93,14 @@ public class NewRoomScript : MonoBehaviour {
         recordingService = SpeechToTextAudioSource.GetComponent<RecordingService>();
 
         updateNumberOfSearchPages();
+
+        if (MainRoomSettings.musicVolume == -1)
+        {
+            MainRoomSettings.musicVolume = music.volume * 100.0f;
+        }
+
+        updateSliderFromPercentage(MainRoomSettings.musicVolume);
+        music.volume = MainRoomSettings.musicVolume * 0.01f;
     }
 
     // Update is called once per frame
@@ -107,6 +122,7 @@ public class NewRoomScript : MonoBehaviour {
         else if (MenuPanel.activeSelf)
         {
             findMenuHoverButton();
+            updateMusicSlider();
         }
         
         RTriggerDown = getRightTriggerDown();
@@ -759,5 +775,53 @@ public class NewRoomScript : MonoBehaviour {
                 }
             });
         }
+    }
+    
+    private void updateMusicSlider()
+    {
+        if (Input.GetAxisRaw("RightTrigger") > 0.2f)
+        {
+            BoxCollider areaCollider = musicVolumeSliderArea.GetComponent<BoxCollider>();
+            if (CheckBoxCollision(areaCollider, rayCastEndSphere.transform.position))
+            {
+                BoxCollider sliderCollider = musicVolumeSlider.GetComponent<BoxCollider>();
+                float width = areaCollider.bounds.size.magnitude;
+
+                Vector3 minPos = minVolumePos.transform.position;
+                Vector3 maxPos = maxVolumePos.transform.position;
+
+                float distanceBetweenMinAndMax = (maxPos - minPos).magnitude + sliderCollider.bounds.size.magnitude;
+                float distanceToMin = (rayCastEndSphere.transform.position - minPos).magnitude;
+                float distanceToMax = (rayCastEndSphere.transform.position - maxPos).magnitude;
+
+                if (distanceToMax < distanceBetweenMinAndMax && distanceToMin < distanceBetweenMinAndMax)
+                {
+                    float percentage = Mathf.Clamp(((distanceToMin / width) * 100.0f - 5.0f),
+                        0.0f, 100.0f);
+
+                    music.volume = percentage * 0.01f;
+                    updateSliderFromPercentage(percentage);
+                }
+            }
+        }
+    }
+    
+    private void updateSliderFromPercentage(float percentage)
+    {
+        //Takes in a value from 0 to 100
+        percentage = Mathf.Clamp(percentage, 0.0f, 100.0f);
+        MainRoomSettings.musicVolume = percentage;
+
+        musicVolumeText.GetComponent<Text>().text = ((int)Mathf.Round(percentage)).ToString() + "%";
+        
+        Vector3 minPos = minVolumePos.transform.localPosition;
+        Vector3 maxPos = maxVolumePos.transform.localPosition;
+
+        float percentDecimal = percentage * 0.01f;
+        Vector3 newSliderPosition = 
+            (minPos * (1.0f - percentDecimal)) +
+            (maxPos * percentDecimal);
+
+        musicVolumeSlider.transform.localPosition = newSliderPosition;
     }
 }
