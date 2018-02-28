@@ -53,6 +53,10 @@ class SearchService(metaclass=Singleton):
 
         res.max_score = 0.0
 
+        if len(hits.scoreDocs) <= 0:
+            res.count = 0
+            return res
+
         # iterate all hits within bounds
         for i in range(bounds[0] - 1, bounds[1]):
             hit = hits.scoreDocs[i]

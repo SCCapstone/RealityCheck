@@ -1,0 +1,84 @@
+version: '3'
+services:
+
+  zookeeper:
+    image: confluent/zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      zk_id: "1"
+    logging:
+      driver: none
+
+  kafka:
+    image: confluent/kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+    logging:
+      driver: none
+
+  mongodbv3:
+    image: mongo:latest
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - ./data/db:/data/db
+    ports:
+      - 27017:27017
+    logging:
+      driver: none
+    command: mongod --smallfiles --logpath=/dev/null # --quiet
+
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
+    logging:
+      driver: none
+
+  realitycheckservice:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
+    ports:
+      - 8001:8001
+    depends_on:
+      - mongodbv3
+
+  # https://github.com/elgalu/docker-selenium/issues/20
+  crawler-master:
+    privileged: true
+    build:
+      context: ./crawler-master
+      dockerfile: Dockerfile
+    volumes:
+      - ./data/dl:/data/dl
+    restart:
+      - always
+    shm_size: 1G
+    depends_on:
+      - kafka
+      - realitycheckservice
+
+  crawler-slave:
+    privileged: true
+    build:
+      context: ./crawler-slave
+      dockerfile: Dockerfile
+    volumes:
+      - ./data/dl:/data/dl
+    restart:
+      - always
+    shm_size: 1G
+    depends_on:
+      - kafka
+      - crawler-master
+      - realitycheckservice
+
+
+
