@@ -613,7 +613,7 @@ public class NewRoomScript : MonoBehaviour {
 
         if (!string.IsNullOrEmpty(query))
         {
-            SearchService.Instance.Flush();
+            //SearchService.Instance.Flush();
             SearchService.Instance.Search(query, res =>
             {
                 searchResults = res;
@@ -757,7 +757,7 @@ public class NewRoomScript : MonoBehaviour {
 
             lastNewLoadedModels.Clear();
 
-            SearchService.Instance.Flush();
+            //SearchService.Instance.Flush();
         }
     }
 
@@ -775,7 +775,7 @@ public class NewRoomScript : MonoBehaviour {
         }
 
         lastNewLoadedModels.Clear();
-        SearchService.Instance.Flush();
+        //SearchService.Instance.Flush();
     }
 
     private void clearResultsUI()
