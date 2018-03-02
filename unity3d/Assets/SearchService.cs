@@ -21,12 +21,16 @@ public sealed class SearchService: Singleton<SearchService> {
     
     private FastZip fastZip = new FastZip();
 
+    private Dictionary<Search.Hit, NetModel> cachedModels = new Dictionary<Search.Hit, NetModel>();
+
     public Text debugText;
 
     protected SearchService() {}
 
     // Delete App Cache Folder
     public void Flush() {
+        cachedModels.Clear();
+
         string path = Application.temporaryCachePath;
  
         DirectoryInfo di = new DirectoryInfo(path);
@@ -56,13 +60,24 @@ public sealed class SearchService: Singleton<SearchService> {
 
     // Download model from server
     public void DownloadModel(Search.Hit hit, Action<NetModel> callBack) {
-        try {
-            var fp = DOWNLOAD_URI + hit.Asset.Filename;
-            StartCoroutine(DownloadRequest(new WWW(fp), fp, hit, callBack));
-        } catch (UnityException ex) {
-            debugText.text = ex.Message;
-            Debug.Log(ex.Message);
-	    }
+
+        if (cachedModels.ContainsKey(hit))
+        {
+            callBack(cachedModels[hit]);
+        }
+        else
+        {
+            try
+            {
+                var fp = DOWNLOAD_URI + hit.Asset.Filename;
+                StartCoroutine(DownloadRequest(new WWW(fp), fp, hit, callBack));
+            }
+            catch (UnityException ex)
+            {
+                debugText.text = ex.Message;
+                Debug.Log(ex.Message);
+            }
+        }
     }
 
     // Send search query
@@ -140,6 +155,11 @@ public sealed class SearchService: Singleton<SearchService> {
             nm.obj = extractPath + Path.DirectorySeparatorChar + "0.obj";
             nm.mtl = extractPath + Path.DirectorySeparatorChar + "0.mtl";
             Debug.Log("DL: " + nm.obj);
+
+            if (!cachedModels.ContainsKey(hit))
+            {
+                cachedModels.Add(hit, nm);
+            }
             
             callBack(nm);
         } catch (UnityException ex) {
