@@ -48,6 +48,7 @@ public class NewRoomScript : MonoBehaviour {
     private string menuHoverButton;
 
     private GameObject rayCastEndSphere;
+    private LineRenderer rayCastLineRenderer;
     private string keyboardSource;
     private string hoveredKey;
     private double keyHoldTime = 500.0; // 500 milliseconds
@@ -70,11 +71,17 @@ public class NewRoomScript : MonoBehaviour {
 
     private Search.SearchResult searchResults;
 
+    private bool isLoadingInNewModel = false;
+    private List<GameObject> lastNewLoadedModels;
+    public GameObject loadingCircle;
+
     private RecordingService recordingService;
     private bool voiceRecordingInProgress;
 
     // Use this for initialization
     void Start () {
+        lastNewLoadedModels = new List<GameObject>();
+        loadingCircle.SetActive(false);
         MenuPanel.SetActive(false);
         VirtualKeyboardCanvas.SetActive(false);
         SearchResultsPanel.SetActive(false);
@@ -111,6 +118,11 @@ public class NewRoomScript : MonoBehaviour {
             rayCastEndSphere = GameObject.Find("rayCastEndSphere");
         }
 
+        if (rayCastLineRenderer == null)
+        {
+            rayCastLineRenderer = GameObject.Find("_GameMaster").GetComponent<LineRenderer>();
+        }
+
         if (VirtualKeyboardCanvas.activeSelf)
         {
             findHoverKey();
@@ -141,8 +153,20 @@ public class NewRoomScript : MonoBehaviour {
             keyDownStartTime = 0;
         }
 
+        if (isLoadingInNewModel)
+        {
+            syncNewModelPosition();
+        }
+
         if (RTriggerDown)
         {
+            if (isLoadingInNewModel)
+            {
+                if (lastNewLoadedModels.Count != 0)
+                {
+                    StartCoroutine(placeNewLoadedModel());
+                }
+            }
             if (VirtualKeyboardCanvas.activeSelf && hoveredKey != "")
             {
                 keyDownStartTime = NowMilliseconds();
@@ -167,6 +191,10 @@ public class NewRoomScript : MonoBehaviour {
         }
         else if (Input.GetButtonDown("YButton") || Input.GetButtonDown("BButton")) //Also Start button for Vive
         {
+            if (isLoadingInNewModel)
+            {
+                cancelNewLoadedModel();
+            }
             if (MenuPanel.activeSelf)
             {
                 MenuPanel.SetActive(false);
@@ -601,6 +629,13 @@ public class NewRoomScript : MonoBehaviour {
             downloadModelName = searchResults.Hits[searchIndex].Asset.Name;
             SearchService.Instance.DownloadModel(searchResults.Hits[searchIndex], nm =>
             {
+                SearchResultsPanel.SetActive(false);
+                isLoadingInNewModel = true;
+                loadingCircle.SetActive(true);
+                rayCastEndSphere.GetComponent<MeshRenderer>().material.color = Color.green;
+                rayCastLineRenderer.startColor = Color.green;
+                rayCastLineRenderer.endColor = Color.green;
+
                 ModelLoaderService.Instance.LoadModel(nm, modelDoneLoadingCallback);
             });
         }
@@ -608,17 +643,15 @@ public class NewRoomScript : MonoBehaviour {
 
     public void modelDoneLoadingCallback(GameObject lastLoadedModel)
     {
-        StartCoroutine(finishUpModelLoad(lastLoadedModel));
+        finishUpModelLoad(lastLoadedModel);
     }
 
-    public IEnumerator finishUpModelLoad(GameObject lastLoadedModel)
+    public void finishUpModelLoad(GameObject lastLoadedModel)
     {
         if (lastLoadedModel != null)
         {
-            lastLoadedModel.layer = 8;
-            
             lastLoadedModel.name = downloadModelName;
-            
+
             Quaternion currentRotation = lastLoadedModel.transform.rotation;
             lastLoadedModel.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
             Bounds bounds = new Bounds(lastLoadedModel.transform.position, Vector3.zero);
@@ -640,36 +673,109 @@ public class NewRoomScript : MonoBehaviour {
             float diff = bounds.min.y * newScale;
 
             lastLoadedModel.transform.position = new Vector3(0, Mathf.Abs(diff), 0);
+            lastLoadedModel.GetComponent<BoxCollider>().enabled = false;
 
             GameObject parentObject = new GameObject();
-            parentObject.name = downloadModelName + "parent";
+            parentObject.name = downloadModelName + " parent";
             lastLoadedModel.transform.parent = parentObject.transform;
+            setGameObjectLayer(parentObject, 2);
 
-            parentObject.AddComponent<Valve.VR.InteractionSystem.VelocityEstimator>();
-            parentObject.AddComponent<Valve.VR.InteractionSystem.Interactable>();
+            lastNewLoadedModels.Add(parentObject);
+        }
+        else
+        {
+            cancelNewLoadedModel();
+        }
+    }
+
+    private void setGameObjectLayer(GameObject model, int layer)
+    {
+        model.layer = layer;
+        int childCount = model.transform.childCount;
+        if (childCount > 0)
+        {
+            for (int i = 0; i < childCount; i++)
+            {
+                setGameObjectLayer(model.transform.GetChild(i).gameObject, layer);
+            }
+        }
+    }
+
+    private void syncNewModelPosition()
+    {
+        Vector3 rayCastPos = rayCastEndSphere.transform.position;
+        Vector3 newPos = new Vector3(rayCastPos.x, 0, rayCastPos.z);
+
+        if (lastNewLoadedModels.Count != 0)
+        {
+            lastNewLoadedModels[0].transform.position = newPos + 
+                    new Vector3(0, lastNewLoadedModels[0].transform.position.y, 0);
+        }
+        
+        if (loadingCircle.activeSelf)
+        {
+            loadingCircle.transform.position = newPos;
+        }
+    }
+
+    private IEnumerator placeNewLoadedModel()
+    {
+        if (lastNewLoadedModels.Count != 0)
+        {
+            isLoadingInNewModel = false;
+            loadingCircle.SetActive(false);
+            rayCastEndSphere.GetComponent<MeshRenderer>().material.color = Color.blue;
+            rayCastLineRenderer.startColor = Color.blue;
+            rayCastLineRenderer.endColor = Color.blue;
+
+            GameObject lastNewLoadedModel = lastNewLoadedModels[0];
+            
+            lastNewLoadedModel.AddComponent<Valve.VR.InteractionSystem.VelocityEstimator>();
+            lastNewLoadedModel.AddComponent<Valve.VR.InteractionSystem.Interactable>();
             //parentObject.AddComponent<Valve.VR.InteractionSystem.InteractableHoverEvents>();
-            parentObject.AddComponent<Valve.VR.InteractionSystem.Throwable>();
+            lastNewLoadedModel.AddComponent<Valve.VR.InteractionSystem.Throwable>();
 
-            Valve.VR.InteractionSystem.Throwable throwable = parentObject.GetComponent<Valve.VR.InteractionSystem.Throwable>();
+            Valve.VR.InteractionSystem.Throwable throwable = lastNewLoadedModel.GetComponent<Valve.VR.InteractionSystem.Throwable>();
             throwable.onPickUp = new UnityEngine.Events.UnityEvent();
             throwable.onDetachFromHand = new UnityEngine.Events.UnityEvent();
 
-            parentObject.AddComponent<userAsset>();
+            lastNewLoadedModel.AddComponent<userAsset>();
 
-            parentObject.AddComponent<Rigidbody>(); // Add gravity rules for physics
-            Rigidbody rigidBody = parentObject.GetComponent<Rigidbody>();
+            lastNewLoadedModel.transform.GetChild(0).gameObject.GetComponent<BoxCollider>().enabled = true;
+            lastNewLoadedModel.AddComponent<Rigidbody>(); // Add gravity rules for physics
+            Rigidbody rigidBody = lastNewLoadedModel.GetComponent<Rigidbody>();
             rigidBody.isKinematic = true;
 
             rigidBody.mass = 1000;
             rigidBody.velocity = Vector3.zero;
             rigidBody.angularVelocity = Vector3.zero;
-            
+
             yield return new WaitForSeconds(0.1f);
 
             rigidBody.isKinematic = false;
+            setGameObjectLayer(lastNewLoadedModel, 0);
+
+            lastNewLoadedModels.Clear();
 
             SearchService.Instance.Flush();
         }
+    }
+
+    private void cancelNewLoadedModel()
+    {
+        isLoadingInNewModel = false;
+        loadingCircle.SetActive(false);
+        rayCastEndSphere.GetComponent<MeshRenderer>().material.color = Color.blue;
+        rayCastLineRenderer.startColor = Color.blue;
+        rayCastLineRenderer.endColor = Color.blue;
+
+        if (lastNewLoadedModels.Count != 0)
+        {
+            Destroy(lastNewLoadedModels[0]);
+        }
+
+        lastNewLoadedModels.Clear();
+        SearchService.Instance.Flush();
     }
 
     private void clearResultsUI()

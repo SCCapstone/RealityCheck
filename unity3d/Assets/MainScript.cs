@@ -82,7 +82,10 @@ public class MainScript : MonoBehaviour
         //    panel.SetActive(state);
         //    resultsPanel.SetActive(state);
         //}
-        
+
+        var layerMask = 1 << 2;
+        layerMask = ~layerMask;
+
         RaycastHit hit;
 
         Vector3 rotation = pointerHand.transform.localEulerAngles;
@@ -90,7 +93,7 @@ public class MainScript : MonoBehaviour
 
         Vector3 forwardVector = Quaternion.Euler(rotation) * Vector3.forward;
         
-        if (Physics.Raycast(pointerHand.transform.position, forwardVector, out hit))
+        if (Physics.Raycast(pointerHand.transform.position, forwardVector, out hit, Mathf.Infinity, layerMask))
         {
             float size = Mathf.Clamp(hit.distance * 0.01f, 0.01f, 1f);
             rayCastEndSphere.transform.localScale = new Vector3(size, size, size);

@@ -13,10 +13,21 @@ public class NewCircleRoomDoorKnob : MonoBehaviour {
     private GameObject rayCastEndSphere;
     private string onCollidedText;
 
+    private bool RTriggerHeld;
+    private bool LTriggerHeld;
+
+    private double LDownTime;
+    private double RDownTime;
+    private double triggerTime = 10.0; // 10 milliseconds
+    private bool RTriggerDown;
+    private bool LTriggerDown;
+
     // Use this for initialization
     void Start () {
         onCollidedText = "Press \"A\" to create a new circle room";
-	}
+        LTriggerDown = false;
+        RTriggerDown = false;
+    }
 
 	// Update is called once per frame
 	void Update () {
@@ -25,6 +36,9 @@ public class NewCircleRoomDoorKnob : MonoBehaviour {
         {
             rayCastEndSphere = GameObject.Find("rayCastEndSphere");
         }
+
+        RTriggerDown = getRightTriggerDown();
+        LTriggerDown = getLeftTriggerDown();
 
         SphereCollider sphereBox = GetComponent<SphereCollider>();
         Vector3 leftPos = leftHand.transform.position;
@@ -44,7 +58,7 @@ public class NewCircleRoomDoorKnob : MonoBehaviour {
             || sphereBox.bounds.Contains(rayPos))
         {
             KnobGlow.SetActive(true);
-            if (Input.GetAxis("RightTrigger") > 0.2f)
+            if (RTriggerDown)
             {
                 SceneManager.LoadScene("newCircleRoom", LoadSceneMode.Single);
             }
@@ -56,5 +70,73 @@ public class NewCircleRoomDoorKnob : MonoBehaviour {
 
     }
 
+    private bool getRightTriggerDown()
+    {
+        float pressure = Input.GetAxisRaw("RightTrigger");
+        bool down = pressure > 0.2f;
+        if (down)
+        {
+            if (RTriggerHeld)
+            {
+                if (NowMilliseconds() - RDownTime < triggerTime)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                RDownTime = NowMilliseconds();
+                RTriggerHeld = true;
+                return true;
+            }
+        }
+        else
+        {
+            RTriggerHeld = false;
+            return false;
+        }
+    }
+
+    private bool getLeftTriggerDown()
+    {
+        float pressure = Input.GetAxisRaw("LeftTrigger");
+        bool down = pressure > 0.2f;
+        if (down)
+        {
+            if (LTriggerHeld)
+            {
+                if (NowMilliseconds() - LDownTime < triggerTime)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                LDownTime = NowMilliseconds();
+                LTriggerHeld = true;
+                return true;
+            }
+        }
+        else
+        {
+            LTriggerHeld = false;
+            return false;
+        }
+    }
+
+    private double NowMilliseconds()
+    {
+        return (System.DateTime.UtcNow -
+                new System.DateTime(1970, 1, 1, 0, 0, 0,
+                    System.DateTimeKind.Utc)).TotalMilliseconds;
+    }
 
 }
