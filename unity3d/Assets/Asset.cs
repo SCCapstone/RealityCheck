@@ -24,15 +24,19 @@ namespace Asset {
           string.Concat(
             "Cgthc3NldC5wcm90bxIFYXNzZXQibgoDVGFnEg0KBXZhbHVlGAEgASgJEiEK",
             "Bm9yaWdpbhgCIAEoDjIRLmFzc2V0LlRhZy5PcmlnaW4iNQoGT3JpZ2luEgsK",
-            "B1NDUkFQRUQQABIKCgZWSVNJT04QARIGCgJBSRACEgoKBk1BTlVBTBADImIK",
-            "BUFzc2V0EgoKAmlkGAEgASgFEgwKBG5hbWUYAiABKAkSEwoLZGVzY3JpcHRp",
-            "b24YAyABKAkSEAoIZmlsZW5hbWUYBCABKAkSGAoEdGFncxgFIAMoCzIKLmFz",
-            "c2V0LlRhZ2IGcHJvdG8z"));
+            "B1NDUkFQRUQQABIKCgZWSVNJT04QARIGCgJBSRACEgoKBk1BTlVBTBADIkEK",
+            "D0FyY2hpdmVNZXRhZGF0YRIMCgRuYW1lGAEgASgJEhEKCWtpbG9ieXRlcxgC",
+            "IAEoAxINCgVmaWxlcxgDIAMoCSKtAQoFQXNzZXQSCgoCaWQYASABKAUSDAoE",
+            "dXVpZBgCIAEoCRIMCgRuYW1lGAMgASgJEhMKC2Rlc2NyaXB0aW9uGAQgASgJ",
+            "EhAKCGZpbGVuYW1lGAUgASgJEhIKCmJhbm5lcl91cmkYBiABKAkSGAoEdGFn",
+            "cxgHIAMoCzIKLmFzc2V0LlRhZxInCgdhcmNoaXZlGAggASgLMhYuYXNzZXQu",
+            "QXJjaGl2ZU1ldGFkYXRhYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Asset.Tag), global::Asset.Tag.Parser, new[]{ "Value", "Origin" }, null, new[]{ typeof(global::Asset.Tag.Types.Origin) }, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Asset.Asset), global::Asset.Asset.Parser, new[]{ "Id", "Name", "Description", "Filename", "Tags" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Asset.ArchiveMetadata), global::Asset.ArchiveMetadata.Parser, new[]{ "Name", "Kilobytes", "Files" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Asset.Asset), global::Asset.Asset.Parser, new[]{ "Id", "Uuid", "Name", "Description", "Filename", "BannerUri", "Tags", "Archive" }, null, null, null)
           }));
     }
     #endregion
@@ -198,6 +202,171 @@ namespace Asset {
 
   }
 
+  public sealed partial class ArchiveMetadata : pb::IMessage<ArchiveMetadata> {
+    private static readonly pb::MessageParser<ArchiveMetadata> _parser = new pb::MessageParser<ArchiveMetadata>(() => new ArchiveMetadata());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<ArchiveMetadata> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Asset.AssetReflection.Descriptor.MessageTypes[1]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ArchiveMetadata() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ArchiveMetadata(ArchiveMetadata other) : this() {
+      name_ = other.name_;
+      kilobytes_ = other.kilobytes_;
+      files_ = other.files_.Clone();
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ArchiveMetadata Clone() {
+      return new ArchiveMetadata(this);
+    }
+
+    /// <summary>Field number for the "name" field.</summary>
+    public const int NameFieldNumber = 1;
+    private string name_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Name {
+      get { return name_; }
+      set {
+        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "kilobytes" field.</summary>
+    public const int KilobytesFieldNumber = 2;
+    private long kilobytes_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long Kilobytes {
+      get { return kilobytes_; }
+      set {
+        kilobytes_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "files" field.</summary>
+    public const int FilesFieldNumber = 3;
+    private static readonly pb::FieldCodec<string> _repeated_files_codec
+        = pb::FieldCodec.ForString(26);
+    private readonly pbc::RepeatedField<string> files_ = new pbc::RepeatedField<string>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<string> Files {
+      get { return files_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as ArchiveMetadata);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(ArchiveMetadata other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Name != other.Name) return false;
+      if (Kilobytes != other.Kilobytes) return false;
+      if(!files_.Equals(other.files_)) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Name.Length != 0) hash ^= Name.GetHashCode();
+      if (Kilobytes != 0L) hash ^= Kilobytes.GetHashCode();
+      hash ^= files_.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (Name.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(Name);
+      }
+      if (Kilobytes != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(Kilobytes);
+      }
+      files_.WriteTo(output, _repeated_files_codec);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Name.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
+      }
+      if (Kilobytes != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(Kilobytes);
+      }
+      size += files_.CalculateSize(_repeated_files_codec);
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(ArchiveMetadata other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Name.Length != 0) {
+        Name = other.Name;
+      }
+      if (other.Kilobytes != 0L) {
+        Kilobytes = other.Kilobytes;
+      }
+      files_.Add(other.files_);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 10: {
+            Name = input.ReadString();
+            break;
+          }
+          case 16: {
+            Kilobytes = input.ReadInt64();
+            break;
+          }
+          case 26: {
+            files_.AddEntriesFrom(input, _repeated_files_codec);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
   public sealed partial class Asset : pb::IMessage<Asset> {
     private static readonly pb::MessageParser<Asset> _parser = new pb::MessageParser<Asset>(() => new Asset());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -205,7 +374,7 @@ namespace Asset {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Asset.AssetReflection.Descriptor.MessageTypes[1]; }
+      get { return global::Asset.AssetReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -223,10 +392,13 @@ namespace Asset {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public Asset(Asset other) : this() {
       id_ = other.id_;
+      uuid_ = other.uuid_;
       name_ = other.name_;
       description_ = other.description_;
       filename_ = other.filename_;
+      bannerUri_ = other.bannerUri_;
       tags_ = other.tags_.Clone();
+      Archive = other.archive_ != null ? other.Archive.Clone() : null;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -237,6 +409,9 @@ namespace Asset {
     /// <summary>Field number for the "id" field.</summary>
     public const int IdFieldNumber = 1;
     private int id_;
+    /// <summary>
+    ///  Lucene Document ID
+    /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int Id {
       get { return id_; }
@@ -245,8 +420,22 @@ namespace Asset {
       }
     }
 
+    /// <summary>Field number for the "uuid" field.</summary>
+    public const int UuidFieldNumber = 2;
+    private string uuid_ = "";
+    /// <summary>
+    ///  MongoDB UUID
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Uuid {
+      get { return uuid_; }
+      set {
+        uuid_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     /// <summary>Field number for the "name" field.</summary>
-    public const int NameFieldNumber = 2;
+    public const int NameFieldNumber = 3;
     private string name_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string Name {
@@ -257,7 +446,7 @@ namespace Asset {
     }
 
     /// <summary>Field number for the "description" field.</summary>
-    public const int DescriptionFieldNumber = 3;
+    public const int DescriptionFieldNumber = 4;
     private string description_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string Description {
@@ -268,7 +457,7 @@ namespace Asset {
     }
 
     /// <summary>Field number for the "filename" field.</summary>
-    public const int FilenameFieldNumber = 4;
+    public const int FilenameFieldNumber = 5;
     private string filename_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string Filename {
@@ -278,14 +467,36 @@ namespace Asset {
       }
     }
 
+    /// <summary>Field number for the "banner_uri" field.</summary>
+    public const int BannerUriFieldNumber = 6;
+    private string bannerUri_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string BannerUri {
+      get { return bannerUri_; }
+      set {
+        bannerUri_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     /// <summary>Field number for the "tags" field.</summary>
-    public const int TagsFieldNumber = 5;
+    public const int TagsFieldNumber = 7;
     private static readonly pb::FieldCodec<global::Asset.Tag> _repeated_tags_codec
-        = pb::FieldCodec.ForMessage(42, global::Asset.Tag.Parser);
+        = pb::FieldCodec.ForMessage(58, global::Asset.Tag.Parser);
     private readonly pbc::RepeatedField<global::Asset.Tag> tags_ = new pbc::RepeatedField<global::Asset.Tag>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::RepeatedField<global::Asset.Tag> Tags {
       get { return tags_; }
+    }
+
+    /// <summary>Field number for the "archive" field.</summary>
+    public const int ArchiveFieldNumber = 8;
+    private global::Asset.ArchiveMetadata archive_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Asset.ArchiveMetadata Archive {
+      get { return archive_; }
+      set {
+        archive_ = value;
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -302,10 +513,13 @@ namespace Asset {
         return true;
       }
       if (Id != other.Id) return false;
+      if (Uuid != other.Uuid) return false;
       if (Name != other.Name) return false;
       if (Description != other.Description) return false;
       if (Filename != other.Filename) return false;
+      if (BannerUri != other.BannerUri) return false;
       if(!tags_.Equals(other.tags_)) return false;
+      if (!object.Equals(Archive, other.Archive)) return false;
       return true;
     }
 
@@ -313,10 +527,13 @@ namespace Asset {
     public override int GetHashCode() {
       int hash = 1;
       if (Id != 0) hash ^= Id.GetHashCode();
+      if (Uuid.Length != 0) hash ^= Uuid.GetHashCode();
       if (Name.Length != 0) hash ^= Name.GetHashCode();
       if (Description.Length != 0) hash ^= Description.GetHashCode();
       if (Filename.Length != 0) hash ^= Filename.GetHashCode();
+      if (BannerUri.Length != 0) hash ^= BannerUri.GetHashCode();
       hash ^= tags_.GetHashCode();
+      if (archive_ != null) hash ^= Archive.GetHashCode();
       return hash;
     }
 
@@ -331,19 +548,31 @@ namespace Asset {
         output.WriteRawTag(8);
         output.WriteInt32(Id);
       }
-      if (Name.Length != 0) {
+      if (Uuid.Length != 0) {
         output.WriteRawTag(18);
+        output.WriteString(Uuid);
+      }
+      if (Name.Length != 0) {
+        output.WriteRawTag(26);
         output.WriteString(Name);
       }
       if (Description.Length != 0) {
-        output.WriteRawTag(26);
+        output.WriteRawTag(34);
         output.WriteString(Description);
       }
       if (Filename.Length != 0) {
-        output.WriteRawTag(34);
+        output.WriteRawTag(42);
         output.WriteString(Filename);
       }
+      if (BannerUri.Length != 0) {
+        output.WriteRawTag(50);
+        output.WriteString(BannerUri);
+      }
       tags_.WriteTo(output, _repeated_tags_codec);
+      if (archive_ != null) {
+        output.WriteRawTag(66);
+        output.WriteMessage(Archive);
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -351,6 +580,9 @@ namespace Asset {
       int size = 0;
       if (Id != 0) {
         size += 1 + pb::CodedOutputStream.ComputeInt32Size(Id);
+      }
+      if (Uuid.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Uuid);
       }
       if (Name.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
@@ -361,7 +593,13 @@ namespace Asset {
       if (Filename.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Filename);
       }
+      if (BannerUri.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(BannerUri);
+      }
       size += tags_.CalculateSize(_repeated_tags_codec);
+      if (archive_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Archive);
+      }
       return size;
     }
 
@@ -373,6 +611,9 @@ namespace Asset {
       if (other.Id != 0) {
         Id = other.Id;
       }
+      if (other.Uuid.Length != 0) {
+        Uuid = other.Uuid;
+      }
       if (other.Name.Length != 0) {
         Name = other.Name;
       }
@@ -382,7 +623,16 @@ namespace Asset {
       if (other.Filename.Length != 0) {
         Filename = other.Filename;
       }
+      if (other.BannerUri.Length != 0) {
+        BannerUri = other.BannerUri;
+      }
       tags_.Add(other.tags_);
+      if (other.archive_ != null) {
+        if (archive_ == null) {
+          archive_ = new global::Asset.ArchiveMetadata();
+        }
+        Archive.MergeFrom(other.Archive);
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -398,19 +648,34 @@ namespace Asset {
             break;
           }
           case 18: {
-            Name = input.ReadString();
+            Uuid = input.ReadString();
             break;
           }
           case 26: {
-            Description = input.ReadString();
+            Name = input.ReadString();
             break;
           }
           case 34: {
-            Filename = input.ReadString();
+            Description = input.ReadString();
             break;
           }
           case 42: {
+            Filename = input.ReadString();
+            break;
+          }
+          case 50: {
+            BannerUri = input.ReadString();
+            break;
+          }
+          case 58: {
             tags_.AddEntriesFrom(input, _repeated_tags_codec);
+            break;
+          }
+          case 66: {
+            if (archive_ == null) {
+              archive_ = new global::Asset.ArchiveMetadata();
+            }
+            input.ReadMessage(archive_);
             break;
           }
         }
