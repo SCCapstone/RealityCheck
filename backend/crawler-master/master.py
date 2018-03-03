@@ -1,8 +1,6 @@
 import logging
 import time
 
-import redis
-from pymongo import MongoClient
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import os
@@ -25,14 +23,6 @@ handler.setFormatter(formatter)
 # add the handlers to the logger
 logger.addHandler(handler)
 
-MONGO_HOST = 'realitydb'
-MONGO_DB = 'crawlerdb'
-'''
-MongoDB: crawlerdb
-
-Collections:
- - links: sort all links posted to crawl
-'''
 
 def asset_uri(path):
     return '%s%s' % ('http://realitycheckservice:8001', path)
@@ -44,12 +34,7 @@ class MasterCrawler:
 
     def __init__(self, page_url='https://free3d.com/free-3d-models/obj?page=%s'):
         self.page_url = page_url
-        self.redis_db = redis.Redis(host='redis', port=6379, db=0, charset="utf-8", decode_responses=True)
-        self.redis_db.flushall()
-
         self.producer = KafkaProducer(bootstrap_servers='kafka:9092')
-        # self.mongo_client = MongoClient(MONGO_HOST, 27017)
-        # self.db = self.mongo_client[MONGO_DB]
 
     def has_linked(self, href: str) -> bool:
         r = requests.put(asset_uri('/api/v2/crawl/job/uri'),
@@ -58,10 +43,6 @@ class MasterCrawler:
                          })
 
         return r.status_code == requests.codes.ok
-        # link = self.db.links.find_one({'href': href})
-        #if not link:
-        #    return False
-        #return True
 
     def get_models(self):
         """
@@ -78,9 +59,8 @@ class MasterCrawler:
 
             queued = False
 
-            if self.redis_db.get(l) is None:
+            if not queued:
                 if not self.has_linked(l):
-                    self.redis_db.set(l, '0')
 
                     # Store links in mongodb
                     r = requests.post(asset_uri('/api/v2/crawl/job/'), json={
@@ -90,16 +70,8 @@ class MasterCrawler:
                     })
 
                     payload = json.dumps(r.json()).encode('utf-8')
-                    time.sleep(1)
-
-                    # self.redis_db.publish("dl", json.dumps(r.json()))
                     self.producer.send('dl', payload)
 
-                    # self.db.links.insert_one(
-                    #    {
-                    #        'href': l,
-                    #        'state': 'queued',
-                    #    })
                     logger.info(l)
                     links.append(l)
                     queued = True

@@ -8,6 +8,6 @@
     "vue-resource": "1.0.3"
   },
   "dependencies": {
-    "jsoneditor": "^5.13.3"
+    "jsoneditor": "^5.14.0"
   }
 }

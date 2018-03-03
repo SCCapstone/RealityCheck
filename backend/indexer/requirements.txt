@@ -1,5 +1,0 @@
-redis
-pymongo
-libarchive
-google-api-python-client
-google-cloud-storage

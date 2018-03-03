@@ -15,6 +15,9 @@ from search.searcher import SearchService
 from flask_mongoengine import MongoEngine
 import enum
 import datetime
+import os
+import consul
+
 
 lucene.initVM()
 app = Flask(__name__)
@@ -23,10 +26,10 @@ app.config.from_pyfile('config.py')
 searcher = SearchService()
 log = logging.getLogger("my-logger")
 
-gcloud_key = 'xxx'
-gspeech_uri = "https://speech.googleapis.com/v1/speech:recognize?key=%s" % gcloud_key
+consul_service = consul.Consul(host='consul')
 
 db = MongoEngine(app)
+
 
 
 class ArchiveMetadata(db.EmbeddedDocument):
@@ -90,33 +93,6 @@ class Asset(db.Document):
     timestamp = db.DateTimeField(default=datetime.datetime.now())
 
 
-from mongoengine import fields
-
-
-def update_document(document, data_dict):
-    def field_value(field, value):
-
-        if field.__class__ in (fields.ListField, fields.SortedListField):
-            return [
-                field_value(field.field, item)
-                for item in value
-            ]
-        if field.__class__ in (
-                fields.EmbeddedDocumentField,
-                fields.GenericEmbeddedDocumentField,
-                fields.ReferenceField,
-                fields.GenericReferenceField
-        ):
-            return field.document_type(**value)
-        else:
-            return value
-
-    [setattr(
-        document, key,
-        field_value(document._fields[key], value)
-    ) for key, value in data_dict.items()]
-
-    return document
 
 
 @app.route('/api/v1/search', methods=['POST'])
@@ -147,6 +123,9 @@ def return_files_tut(fname: str):
 
 @app.route('/api/v1/transcribe', methods=['POST'])
 def transcribe():
+    index, gcloud_key = consul_service.kv.get('gkey')
+    gspeech_uri = "https://speech.googleapis.com/v1/speech:recognize?key=%s" % gcloud_key
+
     wavb64 = request.stream.read()
 
     payload = {
@@ -189,7 +168,7 @@ def reindex():
 
 def pagination(res):
     page_nb = int(request.args.get('page', default=1))
-    items_per_page = int(request.args.get('limit', default=100))
+    items_per_page = int(request.args.get('limit', default=2000))
 
     offset = (page_nb - 1) * items_per_page
 
@@ -277,8 +256,7 @@ def crawl_asset(uuid):
 @app.route('/api/v2/crawl/asset/', methods=['POST'])
 def new_crawl_asset():
     content = request.json
-    a = crawl_to_asset2(content) #CrawlAsset(**content)
-    ##update_document(a, content)
+    a = crawl_to_asset2(content)
     a.save()
     crawl_to_asset(content).save()
     return jsonify(a)
@@ -321,7 +299,7 @@ def set_asset_primary(uuid):
     return jsonify(Asset.objects.get(id=uuid))
 
 
-@app.route('/')
+@app.route('/e5dff6ec-cf94-47b5-87ed-d26c37a0f9e9')
 def index():
     return render_template('index.html')
 
@@ -356,16 +334,7 @@ def crawl_to_asset2(crawl_dict: dict):
 
 
 def load_docs() -> list:
-    #log.error(Asset.objects.to_json())
     return json.loads(Asset.objects.filter(allow_indexing=True).to_json())
-    d = []
-
-    with open('docs.json') as docs_file:
-        docs = json.load(docs_file)
-        for doc in docs['models']:
-            print(doc)
-            d.append(doc)
-    return d
 
 
 if __name__ == '__main__':

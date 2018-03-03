@@ -22,6 +22,7 @@ import magic
 import requests
 from kafka import KafkaConsumer
 import random
+import consul
 
 mime = magic.Magic(mime=True)
 
@@ -41,24 +42,15 @@ handler.setFormatter(formatter)
 # add the handlers to the logger
 logger.addHandler(handler)
 
-MONGO_HOST = 'realitydb'
-MONGO_DB = 'crawlerdb'
-'''
-MongoDB: crawlerdb
-
-Collections:
- - links: sort all links posted to crawl
- - assets: model assets crawled
- 
-GridFS: save compressed files
-'''
+consul_service = consul.Consul(host='consul')
 
 
 def _get_storage_client():
-    google_api_secret = json.load(open('/app/RealityCheck-USC-9e170ac8f892.json'))
-    ''' credentials = ServiceAccountCredentials.from_json_keyfile_dict(
-        google_api_secret
-    )'''
+    index, data = consul_service.kv.get('gbucket')
+    f = open("/app/RealityCheck-USC-9e170ac8f892.json", "w+")
+    f.write(data)
+    f.close()
+
     return storage.Client \
         .from_service_account_json('/app/RealityCheck-USC-9e170ac8f892.json',
                                    project='RealityCheck-USC')
@@ -127,25 +119,6 @@ def get_extension(filename):
 
 
 def _extract(filename, output_dir=os.getcwd()):
-    """
-
-    extension = get_extension(filename)
-    print('ext ', extension)
-    print('output ', output_dir)
-
-    if '7z' in extension:
-        os.system('7z x %s -o %s' % (filename, output_dir))
-    if 'zip' in extension:
-        os.system('unzip %s -d %s' % (filename, output_dir))
-    if 'tar' in extension:
-        os.system('tar -xvzf %s' % filename)
-    if 'rar' in extension:
-        os.system('unrar x -r %s' % filename)
-
-    :param filename:
-    :param output_dir:
-    :return:
-    """
     f = open(filename, 'rb')
     for e in libarchive.public.memory_pour(f.read()):
         pass
@@ -214,12 +187,12 @@ class SlaveCrawler:
 
     def __init__(self):
         # redis
-        self.redis_db = redis.Redis(host='redis', port=6379, db=0, charset="utf-8", decode_responses=True)
+        self.redis_db = redis.StrictRedis(host='redis', port=6379, db=0, charset="utf-8")
 
         self.consumer = KafkaConsumer('dl', bootstrap_servers=['kafka:9092'],
                                       value_deserializer=lambda m: json.loads(m.decode('utf-8')),
-                                      group_id='crawler-group',
-                                      max_poll_records=1)
+                                      group_id='crawler-%s' % SLAVE_ID,
+                                      max_poll_records=500)
 
         # create download folder
         os.mkdir(self.dldir)
@@ -387,10 +360,14 @@ class SlaveCrawler:
         :return: None
         """
         for msg in self.consumer:
-            time.sleep(5)
-            logger.error(msg)
-            # if msg['type'] == 'subscribe':
-            #    continue
+            _rand_sleep(2, 10)
+            
+            if not self.redis_db.exists(msg.value['uri']):
+                logger.error('crawling %s' % msg.value)
+                self.redis_db.set(msg.value['uri'], SLAVE_ID)
+            else:
+                logger.error('dupe %s' % msg.value)
+                continue
 
             chromeOptions = webdriver.ChromeOptions()
             prefs = {"download.default_directory": self.dldir,

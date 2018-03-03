@@ -21,6 +21,4 @@ RUN pip install --user -r /app/requirements.txt
 WORKDIR /app
 COPY . /app
 
-RUN pip install --user -r requirements.txt
-
 ENTRYPOINT ["sh", "start.sh"]
