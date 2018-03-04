@@ -1,0 +1,7 @@
+flask
+redis
+protobuf
+requests
+flask-mongoengine
+pymongo
+python-consul

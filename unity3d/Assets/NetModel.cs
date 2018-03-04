@@ -4,6 +4,7 @@ using UnityEngine;
 
 
 public class NetModel {
+    public string file;
     public string obj;
     public string mtl;
 }

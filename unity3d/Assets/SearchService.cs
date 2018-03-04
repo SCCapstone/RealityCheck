@@ -12,10 +12,13 @@ using UnityEngine.UI;
 using ICSharpCode.SharpZipLib.Zip;
 using System.Runtime.Serialization.Formatters.Binary; 
 using Google.Protobuf;
+using System.Linq;
 
 public sealed class SearchService: Singleton<SearchService> {
 
-    private static string HOST = "http://45.55.197.39:8001/api/v1/";
+    //private static string HOST = "http://45.55.197.39:8001/api/v1/";
+    // http://165.227.191.119:8080/e5dff6ec-cf94-47b5-87ed-d26c37a0f9e9
+    private static string HOST = "http://165.227.191.119:8080/api/v1/";
     private static string SEARCH_URI = HOST + "search";
     private static string DOWNLOAD_URI = "https://storage.googleapis.com/realitycheck/";
     
@@ -61,12 +64,11 @@ public sealed class SearchService: Singleton<SearchService> {
     // Download model from server
     public void DownloadModel(Search.Hit hit, Action<NetModel> callBack) {
 
-        if (cachedModels.ContainsKey(hit))
-        {
-            callBack(cachedModels[hit]);
-        }
-        else
-        {
+        //if (cachedModels.ContainsKey(hit))
+        //{
+        //    callBack(cachedModels[hit]);
+        //}
+
             try
             {
                 var fp = DOWNLOAD_URI + hit.Asset.Filename;
@@ -77,7 +79,7 @@ public sealed class SearchService: Singleton<SearchService> {
                 debugText.text = ex.Message;
                 Debug.Log(ex.Message);
             }
-        }
+        
     }
 
     // Send search query
@@ -122,10 +124,36 @@ public sealed class SearchService: Singleton<SearchService> {
         yield return www;
 
         try {
-            string noExt = hit.Asset.Filename.Substring(0, hit.Asset.Filename.Length-4);
+
+            var nm = new NetModel();
+
+            //var files = hit.Asset.Archive.Files;
+
+            var files = new List<string>();
+            Debug.Log(hit.Asset);
+            for (int i=0; i<hit.Asset.Archive.Files.Count; i++) {
+                files.Add(hit.Asset.Archive.Files[i]);
+            }
+
+            var fbxList = files.Where(f => f.Count() > 4).Where(f => f.Substring(f.Length-4) == ".fbx").ToList();
+            var objList = files.Where(f => f.Count() > 4).Where(f => f.Substring(f.Length-4) == ".obj").ToList();
+
+            string loadFile = null;
+
+            // prefer fbx format over obj
+            if (objList.Any()) loadFile = objList[0];
+            if (fbxList.Any()) loadFile = fbxList[0];
+
+            Debug.Log(loadFile);
+
+            /*string noExt = hit.Asset.Filename.Substring(0, hit.Asset.Filename.Length-4);
 
             string filePath = Application.temporaryCachePath + Path.DirectorySeparatorChar + hit.Asset.Filename;
-            string extractPath = Application.temporaryCachePath + Path.DirectorySeparatorChar + noExt;        
+            string extractPath = Application.temporaryCachePath + Path.DirectorySeparatorChar + noExt;*/
+
+            string uuid = hit.Asset.Uuid;
+            string filePath = Application.temporaryCachePath + Path.DirectorySeparatorChar + uuid + ".zip";
+            string extractPath = Application.temporaryCachePath + Path.DirectorySeparatorChar;
             
             debugText.text = "Downloading " + path + " as " + filePath;
             Debug.Log("Downloading " + path + " as " + filePath);
@@ -138,7 +166,21 @@ public sealed class SearchService: Singleton<SearchService> {
             ZipConstants.DefaultCodePage = 0;
             
             fastZip.ExtractZip(filePath, extractPath, null);
+
+            var daeFiles = Directory.GetFiles(extractPath, "*.dae", SearchOption.AllDirectories).ToList();
+            var blendFiles = Directory.GetFiles(extractPath, "*.blend", SearchOption.AllDirectories).ToList();
+            var fbxFiles = Directory.GetFiles(extractPath, "*.fbx", SearchOption.AllDirectories).ToList();
+            var objFiles = Directory.GetFiles(extractPath, "*.obj", SearchOption.AllDirectories).ToList();
+
+            string assetFile = null;
+            if (objFiles.Any()) assetFile = objFiles[0];
+            if (fbxFiles.Any()) assetFile = fbxFiles[0];
+            if (daeFiles.Any()) assetFile = daeFiles[0];
+            if (blendFiles.Any()) assetFile = blendFiles[0];
             
+            
+            Debug.Log("Found ... " + assetFile);
+            /*
             try {
                 File.Move(extractPath + Path.DirectorySeparatorChar + noExt + "\\0.obj", extractPath + Path.DirectorySeparatorChar + "0.obj");
                 File.Move(extractPath + Path.DirectorySeparatorChar + noExt + "\\0.mtl", extractPath + Path.DirectorySeparatorChar + "0.mtl");
@@ -148,18 +190,25 @@ public sealed class SearchService: Singleton<SearchService> {
                 debugText.text = ex.Message;
                 Debug.LogError(ex.Message);
                 Debug.Log(ex.Message);
-            }
+            }*/
+
+
+            nm.file = assetFile.Replace("\\", "/");
+            //nm.file = Application.temporaryCachePath + Path.DirectorySeparatorChar + loadFile;
             
-            var nm = new NetModel();
-            
+
+            //nm.obj = extractPath + Path.DirectorySeparatorChar + "0.obj";
+            //nm.mtl = extractPath + Path.DirectorySeparatorChar + "0.mtl";
+            Debug.Log("DL: " + nm.file);
+
             nm.obj = extractPath + Path.DirectorySeparatorChar + "0.obj";
             nm.mtl = extractPath + Path.DirectorySeparatorChar + "0.mtl";
             Debug.Log("DL: " + nm.obj);
 
-            if (!cachedModels.ContainsKey(hit))
+           /* if (!cachedModels.ContainsKey(hit))
             {
                 cachedModels.Add(hit, nm);
-            }
+            }*/
             
             callBack(nm);
         } catch (UnityException ex) {

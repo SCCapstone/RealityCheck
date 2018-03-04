@@ -613,7 +613,7 @@ public class NewRoomScript : MonoBehaviour {
 
         if (!string.IsNullOrEmpty(query))
         {
-            //SearchService.Instance.Flush();
+            SearchService.Instance.Flush();
             SearchService.Instance.Search(query, res =>
             {
                 searchResults = res;
@@ -659,6 +659,12 @@ public class NewRoomScript : MonoBehaviour {
             {
                 bounds.Encapsulate(renderer.bounds);
             }
+
+            lastLoadedModel.AddComponent<BoxCollider>(); // Add Box Collider for physics
+
+            BoxCollider collider = lastLoadedModel.GetComponent<BoxCollider>();
+            collider.center = bounds.center - lastLoadedModel.transform.position;
+            collider.size = bounds.size;
 
             float roomHeight = 1.0f;
             float heightDiff = (bounds.max.y - bounds.min.y) - roomHeight;
@@ -741,9 +747,12 @@ public class NewRoomScript : MonoBehaviour {
 
             lastNewLoadedModel.AddComponent<userAsset>();
 
+            //parentObject.AddComponent<Rigidbody>(); // Add gravity rules for physics
+
             lastNewLoadedModel.transform.GetChild(0).gameObject.GetComponent<BoxCollider>().enabled = true;
             lastNewLoadedModel.AddComponent<Rigidbody>(); // Add gravity rules for physics
             Rigidbody rigidBody = lastNewLoadedModel.GetComponent<Rigidbody>();
+
             rigidBody.isKinematic = true;
 
             rigidBody.mass = 1000;
@@ -753,11 +762,12 @@ public class NewRoomScript : MonoBehaviour {
             yield return new WaitForSeconds(0.1f);
 
             rigidBody.isKinematic = false;
+
             setGameObjectLayer(lastNewLoadedModel, 0);
 
             lastNewLoadedModels.Clear();
 
-            //SearchService.Instance.Flush();
+            SearchService.Instance.Flush();
         }
     }
 
@@ -777,7 +787,7 @@ public class NewRoomScript : MonoBehaviour {
         lastNewLoadedModels.Clear();
         //SearchService.Instance.Flush();
     }
-
+    
     private void clearResultsUI()
     {
         updateNumberOfSearchPages();

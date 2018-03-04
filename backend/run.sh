@@ -1,0 +1,1 @@
+sudo docker-compose up --build --scale crawler-slave=10 --no-color >& trial_run.txt

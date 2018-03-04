@@ -14,13 +14,22 @@ message Tag {
     Origin origin = 2;
 }
 
+message ArchiveMetadata {
+    string name = 1;
+    int64 kilobytes = 2;
+    repeated string files = 3;
+}
+
 message Asset {
-    int32 id = 1;
+    int32 id = 1; // Lucene Document ID
+    string uuid = 2; // MongoDB UUID
 
-    string name = 2;
-    string description = 3;
-    string filename = 4;
+    string name = 3;
+    string description = 4;
+    string filename = 5;
+    string banner_uri = 6;
 
-    repeated Tag tags = 5;
+    repeated Tag tags = 7;
+    ArchiveMetadata archive = 8;
 }
 

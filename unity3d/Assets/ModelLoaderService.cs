@@ -6,6 +6,8 @@ using System.Reflection;
 
 using UnityEngine;
 using UnityEngine.UI;
+using TriLib;
+using UnityEditor.PackageManager;
 
 
 public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
@@ -20,6 +22,10 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 
     Action<GameObject> processFinishedCallBack;
 
+    private AssetLoaderOptions assetLoaderOptions;
+
+
+
     protected ModelLoaderService()
     {
         loaders = new List<OBJThread>();
@@ -27,18 +33,50 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 		boundsList = new List<Bounds>();
     }
 
+    public void Start()
+    {
+        assetLoaderOptions = ScriptableObject.CreateInstance<AssetLoaderOptions>();
+        assetLoaderOptions.AutoPlayAnimations = false;
+        assetLoaderOptions.DontLoadAnimations = true;
+    }
+
+
     public void LoadModel(NetModel nm, Action<GameObject> callBack)
     {
+        StartCoroutine(loadModel(nm, callBack));
+        /*
         processFinishedCallBack = callBack;
         loaders.Add(new OBJThread());
         loaders[loaders.Count - 1].BumpedSpecular = BumpedSpecular;
         loaders[loaders.Count - 1].BumpedDiffuse = BumpedDiffuse;
         loaders[loaders.Count - 1].Standard = Standard;
-        loaders[loaders.Count - 1].LoadLocal(nm.obj);
+        loaders[loaders.Count - 1].LoadLocal(nm.obj);*/
+    }
+
+    private IEnumerator loadModel(NetModel nm, Action<GameObject> callBack)
+    {
+        using (var assetLoader = new AssetLoader())
+        {
+            try
+            {
+                GameObject assetGameObject = assetLoader.LoadFromFile(nm.file, assetLoaderOptions);
+                if (assetGameObject != null)
+                {
+                    callBack(assetGameObject);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("NOPE!!!");
+            }
+            
+            yield return null;
+        }
     }
 
     public void Update()
     {
+        /*
         if (loaders != null) {
             for (int i = 0; i < loaders.Count; i++)
 			{
@@ -50,7 +88,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 					i--;
 				}
 			}
-        }
+        }*/
     }
 
     private void processModel(OBJThread loader)
@@ -206,13 +244,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 		parentOfObjectsToCombine.SetActive(false);
 		parentOfObjectsToCombine.transform.position = originalPosition;
 		resultGO.transform.position = originalPosition;
-
-        resultGO.AddComponent<BoxCollider>(); // Add Box Collider for physics
-
-        BoxCollider collider = resultGO.GetComponent<BoxCollider>();
-        collider.center = bounds.center - resultGO.transform.position;
-        collider.size = bounds.size;
-
+        
         Destroy(parentOfObjectsToCombine);
 		return resultGO;
 	}

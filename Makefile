@@ -1,5 +1,5 @@
 SRC_DIR=protobuf/
-PY_DEST_DIR=webapp/generated/
+PY_DEST_DIR=backend/webapp/generated/
 
 
 all: clean python

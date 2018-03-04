@@ -1,0 +1,248 @@
+version: '3'
+
+
+services:
+
+  # Gateway Service
+  # Reverse Proxy for Admin
+  reverseproxy:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    environment:
+      BASIC_AUTH_USERNAME: admin
+      BASIC_AUTH_PASSWORD: admin123rrr
+    networks:
+      - backend
+      - frontend
+    ports:
+      - 8080:8080
+      - 8081:8081
+      - 8082:8082
+      - 8083:8083
+    depends_on:
+      - realitycheckservice
+      - kibana
+      - consul
+      - redis-commander
+
+  # Service Discovery
+  consul:
+    command: agent -server -ui -bootstrap
+    image: consul:latest
+    volumes:
+      - ./consul:/consul/config
+    networks:
+      - backend
+    #ports:
+    #  - "9300:9300"
+    #  - "9500:9500"
+    #  - "9600:9600/udp"
+
+  # Message Broker
+  zookeeper:
+    image: confluent/zookeeper
+    #ports:
+    #  - "2181:2181"
+    networks:
+      - backend
+    environment:
+      zk_id: "1"
+    logging:
+      driver: none
+
+  kafka:
+    image: confluent/kafka
+    depends_on:
+      - zookeeper
+    #ports:
+    #  - "9092:9092"
+    networks:
+      - backend
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+    logging:
+      driver: none
+
+  mongodbv3:
+    image: mongo:latest
+    environment:
+      - MONGO_DATA_DIR=/data/db
+      - MONGO_LOG_DIR=/dev/null
+    volumes:
+      - ./data/db:/data/db
+    #ports:
+    #  - 27017:27017
+    networks:
+      - backend
+    logging:
+      driver: none
+    command: mongod --smallfiles --logpath=/dev/null # --quiet
+
+  # Caching
+  redis:
+    image: redis:alpine
+    #ports:
+    #  - 6379:6379
+    networks:
+      - backend
+    logging:
+      driver: none
+
+  redis-commander:
+    image: tenstartups/redis-commander:latest
+    restart: always
+    command: --redis-host redis
+    depends_on:
+      - redis
+    #ports:
+    #  - 8083:8081
+    networks:
+      - backend
+      - frontend
+
+  realitycheckservice:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
+    #ports:
+    #  - 8001:8001
+    networks:
+      - backend
+    logging:
+      driver: "fluentd"
+      options:
+        tag: realitycheckservice
+    depends_on:
+      - mongodbv3
+      - fluentd
+
+  # https://github.com/elgalu/docker-selenium/issues/20
+  crawler-master:
+    privileged: true
+    build:
+      context: ./crawler-master
+      dockerfile: Dockerfile
+    volumes:
+      - ./data/dl:/data/dl
+    networks:
+      - backend
+    restart: always
+    shm_size: 1G
+    depends_on:
+      - kafka
+      - realitycheckservice
+    logging:
+      driver: "fluentd"
+      options:
+        tag: crawlermaster
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  crawler-slave:
+    privileged: true
+    build:
+      context: ./crawler-slave
+      dockerfile: Dockerfile
+    volumes:
+      - ./data/dl:/data/dl
+    networks:
+      - backend
+    restart: always
+    shm_size: 1G
+    depends_on:
+      - kafka
+      - crawler-master
+      - realitycheckservice
+    logging:
+      driver: "fluentd"
+      options:
+        tag: crawlerslave
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  fluentd:
+    build:
+      context: ./fluent
+      dockerfile: Dockerfile
+    volumes:
+      - ./logs:/fluentd/log
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    networks:
+      - backend
+    deploy:
+      restart_policy:
+           condition: on-failure
+           delay: 20s
+           max_attempts: 3
+           window: 120s
+      mode: replicated
+      replicas: 1
+      #placement:
+      #  constraints: [node.role == manager]
+      update_config:
+        delay: 2s
+
+  elasticsearch:
+    image: elasticsearch
+    #ports:
+    #  - "9200:9200"
+    networks:
+      - backend
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 20s
+        max_attempts: 3
+        window: 120s
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      update_config:
+        delay: 2s
+      resources:
+        limits:
+          memory: 1000M
+    volumes:
+      - ./esdata:/usr/share/elasticsearch/data    
+      
+  kibana:
+    image: kibana
+    #ports:
+    #  - "5601:5601"
+    networks:
+      - backend
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 20s
+        max_attempts: 3
+        window: 120s
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      update_config:
+        delay: 2s
+
+
+networks:
+  backend:
+    driver: bridge
+  frontend:
