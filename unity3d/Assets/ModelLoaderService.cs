@@ -41,11 +41,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 
     public void LoadModel(NetModel nm, Action<GameObject> callBack)
     {
-        using (var assetLoader = new AssetLoader())
-        {
-            var assetGameObject = assetLoader.LoadFromFile(nm.file, assetLoaderOptions);
-            callBack(assetGameObject);
-        }
+        StartCoroutine(loadModel(nm, callBack));
         /*
         processFinishedCallBack = callBack;
         loaders.Add(new OBJThread());
@@ -53,6 +49,16 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
         loaders[loaders.Count - 1].BumpedDiffuse = BumpedDiffuse;
         loaders[loaders.Count - 1].Standard = Standard;
         loaders[loaders.Count - 1].LoadLocal(nm.obj);*/
+    }
+
+    private IEnumerator loadModel(NetModel nm, Action<GameObject> callBack)
+    {
+        using (var assetLoader = new AssetLoader())
+        {
+            var assetGameObject = assetLoader.LoadFromFile(nm.file, assetLoaderOptions);
+            callBack(assetGameObject);
+            yield return new WaitForSeconds(0.1f);
+        }
     }
 
     public void Update()
