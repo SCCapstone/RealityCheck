@@ -6,6 +6,7 @@ using System.Reflection;
 
 using UnityEngine;
 using UnityEngine.UI;
+using TriLib;
 
 
 public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
@@ -20,6 +21,10 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 
     Action<GameObject> processFinishedCallBack;
 
+    private AssetLoaderOptions assetLoaderOptions;
+
+
+
     protected ModelLoaderService()
     {
         loaders = new List<OBJThread>();
@@ -27,18 +32,32 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 		boundsList = new List<Bounds>();
     }
 
+    public void Start()
+    {
+        assetLoaderOptions = ScriptableObject.CreateInstance<AssetLoaderOptions>();
+        assetLoaderOptions.AutoPlayAnimations = false;
+    }
+
+
     public void LoadModel(NetModel nm, Action<GameObject> callBack)
     {
+        using (var assetLoader = new AssetLoader())
+        {
+            var assetGameObject = assetLoader.LoadFromFile(nm.file, assetLoaderOptions);
+            callBack(assetGameObject);
+        }
+        /*
         processFinishedCallBack = callBack;
         loaders.Add(new OBJThread());
         loaders[loaders.Count - 1].BumpedSpecular = BumpedSpecular;
         loaders[loaders.Count - 1].BumpedDiffuse = BumpedDiffuse;
         loaders[loaders.Count - 1].Standard = Standard;
-        loaders[loaders.Count - 1].LoadLocal(nm.obj);
+        loaders[loaders.Count - 1].LoadLocal(nm.obj);*/
     }
 
     public void Update()
     {
+        /*
         if (loaders != null) {
             for (int i = 0; i < loaders.Count; i++)
 			{
@@ -50,7 +69,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 					i--;
 				}
 			}
-        }
+        }*/
     }
 
     private void processModel(OBJThread loader)

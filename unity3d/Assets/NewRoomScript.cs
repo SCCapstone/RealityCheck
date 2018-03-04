@@ -640,9 +640,10 @@ public class NewRoomScript : MonoBehaviour {
 
             parentObject.AddComponent<userAsset>();
 
-            parentObject.AddComponent<Rigidbody>(); // Add gravity rules for physics
+            //parentObject.AddComponent<Rigidbody>(); // Add gravity rules for physics
             Rigidbody rigidBody = parentObject.GetComponent<Rigidbody>();
             rigidBody.isKinematic = true;
+            rigidBody.useGravity = false;
 
             rigidBody.mass = 1000;
             rigidBody.velocity = Vector3.zero;

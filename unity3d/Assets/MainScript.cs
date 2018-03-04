@@ -66,7 +66,7 @@ public class MainScript : MonoBehaviour
         rayCastEndSphere.name = "rayCastEndSphere";
         
         pointerHand = rightHand;
-
+        /*
         Debug.Log("loading glock");
         SearchService.Instance.Search("glock", res => {
             Debug.Log("found glock " + res.Hits[0]);
@@ -75,7 +75,7 @@ public class MainScript : MonoBehaviour
 			SearchService.Instance.DownloadModel(searchResults.Hits[0], nm => {
 			    Debug.Log(nm.file);
 			});
-		});
+		});*/
     }
 
     // Update is called once per frame

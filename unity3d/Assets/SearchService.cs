@@ -17,7 +17,8 @@ using System.Linq;
 public sealed class SearchService: Singleton<SearchService> {
 
     //private static string HOST = "http://45.55.197.39:8001/api/v1/";
-    private static string HOST = "http://localhost:8080/api/v1/";
+    // http://165.227.191.119:8080/e5dff6ec-cf94-47b5-87ed-d26c37a0f9e9
+    private static string HOST = "http://165.227.191.119:8080/api/v1/";
     private static string SEARCH_URI = HOST + "search";
     private static string DOWNLOAD_URI = "https://storage.googleapis.com/realitycheck/";
     
@@ -109,6 +110,7 @@ public sealed class SearchService: Singleton<SearchService> {
         yield return www;
 
         try {
+
             var nm = new NetModel();
 
             //var files = hit.Asset.Archive.Files;
@@ -125,8 +127,8 @@ public sealed class SearchService: Singleton<SearchService> {
             string loadFile = null;
 
             // prefer fbx format over obj
-            if (objList.Count() > 0) loadFile = objList[0];
-            if (fbxList.Count() > 0) loadFile = fbxList[0];
+            if (objList.Any()) loadFile = objList[0];
+            if (fbxList.Any()) loadFile = fbxList[0];
 
             Debug.Log(loadFile);
 
@@ -151,6 +153,19 @@ public sealed class SearchService: Singleton<SearchService> {
             
             fastZip.ExtractZip(filePath, extractPath, null);
 
+            var daeFiles = Directory.GetFiles(extractPath, "*.dae", SearchOption.AllDirectories).ToList();
+            var blendFiles = Directory.GetFiles(extractPath, "*.blend", SearchOption.AllDirectories).ToList();
+            var fbxFiles = Directory.GetFiles(extractPath, "*.fbx", SearchOption.AllDirectories).ToList();
+            var objFiles = Directory.GetFiles(extractPath, "*.obj", SearchOption.AllDirectories).ToList();
+
+            string assetFile = null;
+            if (objFiles.Any()) assetFile = objFiles[0];
+            if (fbxFiles.Any()) assetFile = fbxFiles[0];
+            if (daeFiles.Any()) assetFile = daeFiles[0];
+            if (blendFiles.Any()) assetFile = blendFiles[0];
+            
+            
+            Debug.Log("Found ... " + assetFile);
             /*
             try {
                 File.Move(extractPath + Path.DirectorySeparatorChar + noExt + "\\0.obj", extractPath + Path.DirectorySeparatorChar + "0.obj");
@@ -162,10 +177,10 @@ public sealed class SearchService: Singleton<SearchService> {
                 Debug.LogError(ex.Message);
                 Debug.Log(ex.Message);
             }*/
-            
 
 
-            nm.file = Application.temporaryCachePath + Path.DirectorySeparatorChar + loadFile;
+            nm.file = assetFile.Replace("\\", "/");
+            //nm.file = Application.temporaryCachePath + Path.DirectorySeparatorChar + loadFile;
             
             //nm.obj = extractPath + Path.DirectorySeparatorChar + "0.obj";
             //nm.mtl = extractPath + Path.DirectorySeparatorChar + "0.mtl";
