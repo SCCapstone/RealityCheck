@@ -599,6 +599,7 @@ public class NewRoomScript : MonoBehaviour {
     {
         if (lastLoadedModel != null)
         {
+            lastLoadedModel.transform.position = new Vector3(0, 1, 0);
             lastLoadedModel.layer = 8;
             
             lastLoadedModel.name = downloadModelName;
@@ -652,6 +653,7 @@ public class NewRoomScript : MonoBehaviour {
             yield return new WaitForSeconds(0.1f);
 
             rigidBody.isKinematic = false;
+            rigidBody.useGravity = false;
 
             SearchService.Instance.Flush();
         }
