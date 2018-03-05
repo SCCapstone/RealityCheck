@@ -7,6 +7,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using TriLib;
+using UnityEditor.PackageManager;
 
 
 public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
@@ -36,6 +37,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
     {
         assetLoaderOptions = ScriptableObject.CreateInstance<AssetLoaderOptions>();
         assetLoaderOptions.AutoPlayAnimations = false;
+        assetLoaderOptions.DontLoadAnimations = true;
     }
 
 
@@ -55,9 +57,20 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
     {
         using (var assetLoader = new AssetLoader())
         {
-            var assetGameObject = assetLoader.LoadFromFile(nm.file, assetLoaderOptions);
-            callBack(assetGameObject);
-            yield return new WaitForSeconds(0.1f);
+            try
+            {
+                GameObject assetGameObject = assetLoader.LoadFromFile(nm.file, assetLoaderOptions);
+                if (assetGameObject != null)
+                {
+                    callBack(assetGameObject);
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("NOPE!!!");
+            }
+            
+            yield return null;
         }
     }
 
@@ -231,13 +244,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 		parentOfObjectsToCombine.SetActive(false);
 		parentOfObjectsToCombine.transform.position = originalPosition;
 		resultGO.transform.position = originalPosition;
-
-        resultGO.AddComponent<BoxCollider>(); // Add Box Collider for physics
-
-        BoxCollider collider = resultGO.GetComponent<BoxCollider>();
-        collider.center = bounds.center - resultGO.transform.position;
-        collider.size = bounds.size;
-
+        
         Destroy(parentOfObjectsToCombine);
 		return resultGO;
 	}
