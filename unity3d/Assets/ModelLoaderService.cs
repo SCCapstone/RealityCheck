@@ -7,7 +7,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using TriLib;
-using UnityEditor.PackageManager;
+//using UnityEditor.PackageManager;
 
 
 public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
