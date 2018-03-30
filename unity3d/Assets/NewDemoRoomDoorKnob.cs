@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class NewCircleRoomDoorKnob : MonoBehaviour {
+public class NewDemoRoomDoorKnob : MonoBehaviour {
 
     public GameObject leftHand;
     public GameObject rightHand;
@@ -24,7 +24,7 @@ public class NewCircleRoomDoorKnob : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        onCollidedText = "Press \"A\" to create a new circle room";
+        onCollidedText = "Press \"A\" to create a new demo room";
         LTriggerDown = false;
         RTriggerDown = false;
     }
@@ -60,7 +60,7 @@ public class NewCircleRoomDoorKnob : MonoBehaviour {
             KnobGlow.SetActive(true);
             if (RTriggerDown)
             {
-                SceneManager.LoadScene("newCircleRoom", LoadSceneMode.Single);
+                SceneManager.LoadScene("newDemoRoom", LoadSceneMode.Single);
             }
         }
         else
