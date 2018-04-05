@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/newBoxRoom.unity
     guid: f34eb67ea5b4545449c9e296de035fcf
   - enabled: 1
-    path: Assets/newCircleRoom.unity
+    path: Assets/newDemoRoom.unity
     guid: 32a4e9f2cf24e4d4ca4bc2a6aab1cbca
   - enabled: 1
     path: Assets/newOutsideRoom.unity

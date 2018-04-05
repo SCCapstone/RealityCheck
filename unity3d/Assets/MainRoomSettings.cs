@@ -39,10 +39,10 @@ public class MainRoomSettings : MonoBehaviour
             if (CheckBoxCollision(areaCollider, rayCastEndSphere.transform.position))
             {
                 BoxCollider sliderCollider = musicVolumeSlider.GetComponent<BoxCollider>();
-                float sliderHalfWidth = sliderCollider.bounds.size.z / 2.0f;
-                float width = areaCollider.bounds.size.z - (sliderHalfWidth * 2.0f);
+                float sliderHalfWidth = sliderCollider.bounds.size.x / 2.0f;
+                float width = areaCollider.bounds.size.x - (sliderHalfWidth * 2.0f);
                 
-                float percentage = Mathf.Clamp((((rayCastEndSphere.transform.position.z - areaCollider.bounds.center.z) / width) * 100.0f) + 50.0f,
+                float percentage = Mathf.Clamp((((rayCastEndSphere.transform.position.x - areaCollider.bounds.center.x) / width) * 100.0f) + 50.0f,
                     0.0f, 100.0f);
                 
                 music.volume = percentage * 0.01f;
@@ -73,15 +73,15 @@ public class MainRoomSettings : MonoBehaviour
 
         BoxCollider areaCollider = musicVolumeSliderArea.GetComponent<BoxCollider>();
         BoxCollider sliderCollider = musicVolumeSlider.GetComponent<BoxCollider>();
-        float sliderHalfWidth = sliderCollider.bounds.size.z / 2.0f;
-        float width = areaCollider.bounds.size.z - (sliderHalfWidth * 2.0f);
+        float sliderHalfWidth = sliderCollider.bounds.size.x / 2.0f;
+        float width = areaCollider.bounds.size.x - (sliderHalfWidth * 2.0f);
 
-        float newZPosition = Mathf.Clamp(areaCollider.bounds.center.z + (((percentage - 50.0f) * 0.01f) * width),
-                    areaCollider.bounds.min.z + sliderHalfWidth,
-                    areaCollider.bounds.max.z - sliderHalfWidth);
+        float newXPosition = Mathf.Clamp(areaCollider.bounds.center.x + (((percentage - 50.0f) * 0.01f) * width),
+                    areaCollider.bounds.min.x + sliderHalfWidth,
+                    areaCollider.bounds.max.x - sliderHalfWidth);
 
-        Vector3 newSliderPosition = new Vector3(musicVolumeSlider.transform.position.x,
-            musicVolumeSlider.transform.position.y, newZPosition);
+        Vector3 newSliderPosition = new Vector3(newXPosition,
+            musicVolumeSlider.transform.position.y, musicVolumeSlider.transform.position.z);
 
         musicVolumeSlider.transform.position = newSliderPosition;
     }

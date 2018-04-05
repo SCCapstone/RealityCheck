@@ -1,0 +1,430 @@
+fileFormatVersion: 2
+guid: bc43aad90ddb7be4f8c47c6c3288de00
+timeCreated: 1515922612
+licenseType: Store
+ModelImporter:
+  serializedVersion: 22
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: caisson 1
+    100004: caisson 1.001
+    100006: caisson 1.002
+    100008: caisson 1.003
+    100010: caisson 2
+    100012: caisson 2.001
+    100014: caisson 2.002
+    100016: caisson 2.003
+    100018: caisson 2.004
+    100020: caisson 2.005
+    100022: caisson 2.006
+    100024: pd caiss 1
+    100026: pd caiss 2
+    100028: pd caiss 2.001
+    100030: pg caiss 1
+    100032: pg caiss 1.001
+    100034: pg caiss 1.002
+    100036: pg caiss 1.003
+    100038: pg caiss 1.004
+    100040: pg caiss.000
+    100042: pg caiss.001
+    100044: pg caiss.003
+    100046: pg caiss.004
+    100048: pg caiss.005
+    100050: pg caiss.006
+    100052: pg caiss.007
+    100054: pg caiss.008
+    100056: pg caiss.009
+    100058: pg caiss.010
+    100060: pg caiss.011
+    100062: pg caiss.012
+    100064: pg caiss.013
+    100066: pg caiss.014
+    100068: pg caiss.2
+    100070: caisson 2.007
+    100072: caisson 2.008
+    100074: caisson 2.009
+    100076: caisson 2.010
+    100078: caisson 2.011
+    100080: caisson 2.012
+    100082: caisson 2.013
+    100084: caisson 2.015
+    100086: caisson 2.017
+    100088: Cube.003
+    100090: Cube.006
+    100092: Cube.008
+    100094: pg caiss.015
+    100096: pg caiss.016
+    100098: pg caiss.017
+    100100: pg caiss.018
+    100102: pg caiss.019
+    100104: pg caiss.020
+    100106: Plane.001
+    100108: Cube.009
+    100110: Plane.004
+    100112: Plane.005
+    100114: Plane.006
+    100116: Plane.007
+    100118: Plane.008
+    100120: Plane.009
+    100122: Plane.010
+    100124: Plane.011
+    100126: Cube.007
+    100128: Cube.010
+    400000: //RootNode
+    400002: caisson 1
+    400004: caisson 1.001
+    400006: caisson 1.002
+    400008: caisson 1.003
+    400010: caisson 2
+    400012: caisson 2.001
+    400014: caisson 2.002
+    400016: caisson 2.003
+    400018: caisson 2.004
+    400020: caisson 2.005
+    400022: caisson 2.006
+    400024: pd caiss 1
+    400026: pd caiss 2
+    400028: pd caiss 2.001
+    400030: pg caiss 1
+    400032: pg caiss 1.001
+    400034: pg caiss 1.002
+    400036: pg caiss 1.003
+    400038: pg caiss 1.004
+    400040: pg caiss.000
+    400042: pg caiss.001
+    400044: pg caiss.003
+    400046: pg caiss.004
+    400048: pg caiss.005
+    400050: pg caiss.006
+    400052: pg caiss.007
+    400054: pg caiss.008
+    400056: pg caiss.009
+    400058: pg caiss.010
+    400060: pg caiss.011
+    400062: pg caiss.012
+    400064: pg caiss.013
+    400066: pg caiss.014
+    400068: pg caiss.2
+    400070: caisson 2.007
+    400072: caisson 2.008
+    400074: caisson 2.009
+    400076: caisson 2.010
+    400078: caisson 2.011
+    400080: caisson 2.012
+    400082: caisson 2.013
+    400084: caisson 2.015
+    400086: caisson 2.017
+    400088: Cube.003
+    400090: Cube.006
+    400092: Cube.008
+    400094: pg caiss.015
+    400096: pg caiss.016
+    400098: pg caiss.017
+    400100: pg caiss.018
+    400102: pg caiss.019
+    400104: pg caiss.020
+    400106: Plane.001
+    400108: Cube.009
+    400110: Plane.004
+    400112: Plane.005
+    400114: Plane.006
+    400116: Plane.007
+    400118: Plane.008
+    400120: Plane.009
+    400122: Plane.010
+    400124: Plane.011
+    400126: Cube.007
+    400128: Cube.010
+    2100000: Material.011
+    2100002: Material.012
+    2100004: Material.010
+    2100006: baskets
+    2100008: top
+    2100010: stainless.001
+    2100012: stainless
+    2100014: door interior
+    2300000: caisson 1
+    2300002: caisson 1.001
+    2300004: caisson 1.002
+    2300006: caisson 1.003
+    2300008: caisson 2
+    2300010: caisson 2.001
+    2300012: caisson 2.002
+    2300014: caisson 2.003
+    2300016: caisson 2.004
+    2300018: caisson 2.005
+    2300020: caisson 2.006
+    2300022: pd caiss 1
+    2300024: pd caiss 2
+    2300026: pd caiss 2.001
+    2300028: pg caiss 1
+    2300030: pg caiss 1.001
+    2300032: pg caiss 1.002
+    2300034: pg caiss 1.003
+    2300036: pg caiss 1.004
+    2300038: pg caiss.000
+    2300040: pg caiss.001
+    2300042: pg caiss.003
+    2300044: pg caiss.004
+    2300046: pg caiss.005
+    2300048: pg caiss.006
+    2300050: pg caiss.007
+    2300052: pg caiss.008
+    2300054: pg caiss.009
+    2300056: pg caiss.010
+    2300058: pg caiss.011
+    2300060: pg caiss.012
+    2300062: pg caiss.013
+    2300064: pg caiss.014
+    2300066: pg caiss.2
+    2300068: caisson 2.007
+    2300070: caisson 2.008
+    2300072: caisson 2.009
+    2300074: caisson 2.010
+    2300076: caisson 2.011
+    2300078: caisson 2.012
+    2300080: caisson 2.013
+    2300082: caisson 2.015
+    2300084: caisson 2.017
+    2300086: Cube.003
+    2300088: Cube.006
+    2300090: Cube.008
+    2300092: pg caiss.015
+    2300094: pg caiss.016
+    2300096: pg caiss.017
+    2300098: pg caiss.018
+    2300100: pg caiss.019
+    2300102: pg caiss.020
+    2300104: Plane.001
+    2300106: Cube.009
+    2300108: Plane.004
+    2300110: Plane.005
+    2300112: Plane.006
+    2300114: Plane.007
+    2300116: Plane.008
+    2300118: Plane.009
+    2300120: Plane.010
+    2300122: Plane.011
+    2300124: Cube.007
+    2300126: Cube.010
+    3300000: caisson 1
+    3300002: caisson 1.001
+    3300004: caisson 1.002
+    3300006: caisson 1.003
+    3300008: caisson 2
+    3300010: caisson 2.001
+    3300012: caisson 2.002
+    3300014: caisson 2.003
+    3300016: caisson 2.004
+    3300018: caisson 2.005
+    3300020: caisson 2.006
+    3300022: pd caiss 1
+    3300024: pd caiss 2
+    3300026: pd caiss 2.001
+    3300028: pg caiss 1
+    3300030: pg caiss 1.001
+    3300032: pg caiss 1.002
+    3300034: pg caiss 1.003
+    3300036: pg caiss 1.004
+    3300038: pg caiss.000
+    3300040: pg caiss.001
+    3300042: pg caiss.003
+    3300044: pg caiss.004
+    3300046: pg caiss.005
+    3300048: pg caiss.006
+    3300050: pg caiss.007
+    3300052: pg caiss.008
+    3300054: pg caiss.009
+    3300056: pg caiss.010
+    3300058: pg caiss.011
+    3300060: pg caiss.012
+    3300062: pg caiss.013
+    3300064: pg caiss.014
+    3300066: pg caiss.2
+    3300068: caisson 2.007
+    3300070: caisson 2.008
+    3300072: caisson 2.009
+    3300074: caisson 2.010
+    3300076: caisson 2.011
+    3300078: caisson 2.012
+    3300080: caisson 2.013
+    3300082: caisson 2.015
+    3300084: caisson 2.017
+    3300086: Cube.003
+    3300088: Cube.006
+    3300090: Cube.008
+    3300092: pg caiss.015
+    3300094: pg caiss.016
+    3300096: pg caiss.017
+    3300098: pg caiss.018
+    3300100: pg caiss.019
+    3300102: pg caiss.020
+    3300104: Plane.001
+    3300106: Cube.009
+    3300108: Plane.004
+    3300110: Plane.005
+    3300112: Plane.006
+    3300114: Plane.007
+    3300116: Plane.008
+    3300118: Plane.009
+    3300120: Plane.010
+    3300122: Plane.011
+    3300124: Cube.007
+    3300126: Cube.010
+    4300000: caisson 2.006
+    4300002: pg caiss.014
+    4300004: pg caiss.013
+    4300006: pg caiss.012
+    4300008: pg caiss.011
+    4300010: caisson 2.005
+    4300012: pg caiss.010
+    4300014: pg caiss.009
+    4300016: pg caiss.008
+    4300018: pg caiss.007
+    4300020: caisson 2.004
+    4300022: pg caiss.006
+    4300024: pd caiss 2.001
+    4300026: pg caiss.005
+    4300028: caisson 2.003
+    4300030: pg caiss.003
+    4300032: pg caiss.004
+    4300034: caisson 1.003
+    4300036: pg caiss 1.003
+    4300038: pg caiss 1.004
+    4300040: caisson 2.002
+    4300042: pg caiss.001
+    4300044: caisson 1.002
+    4300046: pg caiss 1.002
+    4300048: caisson 2.001
+    4300050: pg caiss.000
+    4300052: caisson 1.001
+    4300054: pg caiss 1.001
+    4300056: caisson 2
+    4300058: pg caiss.2
+    4300060: pd caiss 2
+    4300062: caisson 1
+    4300064: pd caiss 1
+    4300066: pg caiss 1
+    4300068: Cube.003
+    4300070: Cube.006
+    4300072: pg caiss.018
+    4300074: pg caiss.017
+    4300076: caisson 2.009
+    4300078: caisson 2.011
+    4300080: caisson 2.010
+    4300082: caisson 2.017
+    4300084: caisson 2.015
+    4300086: caisson 2.013
+    4300088: caisson 2.012
+    4300090: caisson 2.008
+    4300092: Plane.001
+    4300094: Cube.008
+    4300096: pg caiss.020
+    4300098: pg caiss.019
+    4300100: caisson 2.007
+    4300102: pg caiss.016
+    4300104: pg caiss.015
+    4300106: Plane.011
+    4300108: Plane.010
+    4300110: Plane.009
+    4300112: Plane.008
+    4300114: Plane.007
+    4300116: Plane.006
+    4300118: Plane.005
+    4300120: Plane.004
+    4300122: Cube.009
+    4300124: Cube.010
+    4300126: Cube.007
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.010
+    second: {fileID: 2100000, guid: 66e6ba0c7c8ef304ab98a13215677c36, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.011
+    second: {fileID: 2100000, guid: ba1eaa6ea48df964aae4d76349436850, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Material.012
+    second: {fileID: 2100000, guid: b3d462e23a6346c44bebec2b5511e48c, type: 2}
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 0
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
