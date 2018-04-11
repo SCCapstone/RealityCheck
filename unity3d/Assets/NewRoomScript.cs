@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 public class NewRoomScript : MonoBehaviour {
 
@@ -77,6 +78,8 @@ public class NewRoomScript : MonoBehaviour {
 
     private RecordingService recordingService;
     private bool voiceRecordingInProgress;
+
+    private List<GameObject> userAssets = new List<GameObject>();
 
     // Use this for initialization
     void Start () {
@@ -209,6 +212,20 @@ public class NewRoomScript : MonoBehaviour {
                 SearchResultsPanel.SetActive(false);
                 VirtualKeyboardCanvas.SetActive(false);
             }
+        }
+
+        if (Input.GetButtonDown("BButton"))
+        {
+            
+            var states = userAssets.Select(ua => UserAssetState.FromGameObject(ua));
+            var game = new GameState();
+            foreach (var s in states)
+            {
+                game.Add(s);
+            }
+            var jj = JsonUtility.ToJson(game);
+            Debug.Log(jj);
+            Debug.Log("pressed" + states.Count());
         }
     }
 
@@ -626,7 +643,7 @@ public class NewRoomScript : MonoBehaviour {
     {
         if (searchIndex < searchResults.Count && searchIndex >= 0)
         {
-            downloadModelName = searchResults.Hits[searchIndex].Asset.Name;
+            downloadModelName = searchResults.Hits[searchIndex].Asset.Uuid;//searchResults.Hits[searchIndex].Asset.Name;
             SearchService.Instance.DownloadModel(searchResults.Hits[searchIndex], nm =>
             {
                 SearchResultsPanel.SetActive(false);
@@ -682,7 +699,7 @@ public class NewRoomScript : MonoBehaviour {
             lastLoadedModel.GetComponent<BoxCollider>().enabled = false;
 
             GameObject parentObject = new GameObject();
-            parentObject.name = downloadModelName + " parent";
+            parentObject.name = downloadModelName;//" parent";
             lastLoadedModel.transform.parent = parentObject.transform;
             setGameObjectLayer(parentObject, 2);
 
@@ -745,7 +762,7 @@ public class NewRoomScript : MonoBehaviour {
             throwable.onPickUp = new UnityEngine.Events.UnityEvent();
             throwable.onDetachFromHand = new UnityEngine.Events.UnityEvent();
 
-            lastNewLoadedModel.AddComponent<userAsset>();
+            lastNewLoadedModel.AddComponent<userAsset>(); 
 
             //parentObject.AddComponent<Rigidbody>(); // Add gravity rules for physics
 
@@ -764,6 +781,8 @@ public class NewRoomScript : MonoBehaviour {
             rigidBody.isKinematic = false;
 
             setGameObjectLayer(lastNewLoadedModel, 0);
+
+            userAssets.Add(lastNewLoadedModel);
 
             lastNewLoadedModels.Clear();
 

@@ -62,6 +62,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
                 GameObject assetGameObject = assetLoader.LoadFromFile(nm.file, assetLoaderOptions);
                 if (assetGameObject != null)
                 {
+                    assetGameObject.name = nm.uuid;
                     callBack(assetGameObject);
                 }
             }

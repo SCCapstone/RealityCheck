@@ -203,6 +203,8 @@ public sealed class SearchService: Singleton<SearchService> {
 
             nm.obj = extractPath + Path.DirectorySeparatorChar + "0.obj";
             nm.mtl = extractPath + Path.DirectorySeparatorChar + "0.mtl";
+
+            nm.uuid = uuid;
             Debug.Log("DL: " + nm.obj);
 
            /* if (!cachedModels.ContainsKey(hit))
