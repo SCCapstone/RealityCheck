@@ -36,7 +36,7 @@ public class PropertyController : MonoBehaviour
 
     private double LDownTime;
     private double RDownTime;
-    private double triggerTime = 10.0; // 10 milliseconds
+    private double triggerTime = 5; // 10 milliseconds
     private bool RTriggerDown;
     private bool LTriggerDown;
 
@@ -295,19 +295,49 @@ public class PropertyController : MonoBehaviour
             {
                 if (index == 0)
                 {
-                    rot.x = selected.transform.localEulerAngles.x - model.GetRotationSnap();
+                    int currentRotX = (int)Math.Round(selected.transform.localEulerAngles.x);
+                    int newRot = currentRotX / model.GetRotationSnap();
+                    int mod = currentRotX % model.GetRotationSnap();
+                    if (mod == 0)
+                    {
+                        rot.x -= model.GetRotationSnap();
+                    }
+                    else
+                    {
+                        rot.x = newRot * model.GetRotationSnap();
+                    }
                     model.Rotation(rot);
                     _Rotation[index].text = selected.transform.localEulerAngles.x.ToString("0.00");
                 }
                 else if (index == 1)
                 {
-                    rot.y = selected.transform.localEulerAngles.y - model.GetRotationSnap();
+                    int currentRotY = (int)Math.Round(selected.transform.localEulerAngles.y);
+                    int newRot = currentRotY / model.GetRotationSnap();
+                    int mod = currentRotY % model.GetRotationSnap();
+                    if (mod == 0)
+                    {
+                        rot.y -= model.GetRotationSnap();
+                    }
+                    else
+                    {
+                        rot.y = newRot * model.GetRotationSnap();
+                    }
                     model.Rotation(rot);
                     _Rotation[index].text = selected.transform.localEulerAngles.y.ToString("0.00");
                 }
                 else if (index == 2)
                 {
-                    rot.z = selected.transform.localEulerAngles.z - model.GetRotationSnap();
+                    int currentRotZ = (int)Math.Round(selected.transform.localEulerAngles.z);
+                    int newRot = currentRotZ / model.GetRotationSnap();
+                    int mod = currentRotZ % model.GetRotationSnap();
+                    if (mod == 0)
+                    {
+                        rot.z -= model.GetRotationSnap();
+                    }
+                    else
+                    {
+                        rot.z = newRot * model.GetRotationSnap();
+                    }
                     model.Rotation(rot);
                     _Rotation[index].text = selected.transform.localEulerAngles.z.ToString("0.00");
                 }
@@ -360,19 +390,49 @@ public class PropertyController : MonoBehaviour
             {
                 if (index == 0)
                 {
-                    rot.x = selected.transform.localEulerAngles.x + model.GetRotationSnap();
+                    int currentRotX = (int)Math.Round(selected.transform.localEulerAngles.x);
+                    int newRot = currentRotX / model.GetRotationSnap();
+                    int mod = currentRotX % model.GetRotationSnap();
+                    if (mod == 0)
+                    {
+                        rot.x += model.GetRotationSnap();
+                    }
+                    else
+                    {
+                        rot.x = (newRot + 1) * model.GetRotationSnap();
+                    }
                     model.Rotation(rot);
                     _Rotation[index].text = selected.transform.localEulerAngles.x.ToString("0.00");
                 }
                 else if (index == 1)
                 {
-                    rot.y = selected.transform.localEulerAngles.y + model.GetRotationSnap();
+                    int currentRotY = (int)Math.Round(selected.transform.localEulerAngles.y);
+                    int newRot = currentRotY / model.GetRotationSnap();
+                    int mod = currentRotY % model.GetRotationSnap();
+                    if (mod == 0)
+                    {
+                        rot.y += model.GetRotationSnap();
+                    }
+                    else
+                    {
+                        rot.y = (newRot + 1) * model.GetRotationSnap();
+                    }
                     model.Rotation(rot);
                     _Rotation[index].text = selected.transform.localEulerAngles.y.ToString("0.00");
                 }
                 else if (index == 2)
                 {
-                    rot.z = selected.transform.localEulerAngles.z + model.GetRotationSnap();
+                    int currentRotZ = (int)Math.Round(selected.transform.localEulerAngles.z);
+                    int newRot = currentRotZ / model.GetRotationSnap();
+                    int mod = currentRotZ % model.GetRotationSnap();
+                    if (mod == 0)
+                    {
+                        rot.z += model.GetRotationSnap();
+                    }
+                    else
+                    {
+                        rot.z = (newRot + 1) * model.GetRotationSnap();
+                    }
                     model.Rotation(rot);
                     _Rotation[index].text = selected.transform.localEulerAngles.z.ToString("0.00");
                 }
@@ -717,6 +777,8 @@ public class PropertyController : MonoBehaviour
         _Scale[0].onEndEdit.RemoveAllListeners();
         _Scale[1].onEndEdit.RemoveAllListeners();
         _Scale[2].onEndEdit.RemoveAllListeners();
+        _RotSnapButtons[0].onClick.RemoveAllListeners();
+        _RotSnapButtons[1].onClick.RemoveAllListeners();
     }
 
     private bool getRightTriggerDown()
