@@ -83,14 +83,23 @@ public class NewRoomScript : MonoBehaviour {
     private bool isLoadingInNewModel = false;
     private List<GameObject> lastNewLoadedModels;
     public GameObject loadingCircle;
+    private List<UserAssetState> modelStates;
 
     private RecordingService recordingService;
     private bool voiceRecordingInProgress;
 
     private List<GameObject> userAssets = new List<GameObject>();
 
+    private GameState loadedInGameState;
+    private int loadIndex = 0;
+    private bool allModelsLoadedFromStart = false;
+    private bool needLoadFromStart = true;
+    private bool isLoadingFromStart = true;
+
     // Use this for initialization
-    void Start () {
+    void Start ()
+    {
+        modelStates = new List<UserAssetState>();
         lastNewLoadedModels = new List<GameObject>();
         loadingCircle.SetActive(false);
         MenuPanel.SetActive(false);
@@ -121,7 +130,7 @@ public class NewRoomScript : MonoBehaviour {
         updateSliderFromPercentage(MainRoomSettings.musicVolume);
         music.volume = MainRoomSettings.musicVolume * 0.01f;
     }
-
+    
     // Update is called once per frame
     void Update()
     {
@@ -255,9 +264,24 @@ public class NewRoomScript : MonoBehaviour {
             }
         }
 
-        if (Input.GetButtonDown("BButton"))
+        if (allModelsLoadedFromStart)
         {
-            SaveLoadService.Instance.Save(0, "unamed", userAssets);
+            if (Input.GetButtonDown("BButton"))
+            {
+                StartCoroutine(SaveLoadService.Instance.Save(0, "unamed", userAssets));
+            }
+        }
+        else if (needLoadFromStart)
+        {
+            needLoadFromStart = false;
+            loadLevelOnStart();
+        }
+        else if (!isLoadingFromStart)
+        {
+            for (int i = 0; i < lastNewLoadedModels.Count; i++)
+            {
+                StartCoroutine(placeNewLoadedModel());
+            }
         }
     }
 
@@ -758,7 +782,7 @@ public class NewRoomScript : MonoBehaviour {
     {
         if (searchIndex < searchResults.Count && searchIndex >= 0)
         {
-            downloadModelName = searchResults.Hits[searchIndex].Asset.Uuid;//searchResults.Hits[searchIndex].Asset.Name;
+            downloadModelName = searchResults.Hits[searchIndex].Asset.Filename;//searchResults.Hits[searchIndex].Asset.Name;
             SearchService.Instance.DownloadModel(searchResults.Hits[searchIndex], nm =>
             {
                 SearchResultsPanel.SetActive(false);
@@ -818,14 +842,33 @@ public class NewRoomScript : MonoBehaviour {
             lastLoadedModel.transform.parent = parentObject.transform;
             setGameObjectLayer(parentObject, 2);
 
+            Debug.Log("Adding bounding box to object");
+            if (modelStates.Count != 0)
+            {
+                Debug.Log("Adding bounding box to object and moving");
+                UserAssetState state = modelStates[modelStates.Count - 1];
+                parentObject.transform.position = new Vector3(state.pos.x, state.pos.y, state.pos.z);
+                parentObject.transform.rotation = new Quaternion(state.rot.x, state.rot.y, state.rot.z, state.rot.w);
+                parentObject.transform.localScale = new Vector3(state.scale.x, state.scale.y, state.scale.z);
+            }
+
             lastNewLoadedModels.Add(parentObject);
+
+            if (loadedInGameState != null)
+            {
+                if (modelStates.Count >= loadedInGameState.assets.Count)
+                {
+                    Debug.Log("isLoadingFromStart set to false");
+                    isLoadingFromStart = false;
+                }
+            }
         }
         else
         {
             cancelNewLoadedModel();
         }
     }
-
+    
     private void setGameObjectLayer(GameObject model, int layer)
     {
         model.layer = layer;
@@ -897,9 +940,43 @@ public class NewRoomScript : MonoBehaviour {
 
             setGameObjectLayer(lastNewLoadedModel, 0);
 
+            Debug.Log("Adding rigidbody to object");
+
+            if (modelStates.Count != 0)
+            {
+                Debug.Log("Adding rigidbody to object with physics");
+                UserAssetState state = modelStates[0];
+                
+                lastNewLoadedModel.GetComponent<userAsset>().Gravity = state.gravity;
+                lastNewLoadedModel.GetComponent<userAsset>().Physics();
+
+                modelStates.Remove(state);
+            }
+
             userAssets.Add(lastNewLoadedModel);
 
-            lastNewLoadedModels.Clear();
+            if (allModelsLoadedFromStart)
+            {
+                lastNewLoadedModels.Clear();
+            }
+            else
+            {
+                Debug.Log("Adding rigidbody to object with physics and removed");
+                lastNewLoadedModels.Remove(lastNewLoadedModel);
+            }
+
+            if (loadedInGameState != null)
+            {
+                if (lastNewLoadedModels.Count == 0)
+                {
+                    Debug.Log("allModelsLoadedFromStart set to true");
+
+                    allModelsLoadedFromStart = true;
+                    modelStates.Clear();
+                    lastNewLoadedModels.Clear();
+                    loadedInGameState = null;
+                }
+            }
 
             SearchService.Instance.Flush();
         }
@@ -1073,5 +1150,61 @@ public class NewRoomScript : MonoBehaviour {
             (maxPos * percentDecimal);
 
         musicVolumeSlider.transform.localPosition = newSliderPosition;
+    }
+
+    private void loadLevelOnStart()
+    {
+        Debug.Log(SceneManager.GetActiveScene().name);
+        if (SceneManager.GetActiveScene().name == "newDemoRoom")
+        {
+            int slotNumber = 0;
+            GameState state = null;
+            try
+            {
+                state = SaveLoadService.Instance.Load(slotNumber);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("Failed to load at slot " + slotNumber + " ex:" + ex);
+            }
+            
+            if (state != null)
+            {
+                loadedInGameState = state;
+                loadIndex = 0;
+                //string levelName = state.roomName;
+                //Debug.Log("Loading " + levelName + " room");
+
+                onStartLoadAtIndex(state.assets);
+            }
+            else
+            {
+                allModelsLoadedFromStart = true;
+            }
+        }
+        else
+        {
+            allModelsLoadedFromStart = true;
+        }
+    }
+
+    private void onStartLoadAtIndex(List<UserAssetState> states)
+    {
+        if (loadIndex >= states.Count())
+        {
+            return;
+        }
+
+        Debug.Log("loading at index " + loadIndex);
+        UserAssetState state = states[loadIndex];
+        modelStates.Add(state);
+
+        SearchService.Instance.DownloadModel(state, nm =>
+        {
+            ModelLoaderService.Instance.LoadModel(nm, modelDoneLoadingCallback);
+
+            loadIndex++;
+            onStartLoadAtIndex( states);
+        });
     }
 }

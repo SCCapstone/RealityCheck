@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using UnityEditor;
+using System;
+using System.Collections;
 
 public class SaveLoadService : Singleton<SaveLoadService>
 {
@@ -30,12 +33,19 @@ public class SaveLoadService : Singleton<SaveLoadService>
         return Application.persistentDataPath + Path.DirectorySeparatorChar + "save" + slot + ".json";
     }
 
-    public void Save(int roomId, string roomName, List<GameObject> userAssets)
+    public IEnumerator Save(int roomId, string roomName, List<GameObject> userAssets)
     {
         var screenshotFn = Application.persistentDataPath + Path.DirectorySeparatorChar + "save" + slot + ".png";
         ScreenCapture.CaptureScreenshot(screenshotFn);
 
-        var states = userAssets.Select(ua => UserAssetState.FromGameObject(ua));
+        //Wait for 4 frames
+        for (int i = 0; i < 10; i++)
+        {
+            yield return null;
+        }
+
+
+        var states = userAssets.Where(ua => ua != null).Select(ua => UserAssetState.FromGameObject(ua));
         var game = new GameState
         {
             RoomId = roomId
@@ -43,6 +53,7 @@ public class SaveLoadService : Singleton<SaveLoadService>
 
         game.roomName = roomName;
         game.screenshotPNG = GameState.Img2B64(screenshotFn);
+        FileUtil.DeleteFileOrDirectory(screenshotFn);
 
         foreach (var s in states)
         {
@@ -55,6 +66,14 @@ public class SaveLoadService : Singleton<SaveLoadService>
         Debug.Log("Saving Game: " + fn);
         Debug.Log(jsonContent);
 
+        try
+        {
+            FileUtil.DeleteFileOrDirectory(fn);
+        } catch (Exception ex)
+        {
+            Debug.Log(ex);
+        }
+
         using (var fs = new FileStream(fn, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
         {
             using (var writer = new StreamWriter(fs))
@@ -66,6 +85,7 @@ public class SaveLoadService : Singleton<SaveLoadService>
 
     public GameState Load(int slot)
     {
+        this.slot = slot;
         var fn = FilePath();
 
         Debug.Log("Loading Game: " + fn);

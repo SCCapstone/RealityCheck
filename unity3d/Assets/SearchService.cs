@@ -176,7 +176,7 @@ public sealed class SearchService: Singleton<SearchService> {
             nm.mtl = extractPath + Path.DirectorySeparatorChar + "0.mtl";
 
             nm.uuid = uuid;
-            Debug.Log("DL: " + nm.obj);
+            Debug.Log("IDS : " + nm.uuid + " " + nm.file_uuid);
 
             callBack(nm);
         } catch (UnityException ex) {

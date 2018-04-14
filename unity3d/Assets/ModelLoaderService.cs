@@ -63,12 +63,13 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
                 if (assetGameObject != null)
                 {
                     assetGameObject.name = nm.file_uuid; //nm.uuid;
+                    Debug.Log("MLS name: " + assetGameObject.name);
                     callBack(assetGameObject);
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError("NOPE!!!");
+                Debug.LogError("NOPE!!! ex " + e);
             }
             
             yield return null;

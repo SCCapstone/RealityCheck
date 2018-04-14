@@ -25,17 +25,12 @@ public class UserAssetState
     public string uuid;
 
     public SVec pos = new SVec();
+    public SVec scale = new SVec();
+
     public SQuat rot = new SQuat();
 
     public bool gravity;
     public bool maintainProportions;
-
-    public float xToY = 1.0f;
-    public float xToZ = 1.0f;
-    public float yToX = 1.0f;
-    public float yToZ = 1.0f;
-    public float zToX = 1.0f;
-    public float zToY = 1.0f;
 
     public static UserAssetState FromGameObject(GameObject obj)
     {
@@ -54,14 +49,10 @@ public class UserAssetState
 
         state.uuid = obj.name;
 
-        state.xToY = ua.xToY;
-        state.xToZ = ua.xToZ;
+        state.scale.x = ua.transform.localScale.x;
+        state.scale.y = ua.transform.localScale.y;
+        state.scale.z = ua.transform.localScale.z;
 
-        state.yToX = ua.yToX;
-        state.yToZ = ua.yToZ;
-
-        state.zToX = ua.zToX;
-        state.zToY = ua.zToY;
 
         state.maintainProportions = ua.Maintain;
         state.gravity = ua.Gravity;
@@ -78,15 +69,6 @@ public class UserAssetState
             msg += "uuid:" + uuid + "\n";
             msg += "proportions:" + maintainProportions + "\n";
             msg += "gravity:" + gravity + "\n";
-
-            msg += "xToY:" + xToY + "\n";
-            msg += "xToZ:" + xToZ + "\n";
-
-            msg += "yToX:" + yToX + "\n";
-            msg += "yToZ:" + yToZ + "\n";
-
-            msg += "zToX:" + zToX + "\n";
-            msg += "zToY:" + zToY + "\n";
 
             return msg;
         }
