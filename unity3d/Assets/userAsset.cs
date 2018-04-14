@@ -4,13 +4,15 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class userAsset : MonoBehaviour {
-    public float xToY = 1.0f;
-    public float xToZ = 1.0f;
-    public float yToX = 1.0f;
-    public float yToZ = 1.0f;
-    public float zToX = 1.0f;
-    public float zToY = 1.0f;
-    private float[] rotationSnap = { 1, 5, 10, 15, 30, 45, 90 };
+
+    private float xToY = 1.0f;
+    private float xToZ = 1.0f;
+    private float yToX = 1.0f;
+    private float yToZ = 1.0f;
+    private float zToX = 1.0f;
+    private float zToY = 1.0f;
+    private int[] rotationSnap = { 1, 5, 10, 15, 30, 45, 90 };
+
     private int rotationSnapIndex = 0;
     private bool maintain = true;
     private bool gravity = true;
@@ -103,17 +105,19 @@ public class userAsset : MonoBehaviour {
 
     public void RotationSnapInc()
     {
+        Debug.Log("SnapRotIndex: " + rotationSnapIndex);
         if(rotationSnapIndex < rotationSnap.Length - 1)
         rotationSnapIndex++;
     }
 
     public void RotationSnapDec()
     {
-        if(rotationSnapIndex > 0)
+        Debug.Log("SnapRotIndex: " + rotationSnapIndex);
+        if (rotationSnapIndex > 0)
             rotationSnapIndex--;
     }
 
-    public float GetRotationSnap()
+    public int GetRotationSnap()
     {
         return rotationSnap[rotationSnapIndex];
     }

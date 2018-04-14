@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Video;
 using UnityEngine.SceneManagement;
 using System.Linq;
 
@@ -12,6 +13,7 @@ public class NewRoomScript : MonoBehaviour {
 
     public GameObject MenuPanel;
     public GameObject PropertiesPanel;
+    public GameObject TutorialPanel;
 
     public GameObject LocalPlayer;
 
@@ -36,17 +38,23 @@ public class NewRoomScript : MonoBehaviour {
     public GameObject maxVolumePos;
     public GameObject minVolumePos;
     public AudioSource music;
-    
+
+    public GameObject[] videoObjects;
+    public VideoPlayer[] videos;
+
+    private bool videoIsPlaying = false;
+
     private bool RTriggerHeld;
     private bool LTriggerHeld;
 
     private double LDownTime;
     private double RDownTime;
-    private double triggerTime = 10.0; // 10 milliseconds
+    private double triggerTime = 5.0; // 10 milliseconds
     private bool RTriggerDown;
     private bool LTriggerDown;
 
     private string menuHoverButton;
+    private string tutorialHoverButton;
 
     private GameObject rayCastEndSphere;
     private LineRenderer rayCastLineRenderer;
@@ -86,6 +94,7 @@ public class NewRoomScript : MonoBehaviour {
         lastNewLoadedModels = new List<GameObject>();
         loadingCircle.SetActive(false);
         MenuPanel.SetActive(false);
+        TutorialPanel.SetActive(false);
         VirtualKeyboardCanvas.SetActive(false);
         SearchResultsPanel.SetActive(false);
         keyboardSource = "";
@@ -139,7 +148,11 @@ public class NewRoomScript : MonoBehaviour {
             findMenuHoverButton();
             updateMusicSlider();
         }
-        
+        else if (TutorialPanel.activeSelf)
+        {
+            findTutorialHoverButton();
+        }
+
         RTriggerDown = getRightTriggerDown();
         LTriggerDown = getLeftTriggerDown();
         bool keyButtonOverride = false;
@@ -183,6 +196,10 @@ public class NewRoomScript : MonoBehaviour {
             {
                 activateMenu();
             }
+            else if (TutorialPanel.activeSelf && menuHoverButton != "")
+            {
+                activateTutorial();
+            }
         }
         else if (keyButtonOverride && VirtualKeyboardCanvas.activeSelf && hoveredKey == "Back")
         {
@@ -204,6 +221,13 @@ public class NewRoomScript : MonoBehaviour {
                 PropertiesPanel.SetActive(false);
                 SearchResultsPanel.SetActive(false);
                 VirtualKeyboardCanvas.SetActive(false);
+                TutorialPanel.SetActive(false);
+                for (int i = 0; i < videoObjects.Length; i++)
+                {
+                    videoObjects[i].SetActive(false);
+                    videos[i].Stop();
+                    videoIsPlaying = false;
+                }
             }
             else
             {
@@ -211,6 +235,23 @@ public class NewRoomScript : MonoBehaviour {
                 PropertiesPanel.SetActive(false);
                 SearchResultsPanel.SetActive(false);
                 VirtualKeyboardCanvas.SetActive(false);
+                TutorialPanel.SetActive(false);
+                for (int i = 0; i < videoObjects.Length; i++)
+                {
+                    videoObjects[i].SetActive(false);
+                    videos[i].Stop();
+                    videoIsPlaying = false;
+                }
+            }
+        }
+        else if (videoIsPlaying)
+        {
+            for (int i = 0; i < videos.Length; i++)
+            {
+                if (!videos[i].isPlaying)
+                {
+                    videoObjects[i].SetActive(false);
+                }
             }
         }
 
@@ -314,6 +355,37 @@ public class NewRoomScript : MonoBehaviour {
                 if (CheckBoxCollision(transform.gameObject.GetComponent<BoxCollider>(), rayCastEndSphere.transform.position))
                 {
                     menuHoverButton = transform.GetChild(0).gameObject.GetComponent<Text>().text;
+                    if (RTriggerDown)
+                    {
+                        cb.normalColor = selectButton;
+                    }
+                    else
+                    {
+                        cb.normalColor = highlightButton;
+                    }
+                }
+                else
+                {
+                    cb.normalColor = normalButton;
+                }
+                currentButton.colors = cb;
+            }
+        }
+    }
+
+    private void findTutorialHoverButton()
+    {
+        tutorialHoverButton = "";
+        for (int i = 0; i < TutorialPanel.transform.childCount; i++)
+        {
+            Transform transform = TutorialPanel.transform.GetChild(i);
+            if (transform.gameObject.name.Contains("Button"))
+            {
+                Button currentButton = transform.gameObject.GetComponent<Button>();
+                ColorBlock cb = currentButton.colors;
+                if (CheckBoxCollision(transform.gameObject.GetComponent<BoxCollider>(), rayCastEndSphere.transform.position))
+                {
+                    tutorialHoverButton = transform.GetChild(0).gameObject.GetComponent<Text>().text;
                     if (RTriggerDown)
                     {
                         cb.normalColor = selectButton;
@@ -484,6 +556,58 @@ public class NewRoomScript : MonoBehaviour {
         {
             MenuPanel.SetActive(false);
         }
+        else if (menuHoverButton == "Tutorials")
+        {
+            MenuPanel.SetActive(false);
+            TutorialPanel.SetActive(true);
+        }
+    }
+
+    private void activateTutorial()
+    {
+        if (tutorialHoverButton == "Teleport")
+        {
+            TutorialPanel.SetActive(false);
+            videoObjects[0].SetActive(true);
+            videos[0].Play();
+            videoIsPlaying = true;
+        }
+        else if (tutorialHoverButton == "Grab")
+        {
+            TutorialPanel.SetActive(false);
+            videoObjects[1].SetActive(true);
+            videos[1].Play();
+            videoIsPlaying = true;
+        }
+        else if (tutorialHoverButton == "Search")
+        {
+            TutorialPanel.SetActive(false);
+            videoObjects[2].SetActive(true);
+            videos[2].Play();
+            videoIsPlaying = true;
+        }
+        else if (tutorialHoverButton == "Spawn")
+        {
+            TutorialPanel.SetActive(false);
+            videoObjects[3].SetActive(true);
+            videos[3].Play();
+            videoIsPlaying = true;
+        }
+        else if (tutorialHoverButton == "Properties pt. 1")
+        {
+            TutorialPanel.SetActive(false);
+            videoObjects[4].SetActive(true);
+            videos[4].Play();
+            videoIsPlaying = true;
+        }
+        else if (tutorialHoverButton == "Properties pt. 2")
+        {
+            TutorialPanel.SetActive(false);
+            videoObjects[5].SetActive(true);
+            videos[5].Play();
+            videoIsPlaying = true;
+        }
+
     }
 
     private void activateKeyboard()
