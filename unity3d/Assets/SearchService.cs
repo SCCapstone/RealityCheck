@@ -42,32 +42,47 @@ public sealed class SearchService: Singleton<SearchService> {
     }
 
     // Send search request
-    public void Search(string query, Action<Search.SearchResult> callBack) {
-        try {
-            Dictionary<string,string> headers = new Dictionary<string, string>();
+    public void Search(string query, Action<Search.SearchResult> callBack)
+    {
+        try
+        {
+            Dictionary<string, string> headers = new Dictionary<string, string>();
             headers.Add("Content-Type", "application/x-protobuf");
 
-            var req = new Search.SearchRequest{
+            var req = new Search.SearchRequest
+            {
                 Query = query
             };
-            
+
             WWW api = new WWW(SEARCH_URI, req.ToByteArray(), headers);
 
             StartCoroutine(SearchRequest(api, callBack));
-        } catch (UnityException ex) {
+        }
+        catch (UnityException ex)
+        {
             debugText.text = ex.Message;
             Debug.Log(ex.Message);
-	    }
+        }
     }
 
     // Download model from server
     public void DownloadModel(Search.Hit hit, Action<NetModel> callBack)
     {
+        DownloadModel(hit.Asset.Filename, hit.Asset.Uuid, callBack);
+    }
+
+    public void DownloadModel(UserAssetState ua, Action<NetModel> callBack)
+    {
+        DownloadModel(ua.uuid, ua.uuid, callBack);
+    }
+
+    public void DownloadModel(string filename, string uuid, Action<NetModel> callBack)
+    {
         try
         {
 
-            var fp = DOWNLOAD_URI + hit.Asset.Filename;
-            StartCoroutine(DownloadRequest(new WWW(fp), fp, hit, callBack));
+            var fp = DOWNLOAD_URI + filename;
+            StartCoroutine(DownloadRequest(new WWW(fp), fp, filename, uuid, callBack));
         }
         catch (UnityException ex)
         {
@@ -114,14 +129,14 @@ public sealed class SearchService: Singleton<SearchService> {
 
     // Download the compressed model files from the server
     // Extract the files
-    private IEnumerator DownloadRequest(WWW www, string path, Search.Hit hit, Action<NetModel> callBack) {
+    private IEnumerator DownloadRequest(WWW www, string path, string file_uuid, string uuid, Action<NetModel> callBack) {
         yield return www;
 
         try {
 
             var nm = new NetModel();
 
-            string uuid = hit.Asset.Uuid;
+            // string uuid = hit.Asset.Uuid;
             string filePath = Application.temporaryCachePath + Path.DirectorySeparatorChar + uuid + ".zip";
             string extractPath = Application.temporaryCachePath + Path.DirectorySeparatorChar;
             
@@ -156,7 +171,7 @@ public sealed class SearchService: Singleton<SearchService> {
 
             Debug.Log("DL: " + nm.file);
 
-            nm.file_uuid = hit.Asset.Filename;
+            nm.file_uuid = file_uuid; // hit.Asset.Filename;
             nm.obj = extractPath + Path.DirectorySeparatorChar + "0.obj";
             nm.mtl = extractPath + Path.DirectorySeparatorChar + "0.mtl";
 
