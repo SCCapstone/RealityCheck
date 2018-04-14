@@ -30,15 +30,19 @@ public class SaveLoadService : Singleton<SaveLoadService>
         return Application.persistentDataPath + Path.DirectorySeparatorChar + "save" + slot + ".json";
     }
 
-    public void Save(int roomId, List<GameObject> userAssets)
+    public void Save(int roomId, string roomName, List<GameObject> userAssets)
     {
-        ScreenCapture.CaptureScreenshot(Application.persistentDataPath + Path.DirectorySeparatorChar + "save" + slot + ".png");
+        var screenshotFn = Application.persistentDataPath + Path.DirectorySeparatorChar + "save" + slot + ".png";
+        ScreenCapture.CaptureScreenshot(screenshotFn);
 
         var states = userAssets.Select(ua => UserAssetState.FromGameObject(ua));
         var game = new GameState
         {
             RoomId = roomId
         };
+
+        game.roomName = roomName;
+        game.screenshotPNG = GameState.Img2B64(screenshotFn);
 
         foreach (var s in states)
         {
@@ -71,5 +75,25 @@ public class SaveLoadService : Singleton<SaveLoadService>
         Debug.Log(jsonContent);
 
         return JsonUtility.FromJson<GameState>(jsonContent);
+    }
+
+    public GameState Load(string fn)
+    {
+
+        Debug.Log("Loading Game: " + fn);
+
+        var jsonContent = File.ReadAllText(fn);
+
+        Debug.Log(jsonContent);
+
+        return JsonUtility.FromJson<GameState>(jsonContent);
+    }
+
+    public List<GameState> Saves()
+    {
+        var jsonFiles = Directory.GetFiles(Application.persistentDataPath + Path.DirectorySeparatorChar, "*.json", SearchOption.AllDirectories).ToList();
+        var saveFiles = jsonFiles.Where(f => f.Contains("save")).ToList();
+        
+        return saveFiles.Select(s => Load(s)).ToList(); ;
     }
 }

@@ -257,7 +257,7 @@ public class NewRoomScript : MonoBehaviour {
 
         if (Input.GetButtonDown("BButton"))
         {
-            SaveLoadService.Instance.Save(0, userAssets);
+            SaveLoadService.Instance.Save(0, "unamed", userAssets);
         }
     }
 
