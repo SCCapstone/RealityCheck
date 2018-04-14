@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class NetModel {
     public string uuid;
+    public string file_uuid;
     public string file;
     public string obj;
     public string mtl;

@@ -3,7 +3,7 @@ using UnityEditor;
 using System;
 
 [Serializable]
-public class UserAssetState : MonoBehaviour
+public class UserAssetState
 {
     // unity's Vec3 and Quanternion are not serializible
     [Serializable]
@@ -69,24 +69,26 @@ public class UserAssetState : MonoBehaviour
         return state;
     }
 
-    public string ToString()
+    public string ToString
     {
-        string msg = "";
+        get
+        {
+            string msg = "";
 
-        msg += "uuid:" + uuid + "\n";
-        msg += "proportions:" + maintainProportions + "\n";
-        msg += "gravity:" + gravity + "\n";
+            msg += "uuid:" + uuid + "\n";
+            msg += "proportions:" + maintainProportions + "\n";
+            msg += "gravity:" + gravity + "\n";
 
-        msg += "xToY:" + xToY + "\n";
-        msg += "xToZ:" + xToZ + "\n";
+            msg += "xToY:" + xToY + "\n";
+            msg += "xToZ:" + xToZ + "\n";
 
-        msg += "yToX:" + yToX + "\n";
-        msg += "yToZ:" + yToZ + "\n";
+            msg += "yToX:" + yToX + "\n";
+            msg += "yToZ:" + yToZ + "\n";
 
-        msg += "zToX:" + zToX + "\n";
-        msg += "zToY:" + zToY + "\n";
+            msg += "zToX:" + zToX + "\n";
+            msg += "zToY:" + zToY + "\n";
 
-        return msg;
+            return msg;
+        }
     }
-
 }

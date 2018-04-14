@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
 public class GameState
 {
-    private int roomId = 0;
-    private List<UserAssetState> assets = new List<UserAssetState>();
+    public int roomId = 0;
+
+    [SerializeField]
+    public List<UserAssetState> assets = new List<UserAssetState>();
 
    public int RoomId
     {

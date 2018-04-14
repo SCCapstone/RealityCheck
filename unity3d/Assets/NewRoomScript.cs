@@ -216,16 +216,7 @@ public class NewRoomScript : MonoBehaviour {
 
         if (Input.GetButtonDown("BButton"))
         {
-            
-            var states = userAssets.Select(ua => UserAssetState.FromGameObject(ua));
-            var game = new GameState();
-            foreach (var s in states)
-            {
-                game.Add(s);
-            }
-            var jj = JsonUtility.ToJson(game);
-            Debug.Log(jj);
-            Debug.Log("pressed" + states.Count());
+            SaveLoadService.Instance.Save(0, userAssets);
         }
     }
 
