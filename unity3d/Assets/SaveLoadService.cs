@@ -32,6 +32,8 @@ public class SaveLoadService : Singleton<SaveLoadService>
 
     public void Save(int roomId, List<GameObject> userAssets)
     {
+        ScreenCapture.CaptureScreenshot(Application.persistentDataPath + Path.DirectorySeparatorChar + "save" + slot + ".png");
+
         var states = userAssets.Select(ua => UserAssetState.FromGameObject(ua));
         var game = new GameState
         {
