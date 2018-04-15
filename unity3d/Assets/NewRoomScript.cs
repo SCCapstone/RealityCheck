@@ -770,24 +770,25 @@ public class NewRoomScript : MonoBehaviour {
         else if (searchButtonHover == "Search")
         {
             keyboardInputField.text = SearchResultsInputField.text;
+            currentSearchPage = 1;
             PerformSearch();
         }
         else if (searchButtonHover == "Last Page")
         {
             if (currentSearchPage > 1)
             {
-                SearchResultsPanel.transform.Find("Page " + currentSearchPage).gameObject.SetActive(false);
+                // TODO here
                 currentSearchPage--;
-                SearchResultsPanel.transform.Find("Page " + currentSearchPage).gameObject.SetActive(true);
+                PerformSearch();
             }
         }
         else if (searchButtonHover == "Next Page")
         {
-            if (currentSearchPage < numberOfSearchPages)
+            if (currentSearchPage <= numberOfSearchPages)
             {
-                SearchResultsPanel.transform.Find("Page " + currentSearchPage).gameObject.SetActive(false);
+                // TODO here
                 currentSearchPage++;
-                SearchResultsPanel.transform.Find("Page " + currentSearchPage).gameObject.SetActive(true);
+                PerformSearch();
             }
         }
         else if (searchButtonHover == "Close")
@@ -869,7 +870,7 @@ public class NewRoomScript : MonoBehaviour {
 
     private void PerformSearch()
     {
-        currentSearchPage = 1;
+        //currentSearchPage = 1;
         clearResultsUI();
 
         // Run search algorithm
@@ -880,10 +881,17 @@ public class NewRoomScript : MonoBehaviour {
         if (!string.IsNullOrEmpty(query))
         {
             SearchService.Instance.Flush();
-            SearchService.Instance.Search(query, res =>
-            {
+
+            var req = new Search.SearchRequest{
+                Query = query,
+                PageNumber = currentSearchPage,
+                ResultPerPage = 4
+            };
+
+            SearchService.Instance.Search(req, res => {
                 searchResults = res;
                 updateResultsUI();
+                numberOfSearchPages = (int)Math.Floor(((double)res.Count) / 4.0f);
             });
         }
     }
@@ -1148,7 +1156,7 @@ public class NewRoomScript : MonoBehaviour {
     private void clearResultsUI()
     {
         updateNumberOfSearchPages();
-        for (int i = 1; i <= numberOfSearchPages; i++)
+        for (int i = 1; i <= Math.Min(1, numberOfSearchPages); i++)
         {
             Destroy(SearchResultsPanel.transform.Find("Page " + i).gameObject);
         }
@@ -1156,16 +1164,9 @@ public class NewRoomScript : MonoBehaviour {
 
     private void updateResultsUI()
     {
-        updateNumberOfSearchPages();
-        for (int i = 1; i <= numberOfSearchPages; i++)
-        {
-            Destroy(SearchResultsPanel.transform.Find("Page " + i).gameObject);
-        }
-
-        int numberOfPagesNeeded = (int)Mathf.Ceil((float)searchResults.Count / 4.0f);
 
         int modelIndex = 0;
-        for (int i = 1; i <= numberOfPagesNeeded; i++)
+        for (int i = 1; i <= 1; i++)
         {
             GameObject page = Instantiate(new GameObject());
             page.name = "Page " + i;
@@ -1175,7 +1176,7 @@ public class NewRoomScript : MonoBehaviour {
             page.transform.localScale = new Vector3(200.0f, 200.0f, 1.0f);
             for (int j = 1; j <= 4; j++)
             {
-                if (modelIndex < searchResults.Count)
+                if (modelIndex < 4)
                 {
                     Button item = Instantiate(SearchButtonPrefab);
                     item.transform.SetParent(page.transform);
@@ -1199,6 +1200,7 @@ public class NewRoomScript : MonoBehaviour {
 
     private void updateNumberOfSearchPages()
     {
+        /*
         numberOfSearchPages = 0;
         for (int i = 0; i < SearchResultsPanel.transform.childCount; i++)
         {
@@ -1214,7 +1216,7 @@ public class NewRoomScript : MonoBehaviour {
             //Subrat 2 because of the 2 buttons that say
             // Last Page and Next Page
             numberOfSearchPages -= 2;
-        }
+        }*/
     }
 
     private void toggleVoiceRecording()

@@ -78,18 +78,6 @@ public class SaveLoadService : Singleton<SaveLoadService>
             File.Delete(fn);
         }
 
-#if UNITY_EDITOR
-        UnityEditor.AssetDatabase.Refresh();
-#endif
-
-        //try
-        //{
-        //    FileUtil.DeleteFileOrDirectory(fn);
-        //} catch (Exception ex)
-        //{
-        //    Debug.Log(ex);
-        //}
-
         using (var fs = new FileStream(fn, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
         {
             using (var writer = new StreamWriter(fs))

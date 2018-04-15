@@ -23,17 +23,12 @@ public sealed class SearchService: Singleton<SearchService> {
     private static string DOWNLOAD_URI = "https://storage.googleapis.com/realitycheck/";
     
     private FastZip fastZip = new FastZip();
-
-    private Dictionary<Search.Hit, NetModel> cachedModels = new Dictionary<Search.Hit, NetModel>();
-
     public Text debugText;
 
     protected SearchService() {}
 
     // Delete App Cache Folder
     public void Flush() {
-        cachedModels.Clear();
-
         var path = Application.temporaryCachePath;
         var di = new DirectoryInfo(path);
     
@@ -46,12 +41,36 @@ public sealed class SearchService: Singleton<SearchService> {
     {
         try
         {
-            Dictionary<string, string> headers = new Dictionary<string, string>();
-            headers.Add("Content-Type", "application/x-protobuf");
+            Dictionary<string, string> headers = new Dictionary<string, string>
+            {
+                { "Content-Type", "application/x-protobuf" }
+            };
 
             var req = new Search.SearchRequest
             {
-                Query = query
+                Query = query,
+                ResultPerPage = 4,
+                PageNumber = 1
+            };
+
+            WWW api = new WWW(SEARCH_URI, req.ToByteArray(), headers);
+
+            StartCoroutine(SearchRequest(api, callBack));
+        }
+        catch (UnityException ex)
+        {
+            debugText.text = ex.Message;
+            Debug.Log(ex.Message);
+        }
+    }
+
+    public void Search(Search.SearchRequest req, Action<Search.SearchResult> callBack)
+    {
+        try
+        {
+            Dictionary<string, string> headers = new Dictionary<string, string>
+            {
+                { "Content-Type", "application/x-protobuf" }
             };
 
             WWW api = new WWW(SEARCH_URI, req.ToByteArray(), headers);
