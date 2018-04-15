@@ -30,6 +30,26 @@ public class MainScript : MonoBehaviour
     public GameObject rightHand;
     public GameObject leftHand;
 
+    public GameObject DoorKnobBox;
+    public GameObject DoorKnobDemo;
+    public GameObject DoorKnobOpen;
+
+    public GameObject KnobGlowBox;
+    public GameObject KnobGlowDemo;
+    public GameObject KnobGlowOpen;
+
+    public GameObject Save1NameText;
+    public GameObject Save2NameText;
+    public GameObject Save3NameText;
+
+    public GameObject Save1Painting;
+    public GameObject Save2Painting;
+    public GameObject Save3Painting;
+
+    public GameObject Save1Image;
+    public GameObject Save2Image;
+    public GameObject Save3Image;
+
     private GameObject rayCastEndSphere;
     private LineRenderer lineRenderer;
 
@@ -39,11 +59,31 @@ public class MainScript : MonoBehaviour
 
 	private List<GameObject> resultsButtons;
 	private Search.SearchResult searchResults;
+
+    private bool needLoadFromStart = true;
+
+    private string saveSlot1Room = "";
+    private string saveSlot2Room = "";
+    private string saveSlot3Room = "";
+    
+    private int slotCount = 0;
+
+    private bool RTriggerHeld;
+    private bool LTriggerHeld;
+
+    private double LDownTime;
+    private double RDownTime;
+    private double triggerTime = 5.0;
+    private bool RTriggerDown;
+    private bool LTriggerDown;
     
     // Use this for initialization
     void Start()
 	{
-		resultsButtons = new List<GameObject>();
+        LTriggerDown = false;
+        RTriggerDown = false;
+
+        resultsButtons = new List<GameObject>();
 
 		SearchService.Instance.Flush();
 		SearchService.Instance.debugText = searchDebugText;
@@ -111,8 +151,255 @@ public class MainScript : MonoBehaviour
             lineRenderer.SetPosition(0, pointerHand.transform.position);
             lineRenderer.SetPosition(1, hit.point);
         }
+        
+        if (SceneManager.GetActiveScene().name == "scene")
+        {
+            if (null == rayCastEndSphere)
+            {
+                rayCastEndSphere = GameObject.Find("rayCastEndSphere");
+            }
+
+            RTriggerDown = getRightTriggerDown();
+            LTriggerDown = getLeftTriggerDown();
+
+            checkDoorKnobs();
+            checkPaintings();
+
+            if (needLoadFromStart)
+            {
+                needLoadFromStart = false;
+                loadSaves();
+            }
+        }
     }
-    
+
+    void checkDoorKnobs()
+    {
+        SphereCollider sphereBox = DoorKnobBox.GetComponent<SphereCollider>();
+        SphereCollider sphereDemo = DoorKnobDemo.GetComponent<SphereCollider>();
+        SphereCollider sphereOpen = DoorKnobOpen.GetComponent<SphereCollider>();
+
+        Vector3 leftPos = leftHand.transform.position;
+        Vector3 rightPos = rightHand.transform.position;
+
+        Vector3 rayPos;
+        if (null == rayCastEndSphere)
+        {
+            rayPos = new Vector3(-1000, -1000, -1000);
+        }
+        else
+        {
+            rayPos = rayCastEndSphere.transform.position;
+        }
+
+        if (sphereBox.bounds.Contains(leftPos) || sphereBox.bounds.Contains(rightPos)
+            || sphereBox.bounds.Contains(rayPos))
+        {
+            KnobGlowBox.SetActive(true);
+            if (RTriggerDown && slotCount < 3)
+            {
+                SaveLoadService.Instance.Slot = slotCount;
+                SceneManager.LoadScene("newBoxRoom", LoadSceneMode.Single);
+            }
+        }
+        else
+        {
+            KnobGlowBox.SetActive(false);
+        }
+
+        if (sphereDemo.bounds.Contains(leftPos) || sphereDemo.bounds.Contains(rightPos)
+            || sphereDemo.bounds.Contains(rayPos))
+        {
+            KnobGlowDemo.SetActive(true);
+            if (RTriggerDown && slotCount < 3)
+            {
+                SaveLoadService.Instance.Slot = slotCount;
+                SceneManager.LoadScene("newDemoRoom", LoadSceneMode.Single);
+            }
+        }
+        else
+        {
+            KnobGlowDemo.SetActive(false);
+        }
+
+        if (sphereOpen.bounds.Contains(leftPos) || sphereOpen.bounds.Contains(rightPos)
+            || sphereOpen.bounds.Contains(rayPos))
+        {
+            KnobGlowOpen.SetActive(true);
+            if (RTriggerDown && slotCount < 3)
+            {
+                SaveLoadService.Instance.Slot = slotCount;
+                SceneManager.LoadScene("newOutsideRoom", LoadSceneMode.Single);
+            }
+        }
+        else
+        {
+            KnobGlowOpen.SetActive(false);
+        }
+    }
+
+    void checkPaintings()
+    {
+        BoxCollider boxSave1 = Save1Painting.GetComponent<BoxCollider>();
+        BoxCollider boxSave2 = Save2Painting.GetComponent<BoxCollider>();
+        BoxCollider boxSave3 = Save3Painting.GetComponent<BoxCollider>();
+
+        Vector3 rayPos;
+        if (null == rayCastEndSphere)
+        {
+            rayPos = new Vector3(-1000, -1000, -1000);
+        }
+        else
+        {
+            rayPos = rayCastEndSphere.transform.position;
+        }
+
+        int loadSlot = -1;
+        string roomName = "";
+
+        if (boxSave1.bounds.Contains(rayPos))
+        {
+            if (RTriggerDown)
+            {
+                loadSlot = 0;
+                roomName = saveSlot1Room;
+            }
+        }
+        else if (boxSave2.bounds.Contains(rayPos))
+        {
+            if (RTriggerDown)
+            {
+                loadSlot = 1;
+                roomName = saveSlot2Room;
+            }
+        }
+        else if (boxSave3.bounds.Contains(rayPos))
+        {
+            if (RTriggerDown)
+            {
+                loadSlot = 2;
+                roomName = saveSlot3Room;
+            }
+        }
+
+        if (loadSlot >= 0 && loadSlot <= 3 && roomName != "")
+        {
+            SaveLoadService.Instance.Slot = loadSlot;
+            if (roomName.Contains("newBoxRoom"))
+            {
+                SceneManager.LoadScene("newBoxRoom", LoadSceneMode.Single);
+            }
+            else if (roomName.Contains("newDemoRoom"))
+            {
+                SceneManager.LoadScene("newDemoRoom", LoadSceneMode.Single);
+            }
+            else if (roomName.Contains("newOutsideRoom"))
+            {
+                SceneManager.LoadScene("newOutsideRoom", LoadSceneMode.Single);
+            }
+        }
+    }
+
+    void loadSaves()
+    {
+        GameState state1 = null;
+        GameState state2 = null;
+        GameState state3 = null;
+
+        try
+        {
+            state1 = SaveLoadService.Instance.Load(0);
+        }
+        catch (Exception ex) { }
+
+        try
+        {
+            state2 = SaveLoadService.Instance.Load(1);
+        }
+        catch (Exception ex) {  }
+
+        try
+        {
+            state3 = SaveLoadService.Instance.Load(2);
+        }
+        catch (Exception ex) { }
+
+        if (state1 != null)
+        {
+            string fullName = state1.roomName;
+            string inputName = fullName;
+            int lastSpaceIndex = inputName.LastIndexOf(" ");
+            inputName = inputName.Substring(0, lastSpaceIndex);
+            Save1NameText.GetComponent<TextMesh>().text = inputName;
+            Save1NameText.name = fullName;
+
+            slotCount++;
+            saveSlot1Room = fullName;
+
+            var screenshotFn = Application.persistentDataPath + Path.DirectorySeparatorChar + "save" + 0 + ".png";
+            if (File.Exists(screenshotFn))
+            {
+                byte[] fileData = File.ReadAllBytes(screenshotFn);
+
+                Texture2D tex = new Texture2D(1, 1);
+                tex.LoadImage(fileData);
+                tex.Apply();
+                Sprite screenshotSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+                Save1Image.GetComponent<Image>().sprite = screenshotSprite;
+            }
+        }
+
+        if (state2 != null)
+        {
+            string fullName = state2.roomName;
+            string inputName = fullName;
+            int lastSpaceIndex = inputName.LastIndexOf(" ");
+            inputName = inputName.Substring(0, lastSpaceIndex);
+            Save2NameText.GetComponent<TextMesh>().text = inputName;
+            Save2NameText.name = fullName;
+
+            slotCount++;
+            saveSlot2Room = fullName;
+
+            var screenshotFn = Application.persistentDataPath + Path.DirectorySeparatorChar + "save" + 1 + ".png";
+            if (File.Exists(screenshotFn))
+            {
+                byte[] fileData = File.ReadAllBytes(screenshotFn);
+
+                Texture2D tex = new Texture2D(1, 1);
+                tex.LoadImage(fileData);
+                tex.Apply();
+                Sprite screenshotSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+                Save2Image.GetComponent<Image>().sprite = screenshotSprite;
+            }
+        }
+
+        if (state3 != null)
+        {
+            string fullName = state3.roomName;
+            string inputName = fullName;
+            int lastSpaceIndex = inputName.LastIndexOf(" ");
+            inputName = inputName.Substring(0, lastSpaceIndex);
+            Save3NameText.GetComponent<TextMesh>().text = inputName;
+            Save3NameText.name = fullName;
+
+            slotCount++;
+            saveSlot3Room = fullName;
+
+            var screenshotFn = Application.persistentDataPath + Path.DirectorySeparatorChar + "save" + 2 + ".png";
+            if (File.Exists(screenshotFn))
+            {
+                byte[] fileData = File.ReadAllBytes(screenshotFn);
+
+                Texture2D tex = new Texture2D(1, 1);
+                tex.LoadImage(fileData);
+                tex.Apply();
+                Sprite screenshotSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+                Save3Image.GetComponent<Image>().sprite = screenshotSprite;
+            }
+        }
+    }
+
     // Click Handler for search results
     // Loads model based on button index
     void ResultClickHandle(int index) {
@@ -173,4 +460,74 @@ public class MainScript : MonoBehaviour
 			UpdateResultsUI();
 		});
 	}
+    
+    private bool getRightTriggerDown()
+    {
+        float pressure = Input.GetAxisRaw("RightTrigger");
+        bool down = pressure > 0.2f;
+        if (down)
+        {
+            if (RTriggerHeld)
+            {
+                if (NowMilliseconds() - RDownTime < triggerTime)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                RDownTime = NowMilliseconds();
+                RTriggerHeld = true;
+                return true;
+            }
+        }
+        else
+        {
+            RTriggerHeld = false;
+            return false;
+        }
+    }
+
+    private bool getLeftTriggerDown()
+    {
+        float pressure = Input.GetAxisRaw("LeftTrigger");
+        bool down = pressure > 0.2f;
+        if (down)
+        {
+            if (LTriggerHeld)
+            {
+                if (NowMilliseconds() - LDownTime < triggerTime)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                LDownTime = NowMilliseconds();
+                LTriggerHeld = true;
+                return true;
+            }
+        }
+        else
+        {
+            LTriggerHeld = false;
+            return false;
+        }
+    }
+
+    private double NowMilliseconds()
+    {
+        return (System.DateTime.UtcNow -
+                new System.DateTime(1970, 1, 1, 0, 0, 0,
+                    System.DateTimeKind.Utc)).TotalMilliseconds;
+    }
+
 }

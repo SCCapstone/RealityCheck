@@ -36,6 +36,12 @@ public class SaveLoadService : Singleton<SaveLoadService>
     public IEnumerator Save(int roomId, string roomName, List<GameObject> userAssets)
     {
         var screenshotFn = Application.persistentDataPath + Path.DirectorySeparatorChar + "save" + slot + ".png";
+
+        if (File.Exists(screenshotFn))
+        {
+            File.Delete(screenshotFn);
+        }
+
         ScreenCapture.CaptureScreenshot(screenshotFn);
 
         //Wait for 4 frames
@@ -53,7 +59,8 @@ public class SaveLoadService : Singleton<SaveLoadService>
 
         game.roomName = roomName;
         game.screenshotPNG = GameState.Img2B64(screenshotFn);
-        FileUtil.DeleteFileOrDirectory(screenshotFn);
+        
+        //FileUtil.DeleteFileOrDirectory(screenshotFn);
 
         foreach (var s in states)
         {
@@ -66,13 +73,22 @@ public class SaveLoadService : Singleton<SaveLoadService>
         Debug.Log("Saving Game: " + fn);
         Debug.Log(jsonContent);
 
-        try
+        if (File.Exists(fn))
         {
-            FileUtil.DeleteFileOrDirectory(fn);
-        } catch (Exception ex)
-        {
-            Debug.Log(ex);
+            File.Delete(fn);
         }
+
+#if UNITY_EDITOR
+        UnityEditor.AssetDatabase.Refresh();
+#endif
+
+        //try
+        //{
+        //    FileUtil.DeleteFileOrDirectory(fn);
+        //} catch (Exception ex)
+        //{
+        //    Debug.Log(ex);
+        //}
 
         using (var fs = new FileStream(fn, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
         {
