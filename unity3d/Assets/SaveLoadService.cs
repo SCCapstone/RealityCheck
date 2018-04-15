@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using UnityEditor;
 using System;
 using System.Collections;
 
@@ -43,20 +42,19 @@ public class SaveLoadService : Singleton<SaveLoadService>
         }
 
         ScreenCapture.CaptureScreenshot(screenshotFn);
-
+        
         //Wait for 4 frames
         for (int i = 0; i < 10; i++)
         {
             yield return null;
         }
-
-
+        
         var states = userAssets.Where(ua => ua != null).Select(ua => UserAssetState.FromGameObject(ua));
         var game = new GameState
         {
             RoomId = roomId
         };
-
+        
         game.roomName = roomName;
         game.screenshotPNG = GameState.Img2B64(screenshotFn);
         
@@ -66,10 +64,10 @@ public class SaveLoadService : Singleton<SaveLoadService>
         {
             game.Add(s);
         }
-
+        
         var jsonContent = JsonUtility.ToJson(game);
         var fn = FilePath();
-
+        
         Debug.Log("Saving Game: " + fn);
         Debug.Log(jsonContent);
 
@@ -77,7 +75,7 @@ public class SaveLoadService : Singleton<SaveLoadService>
         {
             File.Delete(fn);
         }
-
+        
         using (var fs = new FileStream(fn, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None))
         {
             using (var writer = new StreamWriter(fs))

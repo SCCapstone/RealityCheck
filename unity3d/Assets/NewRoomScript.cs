@@ -30,6 +30,13 @@ public class NewRoomScript : MonoBehaviour {
 
     public GameObject SavePanel;
     public InputField SaveInputField;
+    public GameObject SaveInstructions;
+    public GameObject SaveSlot1Button;
+    public GameObject SaveSlot2Button;
+    public GameObject SaveSlot3Button;
+    public GameObject SaveSlot1ButtonText;
+    public GameObject SaveSlot2ButtonText;
+    public GameObject SaveSlot3ButtonText;
 
     public Shader Standard;
     public Shader BumpedDiffuse;
@@ -113,6 +120,10 @@ public class NewRoomScript : MonoBehaviour {
         MenuPanel.SetActive(false);
         TutorialPanel.SetActive(false);
         SavePanel.SetActive(false);
+        SaveInstructions.SetActive(false);
+        SaveSlot1Button.SetActive(false);
+        SaveSlot2Button.SetActive(false);
+        SaveSlot3Button.SetActive(false);
         VirtualKeyboardCanvas.SetActive(false);
         SearchResultsPanel.SetActive(false);
 
@@ -579,6 +590,10 @@ public class NewRoomScript : MonoBehaviour {
 
     private void findSaveHoverButton()
     {
+        SaveSlot1Button.SetActive(SaveInstructions.activeSelf);
+        SaveSlot2Button.SetActive(SaveInstructions.activeSelf);
+        SaveSlot3Button.SetActive(SaveInstructions.activeSelf);
+
         saveHoverButton = "";
         for (int i = 0; i < SavePanel.transform.childCount; i++)
         {
@@ -604,7 +619,7 @@ public class NewRoomScript : MonoBehaviour {
                 }
                 SaveInputField.colors = cb;
             }
-            else if (transform.gameObject.name.Contains("Button"))
+            else if (transform.gameObject.activeSelf && transform.gameObject.name.Contains("Button"))
             {
                 Button currentButton = transform.gameObject.GetComponent<Button>();
                 ColorBlock cb = currentButton.colors;
@@ -817,10 +832,47 @@ public class NewRoomScript : MonoBehaviour {
         }
         else if (saveHoverButton == "Save Room")
         {
-            SavePanel.SetActive(false);
+            if (roomSaveSlot == 3)
+            {
+                SaveInstructions.SetActive(true);
+            }
+            else if (!SaveInstructions.activeSelf)
+            {
+                SavePanel.SetActive(false);
+                roomSaveName = SaveInputField.text;
+                StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
+                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
+            }
+        }
+        else if (saveHoverButton.Contains("Slot 1:"))
+        {
+            SaveInstructions.SetActive(false);
+            roomSaveSlot = 0;
+            SaveLoadService.Instance.Slot = 0;
             roomSaveName = SaveInputField.text;
-            StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot, 
-                roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
+            SaveSlot1ButtonText.GetComponent<Text>().text = "Slot 1: " + roomSaveName;
+            StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
+                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
+        }
+        else if (saveHoverButton.Contains("Slot 2:"))
+        {
+            SaveInstructions.SetActive(false);
+            roomSaveSlot = 1;
+            SaveLoadService.Instance.Slot = 1;
+            roomSaveName = SaveInputField.text;
+            SaveSlot2ButtonText.GetComponent<Text>().text = "Slot 2: " + roomSaveName;
+            StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
+                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
+        }
+        else if (saveHoverButton.Contains("Slot 3:"))
+        {
+            SaveInstructions.SetActive(false);
+            roomSaveSlot = 2;
+            SaveLoadService.Instance.Slot = 2;
+            roomSaveName = SaveInputField.text;
+            SaveSlot3ButtonText.GetComponent<Text>().text = "Slot 3: " + roomSaveName;
+            StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
+                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
         }
         else if (saveHoverButton == "Close")
         {
@@ -1150,15 +1202,25 @@ public class NewRoomScript : MonoBehaviour {
     
     private void clearResultsUI()
     {
-        for (int i = 1; i <= Math.Min(1, numberOfSearchPages); i++)
+        List<GameObject> objectsToDelete = new List<GameObject>();
+
+        for (int i = 0; i < SearchResultsPanel.transform.childCount; i++)
         {
-            Destroy(SearchResultsPanel.transform.Find("Page " + i).gameObject);
+            Transform transform = SearchResultsPanel.transform.GetChild(i);
+            if (transform.gameObject.name.Contains("Page"))
+            {
+                objectsToDelete.Add(transform.gameObject);
+            }
+        }
+
+        for (int i = 0; i < objectsToDelete.Count; i++)
+        {
+            Destroy(objectsToDelete[i]);
         }
     }
 
     private void updateResultsUI()
     {
-
         int modelIndex = 0;
 
         GameObject page = Instantiate(new GameObject());
@@ -1167,11 +1229,10 @@ public class NewRoomScript : MonoBehaviour {
         page.transform.localPosition = new Vector3(0.55f, -4.0f, 0.0f);
         page.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
         page.transform.localScale = new Vector3(200.0f, 200.0f, 1.0f);
-
-
+        
         for (int j = 1; j <= 4; j++)
         {
-            if (modelIndex < 4)
+            if (modelIndex < searchResults.Count)
             {
                 Button item = Instantiate(SearchButtonPrefab);
                 item.transform.SetParent(page.transform);
@@ -1190,7 +1251,6 @@ public class NewRoomScript : MonoBehaviour {
                 modelIndex++;
             }
         }
-
     }
 
     private void toggleVoiceRecording()
@@ -1277,34 +1337,90 @@ public class NewRoomScript : MonoBehaviour {
     private void loadLevelOnStart()
     {
         roomSaveSlot = SaveLoadService.Instance.Slot;
-        GameState state = null;
-        try
+        if (roomSaveSlot == 3)
         {
-            state = SaveLoadService.Instance.Load(roomSaveSlot);
-        }
-        catch (Exception ex)
-        {
-            Debug.Log("Failed to load at slot " + roomSaveSlot + " ex:" + ex);
-        }
+            allModelsLoadedFromStart = true;
 
-        Debug.Log(SceneManager.GetActiveScene().name);
-        if (state != null && state.roomName.Contains(SceneManager.GetActiveScene().name))
-        {
-            loadedInGameState = state;
-            loadIndex = 0;
-            
-            string inputName = state.roomName;
-            int lastSpaceIndex = inputName.LastIndexOf(" ");
-            inputName = inputName.Substring(0, lastSpaceIndex);
+            GameState state1 = null;
+            GameState state2 = null;
+            GameState state3 = null;
 
-            roomSaveName = inputName;
-            SaveInputField.text = inputName;
-            
-            onStartLoadAtIndex(state.assets);
+            try
+            {
+                state1 = SaveLoadService.Instance.Load(0);
+            }
+            catch (Exception ex) { }
+
+            try
+            {
+                state2 = SaveLoadService.Instance.Load(1);
+            }
+            catch (Exception ex) { }
+
+            try
+            {
+                state3 = SaveLoadService.Instance.Load(2);
+            }
+            catch (Exception ex) { }
+
+            if (state1 != null)
+            {
+                string fullName = state1.roomName;
+                string inputName = fullName;
+                int lastSpaceIndex = inputName.LastIndexOf(" ");
+                inputName = inputName.Substring(0, lastSpaceIndex);
+                SaveSlot1ButtonText.GetComponent<Text>().text = "Slot 1: " + inputName;
+            }
+
+            if (state2 != null)
+            {
+                string fullName = state2.roomName;
+                string inputName = fullName;
+                int lastSpaceIndex = inputName.LastIndexOf(" ");
+                inputName = inputName.Substring(0, lastSpaceIndex);
+                SaveSlot2ButtonText.GetComponent<Text>().text = "Slot 2: " + inputName;
+            }
+
+            if (state3 != null)
+            {
+                string fullName = state3.roomName;
+                string inputName = fullName;
+                int lastSpaceIndex = inputName.LastIndexOf(" ");
+                inputName = inputName.Substring(0, lastSpaceIndex);
+                SaveSlot3ButtonText.GetComponent<Text>().text = "Slot 3: " + inputName;
+            }
         }
         else
         {
-            allModelsLoadedFromStart = true;
+            GameState state = null;
+            try
+            {
+                state = SaveLoadService.Instance.Load(roomSaveSlot);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("Failed to load at slot " + roomSaveSlot + " ex:" + ex);
+            }
+
+            Debug.Log(SceneManager.GetActiveScene().name);
+            if (state != null && state.roomName.Contains(SceneManager.GetActiveScene().name))
+            {
+                loadedInGameState = state;
+                loadIndex = 0;
+
+                string inputName = state.roomName;
+                int lastSpaceIndex = inputName.LastIndexOf(" ");
+                inputName = inputName.Substring(0, lastSpaceIndex);
+
+                roomSaveName = inputName;
+                SaveInputField.text = inputName;
+
+                onStartLoadAtIndex(state.assets);
+            }
+            else
+            {
+                allModelsLoadedFromStart = true;
+            }
         }
     }
 

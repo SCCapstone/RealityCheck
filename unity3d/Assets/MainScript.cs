@@ -196,7 +196,7 @@ public class MainScript : MonoBehaviour
             || sphereBox.bounds.Contains(rayPos))
         {
             KnobGlowBox.SetActive(true);
-            if (RTriggerDown && slotCount < 3)
+            if (RTriggerDown)
             {
                 SaveLoadService.Instance.Slot = slotCount;
                 SceneManager.LoadScene("newBoxRoom", LoadSceneMode.Single);
@@ -211,7 +211,7 @@ public class MainScript : MonoBehaviour
             || sphereDemo.bounds.Contains(rayPos))
         {
             KnobGlowDemo.SetActive(true);
-            if (RTriggerDown && slotCount < 3)
+            if (RTriggerDown)
             {
                 SaveLoadService.Instance.Slot = slotCount;
                 SceneManager.LoadScene("newDemoRoom", LoadSceneMode.Single);
@@ -226,7 +226,7 @@ public class MainScript : MonoBehaviour
             || sphereOpen.bounds.Contains(rayPos))
         {
             KnobGlowOpen.SetActive(true);
-            if (RTriggerDown && slotCount < 3)
+            if (RTriggerDown)
             {
                 SaveLoadService.Instance.Slot = slotCount;
                 SceneManager.LoadScene("newOutsideRoom", LoadSceneMode.Single);
