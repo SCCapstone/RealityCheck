@@ -130,8 +130,6 @@ public class NewRoomScript : MonoBehaviour {
 
         recordingService = SpeechToTextAudioSource.GetComponent<RecordingService>();
 
-        updateNumberOfSearchPages();
-
         if (MainRoomSettings.musicVolume == -1)
         {
             MainRoomSettings.musicVolume = music.volume * 100.0f;
@@ -777,7 +775,6 @@ public class NewRoomScript : MonoBehaviour {
         {
             if (currentSearchPage > 1)
             {
-                // TODO here
                 currentSearchPage--;
                 PerformSearch();
             }
@@ -786,7 +783,6 @@ public class NewRoomScript : MonoBehaviour {
         {
             if (currentSearchPage <= numberOfSearchPages)
             {
-                // TODO here
                 currentSearchPage++;
                 PerformSearch();
             }
@@ -870,7 +866,6 @@ public class NewRoomScript : MonoBehaviour {
 
     private void PerformSearch()
     {
-        //currentSearchPage = 1;
         clearResultsUI();
 
         // Run search algorithm
@@ -1155,7 +1150,6 @@ public class NewRoomScript : MonoBehaviour {
     
     private void clearResultsUI()
     {
-        updateNumberOfSearchPages();
         for (int i = 1; i <= Math.Min(1, numberOfSearchPages); i++)
         {
             Destroy(SearchResultsPanel.transform.Find("Page " + i).gameObject);
@@ -1166,57 +1160,37 @@ public class NewRoomScript : MonoBehaviour {
     {
 
         int modelIndex = 0;
-        for (int i = 1; i <= 1; i++)
+
+        GameObject page = Instantiate(new GameObject());
+        page.name = "Page 1";
+        page.transform.SetParent(SearchResultsPanel.transform);
+        page.transform.localPosition = new Vector3(0.55f, -4.0f, 0.0f);
+        page.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+        page.transform.localScale = new Vector3(200.0f, 200.0f, 1.0f);
+
+
+        for (int j = 1; j <= 4; j++)
         {
-            GameObject page = Instantiate(new GameObject());
-            page.name = "Page " + i;
-            page.transform.SetParent(SearchResultsPanel.transform);
-            page.transform.localPosition = new Vector3(0.55f, -4.0f, 0.0f);
-            page.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
-            page.transform.localScale = new Vector3(200.0f, 200.0f, 1.0f);
-            for (int j = 1; j <= 4; j++)
+            if (modelIndex < 4)
             {
-                if (modelIndex < 4)
-                {
-                    Button item = Instantiate(SearchButtonPrefab);
-                    item.transform.SetParent(page.transform);
+                Button item = Instantiate(SearchButtonPrefab);
+                item.transform.SetParent(page.transform);
 
-                    float xPos = j % 2 == 0 ? 0.12f : -0.12f;
-                    float yPos = j > 2 ? -0.12f : 0.09f;
+                float xPos = j % 2 == 0 ? 0.12f : -0.12f;
+                float yPos = j > 2 ? -0.12f : 0.09f;
 
-                    item.gameObject.layer = 0;
-                    item.transform.localPosition = new Vector3(xPos, yPos, 0.0f);
-                    item.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
-                    item.transform.localScale = new Vector3(0.005f, 0.005f, 1.0f);
+                item.gameObject.layer = 0;
+                item.transform.localPosition = new Vector3(xPos, yPos, 0.0f);
+                item.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+                item.transform.localScale = new Vector3(0.005f, 0.005f, 1.0f);
 
-                    item.transform.GetChild(0).gameObject.GetComponent<Text>().text = (modelIndex) + "";
-                    item.transform.GetChild(1).gameObject.GetComponent<Text>().text = searchResults.Hits[modelIndex].Asset.Name + "";
+                item.transform.GetChild(0).gameObject.GetComponent<Text>().text = (modelIndex) + "";
+                item.transform.GetChild(1).gameObject.GetComponent<Text>().text = searchResults.Hits[modelIndex].Asset.Name + "";
 
-                    modelIndex++;
-                }
-            }
-        }
-    }
-
-    private void updateNumberOfSearchPages()
-    {
-        /*
-        numberOfSearchPages = 0;
-        for (int i = 0; i < SearchResultsPanel.transform.childCount; i++)
-        {
-            Transform transform = SearchResultsPanel.transform.GetChild(i);
-            if (transform.gameObject.name.Contains("Page"))
-            {
-                numberOfSearchPages++;
+                modelIndex++;
             }
         }
 
-        if (numberOfSearchPages > 0)
-        {
-            //Subrat 2 because of the 2 buttons that say
-            // Last Page and Next Page
-            numberOfSearchPages -= 2;
-        }*/
     }
 
     private void toggleVoiceRecording()
