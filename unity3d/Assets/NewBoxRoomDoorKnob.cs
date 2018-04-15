@@ -67,7 +67,6 @@ public class NewBoxRoomDoorKnob : MonoBehaviour {
         {
             KnobGlow.SetActive(false);
         }
-
     }
 
     private bool getRightTriggerDown()

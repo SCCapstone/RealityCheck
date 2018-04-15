@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 public class NewRoomScript : MonoBehaviour {
 
@@ -27,6 +28,16 @@ public class NewRoomScript : MonoBehaviour {
     public Button MicButton;
     public AudioSource SpeechToTextAudioSource;
 
+    public GameObject SavePanel;
+    public InputField SaveInputField;
+    public GameObject SaveInstructions;
+    public GameObject SaveSlot1Button;
+    public GameObject SaveSlot2Button;
+    public GameObject SaveSlot3Button;
+    public GameObject SaveSlot1ButtonText;
+    public GameObject SaveSlot2ButtonText;
+    public GameObject SaveSlot3ButtonText;
+
     public Shader Standard;
     public Shader BumpedDiffuse;
     public Shader BumpedSpecular;
@@ -48,12 +59,13 @@ public class NewRoomScript : MonoBehaviour {
 
     private double LDownTime;
     private double RDownTime;
-    private double triggerTime = 5.0; // 10 milliseconds
+    private double triggerTime = 5.0;
     private bool RTriggerDown;
     private bool LTriggerDown;
 
     private string menuHoverButton;
     private string tutorialHoverButton;
+    private string saveHoverButton;
 
     private GameObject rayCastEndSphere;
     private LineRenderer rayCastLineRenderer;
@@ -82,18 +94,39 @@ public class NewRoomScript : MonoBehaviour {
     private bool isLoadingInNewModel = false;
     private List<GameObject> lastNewLoadedModels;
     public GameObject loadingCircle;
+    private List<UserAssetState> modelStates;
 
     private RecordingService recordingService;
     private bool voiceRecordingInProgress;
 
+    private List<GameObject> userAssets = new List<GameObject>();
+
+    private GameState loadedInGameState;
+
+    private string roomSaveName;
+    private int roomSaveSlot;
+
+    private int loadIndex = 0;
+    private bool allModelsLoadedFromStart = false;
+    private bool needLoadFromStart = true;
+    private bool isLoadingFromStart = true;
+
     // Use this for initialization
-    void Start () {
+    void Start ()
+    {
+        modelStates = new List<UserAssetState>();
         lastNewLoadedModels = new List<GameObject>();
         loadingCircle.SetActive(false);
         MenuPanel.SetActive(false);
         TutorialPanel.SetActive(false);
+        SavePanel.SetActive(false);
+        SaveInstructions.SetActive(false);
+        SaveSlot1Button.SetActive(false);
+        SaveSlot2Button.SetActive(false);
+        SaveSlot3Button.SetActive(false);
         VirtualKeyboardCanvas.SetActive(false);
         SearchResultsPanel.SetActive(false);
+
         keyboardSource = "";
         currentSearchPage = 1;
         LTriggerDown = false;
@@ -108,8 +141,6 @@ public class NewRoomScript : MonoBehaviour {
 
         recordingService = SpeechToTextAudioSource.GetComponent<RecordingService>();
 
-        updateNumberOfSearchPages();
-
         if (MainRoomSettings.musicVolume == -1)
         {
             MainRoomSettings.musicVolume = music.volume * 100.0f;
@@ -118,7 +149,7 @@ public class NewRoomScript : MonoBehaviour {
         updateSliderFromPercentage(MainRoomSettings.musicVolume);
         music.volume = MainRoomSettings.musicVolume * 0.01f;
     }
-
+    
     // Update is called once per frame
     void Update()
     {
@@ -148,6 +179,10 @@ public class NewRoomScript : MonoBehaviour {
         else if (TutorialPanel.activeSelf)
         {
             findTutorialHoverButton();
+        }
+        else if (SavePanel.activeSelf)
+        {
+            findSaveHoverButton();
         }
 
         RTriggerDown = getRightTriggerDown();
@@ -193,9 +228,13 @@ public class NewRoomScript : MonoBehaviour {
             {
                 activateMenu();
             }
-            else if (TutorialPanel.activeSelf && menuHoverButton != "")
+            else if (TutorialPanel.activeSelf && tutorialHoverButton != "")
             {
                 activateTutorial();
+            }
+            else if (SavePanel.activeSelf && saveHoverButton != "")
+            {
+                activateSavePanel();
             }
         }
         else if (keyButtonOverride && VirtualKeyboardCanvas.activeSelf && hoveredKey == "Back")
@@ -218,6 +257,7 @@ public class NewRoomScript : MonoBehaviour {
                 PropertiesPanel.SetActive(false);
                 SearchResultsPanel.SetActive(false);
                 VirtualKeyboardCanvas.SetActive(false);
+                SavePanel.SetActive(false);
                 TutorialPanel.SetActive(false);
                 for (int i = 0; i < videoObjects.Length; i++)
                 {
@@ -232,6 +272,7 @@ public class NewRoomScript : MonoBehaviour {
                 PropertiesPanel.SetActive(false);
                 SearchResultsPanel.SetActive(false);
                 VirtualKeyboardCanvas.SetActive(false);
+                SavePanel.SetActive(false);
                 TutorialPanel.SetActive(false);
                 for (int i = 0; i < videoObjects.Length; i++)
                 {
@@ -249,6 +290,20 @@ public class NewRoomScript : MonoBehaviour {
                 {
                     videoObjects[i].SetActive(false);
                 }
+            }
+        }
+
+        if (!allModelsLoadedFromStart)
+        {
+            if (needLoadFromStart)
+            {
+                needLoadFromStart = false;
+                loadLevelOnStart();
+            }
+            else if (!isLoadingFromStart)
+            {
+                allModelsLoadedFromStart = true;
+                StartCoroutine(addRigidBodiesToStartUpModels());
             }
         }
     }
@@ -442,7 +497,7 @@ public class NewRoomScript : MonoBehaviour {
 
     private void findSearchHoverButton()
     {
-        //Go through eacho of the children of the search results panel
+        //Go through each of the children of the search results panel
         //First check if the child is a button or a page holder
         //If its a button, set the searchHoverButton to equal its text
         //Else go through the active page's children
@@ -533,6 +588,62 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    private void findSaveHoverButton()
+    {
+        SaveSlot1Button.SetActive(SaveInstructions.activeSelf);
+        SaveSlot2Button.SetActive(SaveInstructions.activeSelf);
+        SaveSlot3Button.SetActive(SaveInstructions.activeSelf);
+
+        saveHoverButton = "";
+        for (int i = 0; i < SavePanel.transform.childCount; i++)
+        {
+            Transform transform = SavePanel.transform.GetChild(i);
+            if (transform.gameObject == SaveInputField.gameObject)
+            {
+                ColorBlock cb = SaveInputField.colors;
+                if (CheckBoxCollision(transform.gameObject.GetComponent<BoxCollider>(), rayCastEndSphere.transform.position))
+                {
+                    saveHoverButton = "SaveNameChange";
+                    if (RTriggerDown)
+                    {
+                        cb.normalColor = selectInput;
+                    }
+                    else
+                    {
+                        cb.normalColor = highlightInput;
+                    }
+                }
+                else
+                {
+                    cb.normalColor = normalInput;
+                }
+                SaveInputField.colors = cb;
+            }
+            else if (transform.gameObject.activeSelf && transform.gameObject.name.Contains("Button"))
+            {
+                Button currentButton = transform.gameObject.GetComponent<Button>();
+                ColorBlock cb = currentButton.colors;
+                if (CheckBoxCollision(transform.gameObject.GetComponent<BoxCollider>(), rayCastEndSphere.transform.position))
+                {
+                    saveHoverButton = transform.GetChild(0).gameObject.GetComponent<Text>().text;
+                    if (RTriggerDown)
+                    {
+                        cb.normalColor = selectButton;
+                    }
+                    else
+                    {
+                        cb.normalColor = highlightButton;
+                    }
+                }
+                else
+                {
+                    cb.normalColor = normalButton;
+                }
+                currentButton.colors = cb;
+            }
+        }
+    }
+
     private void activateMenu()
     {
         if (menuHoverButton == "Exit To Lobby")
@@ -544,14 +655,19 @@ public class NewRoomScript : MonoBehaviour {
             MenuPanel.SetActive(false);
             SearchResultsPanel.SetActive(true);
         }
-        else if (menuHoverButton == "Close")
+        else if (menuHoverButton == "Save")
         {
             MenuPanel.SetActive(false);
+            SavePanel.SetActive(true);
         }
         else if (menuHoverButton == "Tutorials")
         {
             MenuPanel.SetActive(false);
             TutorialPanel.SetActive(true);
+        }
+        else if (menuHoverButton == "Close")
+        {
+            MenuPanel.SetActive(false);
         }
     }
 
@@ -599,7 +715,10 @@ public class NewRoomScript : MonoBehaviour {
             videos[5].Play();
             videoIsPlaying = true;
         }
-
+        else if (tutorialHoverButton == "Close")
+        {
+            TutorialPanel.SetActive(false);
+        }
     }
 
     private void activateKeyboard()
@@ -634,6 +753,10 @@ public class NewRoomScript : MonoBehaviour {
                 {
                     updateSearchInput();
                 }
+                else if (keyboardSource == "SaveNameChange")
+                {
+                    updateSaveInput();
+                }
             }
             else if (hoveredKey == "Mic")
             {
@@ -660,24 +783,23 @@ public class NewRoomScript : MonoBehaviour {
         else if (searchButtonHover == "Search")
         {
             keyboardInputField.text = SearchResultsInputField.text;
+            currentSearchPage = 1;
             PerformSearch();
         }
         else if (searchButtonHover == "Last Page")
         {
             if (currentSearchPage > 1)
             {
-                SearchResultsPanel.transform.Find("Page " + currentSearchPage).gameObject.SetActive(false);
                 currentSearchPage--;
-                SearchResultsPanel.transform.Find("Page " + currentSearchPage).gameObject.SetActive(true);
+                PerformSearch();
             }
         }
         else if (searchButtonHover == "Next Page")
         {
-            if (currentSearchPage < numberOfSearchPages)
+            if (currentSearchPage <= numberOfSearchPages)
             {
-                SearchResultsPanel.transform.Find("Page " + currentSearchPage).gameObject.SetActive(false);
                 currentSearchPage++;
-                SearchResultsPanel.transform.Find("Page " + currentSearchPage).gameObject.SetActive(true);
+                PerformSearch();
             }
         }
         else if (searchButtonHover == "Close")
@@ -694,6 +816,67 @@ public class NewRoomScript : MonoBehaviour {
                     downloadModelAtIndex(index);
                 }
             }
+        }
+    }
+
+    private void activateSavePanel()
+    {
+        if (saveHoverButton == "SaveNameChange")
+        {
+            updateKeyboardPosition();
+
+            keyboardSource = "SaveNameChange";
+            keyboardInputField.text = SaveInputField.text;
+            SavePanel.SetActive(false);
+            VirtualKeyboardCanvas.SetActive(true);
+        }
+        else if (saveHoverButton == "Save Room")
+        {
+            if (roomSaveSlot == 3)
+            {
+                SaveInstructions.SetActive(true);
+            }
+            else if (!SaveInstructions.activeSelf)
+            {
+                SavePanel.SetActive(false);
+                roomSaveName = SaveInputField.text;
+                StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
+                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
+            }
+        }
+        else if (saveHoverButton.Contains("Slot 1:"))
+        {
+            SaveInstructions.SetActive(false);
+            roomSaveSlot = 0;
+            SaveLoadService.Instance.Slot = 0;
+            roomSaveName = SaveInputField.text;
+            SaveSlot1ButtonText.GetComponent<Text>().text = "Slot 1: " + roomSaveName;
+            StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
+                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
+        }
+        else if (saveHoverButton.Contains("Slot 2:"))
+        {
+            SaveInstructions.SetActive(false);
+            roomSaveSlot = 1;
+            SaveLoadService.Instance.Slot = 1;
+            roomSaveName = SaveInputField.text;
+            SaveSlot2ButtonText.GetComponent<Text>().text = "Slot 2: " + roomSaveName;
+            StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
+                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
+        }
+        else if (saveHoverButton.Contains("Slot 3:"))
+        {
+            SaveInstructions.SetActive(false);
+            roomSaveSlot = 2;
+            SaveLoadService.Instance.Slot = 2;
+            roomSaveName = SaveInputField.text;
+            SaveSlot3ButtonText.GetComponent<Text>().text = "Slot 3: " + roomSaveName;
+            StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
+                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
+        }
+        else if (saveHoverButton == "Close")
+        {
+            SavePanel.SetActive(false);
         }
     }
 
@@ -725,9 +908,16 @@ public class NewRoomScript : MonoBehaviour {
         VirtualKeyboardCanvas.SetActive(false);
     }
 
+    private void updateSaveInput()
+    {
+        SaveInputField.text = keyboardInputField.text;
+        keyboardInputField.text = "";
+        SavePanel.SetActive(true);
+        VirtualKeyboardCanvas.SetActive(false);
+    }
+
     private void PerformSearch()
     {
-        currentSearchPage = 1;
         clearResultsUI();
 
         // Run search algorithm
@@ -738,10 +928,17 @@ public class NewRoomScript : MonoBehaviour {
         if (!string.IsNullOrEmpty(query))
         {
             SearchService.Instance.Flush();
-            SearchService.Instance.Search(query, res =>
-            {
+
+            var req = new Search.SearchRequest{
+                Query = query,
+                PageNumber = currentSearchPage,
+                ResultPerPage = 4
+            };
+
+            SearchService.Instance.Search(req, res => {
                 searchResults = res;
                 updateResultsUI();
+                numberOfSearchPages = (int)Math.Floor(((double)res.Count) / 4.0f);
             });
         }
     }
@@ -750,7 +947,7 @@ public class NewRoomScript : MonoBehaviour {
     {
         if (searchIndex < searchResults.Count && searchIndex >= 0)
         {
-            downloadModelName = searchResults.Hits[searchIndex].Asset.Name;
+            downloadModelName = searchResults.Hits[searchIndex].Asset.Filename;//searchResults.Hits[searchIndex].Asset.Name;
             SearchService.Instance.DownloadModel(searchResults.Hits[searchIndex], nm =>
             {
                 SearchResultsPanel.SetActive(false);
@@ -806,18 +1003,36 @@ public class NewRoomScript : MonoBehaviour {
             lastLoadedModel.GetComponent<BoxCollider>().enabled = false;
 
             GameObject parentObject = new GameObject();
-            parentObject.name = downloadModelName + " parent";
+            parentObject.name = downloadModelName;//" parent";
             lastLoadedModel.transform.parent = parentObject.transform;
             setGameObjectLayer(parentObject, 2);
+            
+            if (modelStates.Count != 0)
+            {
+                UserAssetState state = modelStates[modelStates.Count - 1];
+                parentObject.transform.position = new Vector3(state.pos.x, state.pos.y, state.pos.z);
+                parentObject.transform.rotation = new Quaternion(state.rot.x, state.rot.y, state.rot.z, state.rot.w);
+                parentObject.transform.localScale = new Vector3(state.scale.x, state.scale.y, state.scale.z);
+                SearchService.Instance.Flush();
+            }
 
             lastNewLoadedModels.Add(parentObject);
+
+            if (loadedInGameState != null)
+            {
+                if (modelStates.Count >= loadedInGameState.assets.Count)
+                {
+                    Debug.Log("isLoadingFromStart set to false");
+                    isLoadingFromStart = false;
+                }
+            }
         }
         else
         {
             cancelNewLoadedModel();
         }
     }
-
+    
     private void setGameObjectLayer(GameObject model, int layer)
     {
         model.layer = layer;
@@ -869,12 +1084,17 @@ public class NewRoomScript : MonoBehaviour {
             throwable.onPickUp = new UnityEngine.Events.UnityEvent();
             throwable.onDetachFromHand = new UnityEngine.Events.UnityEvent();
 
-            lastNewLoadedModel.AddComponent<userAsset>();
+            lastNewLoadedModel.AddComponent<userAsset>(); 
 
             //parentObject.AddComponent<Rigidbody>(); // Add gravity rules for physics
 
             lastNewLoadedModel.transform.GetChild(0).gameObject.GetComponent<BoxCollider>().enabled = true;
-            lastNewLoadedModel.AddComponent<Rigidbody>(); // Add gravity rules for physics
+
+            if (lastNewLoadedModel.GetComponent<Rigidbody>() == null)
+            {
+                lastNewLoadedModel.AddComponent<Rigidbody>(); // Add gravity rules for physics
+            }
+
             Rigidbody rigidBody = lastNewLoadedModel.GetComponent<Rigidbody>();
 
             rigidBody.isKinematic = true;
@@ -888,11 +1108,79 @@ public class NewRoomScript : MonoBehaviour {
             rigidBody.isKinematic = false;
 
             setGameObjectLayer(lastNewLoadedModel, 0);
-
+            
+            userAssets.Add(lastNewLoadedModel);
             lastNewLoadedModels.Clear();
-
+            
             SearchService.Instance.Flush();
         }
+    }
+
+    private IEnumerator addRigidBodiesToStartUpModels()
+    {
+        for (int i = 0; i < lastNewLoadedModels.Count; i++)
+        {
+            GameObject lastNewLoadedModel = lastNewLoadedModels[i];
+
+            lastNewLoadedModel.AddComponent<Valve.VR.InteractionSystem.VelocityEstimator>();
+            lastNewLoadedModel.AddComponent<Valve.VR.InteractionSystem.Interactable>();
+            //parentObject.AddComponent<Valve.VR.InteractionSystem.InteractableHoverEvents>();
+            lastNewLoadedModel.AddComponent<Valve.VR.InteractionSystem.Throwable>();
+            
+            Valve.VR.InteractionSystem.Throwable throwable = lastNewLoadedModel.GetComponent<Valve.VR.InteractionSystem.Throwable>();
+            throwable.onPickUp = new UnityEngine.Events.UnityEvent();
+            throwable.onDetachFromHand = new UnityEngine.Events.UnityEvent();
+
+            lastNewLoadedModel.AddComponent<userAsset>();
+
+            //parentObject.AddComponent<Rigidbody>(); // Add gravity rules for physics
+
+            lastNewLoadedModel.transform.GetChild(0).gameObject.GetComponent<BoxCollider>().enabled = true;
+
+            if (lastNewLoadedModel.GetComponent<Rigidbody>() == null)
+            {
+                lastNewLoadedModel.AddComponent<Rigidbody>(); // Add gravity rules for physics
+            }
+            
+            Rigidbody rigidBody = lastNewLoadedModel.GetComponent<Rigidbody>();
+
+            rigidBody.isKinematic = true;
+
+            rigidBody.mass = 1000;
+            rigidBody.velocity = Vector3.zero;
+            rigidBody.angularVelocity = Vector3.zero;
+        }
+
+        yield return new WaitForSeconds(0.1f);
+
+        for (int i = 0; i < lastNewLoadedModels.Count; i++)
+        {
+            GameObject lastNewLoadedModel = lastNewLoadedModels[i];
+            Rigidbody rigidBody = lastNewLoadedModel.GetComponent<Rigidbody>();
+
+            rigidBody.isKinematic = false;
+
+            setGameObjectLayer(lastNewLoadedModel, 0);
+            
+            if (modelStates.Count != 0)
+            {
+                UserAssetState state = modelStates[0];
+
+                lastNewLoadedModel.GetComponent<userAsset>().Gravity = state.gravity;
+                lastNewLoadedModel.GetComponent<userAsset>().Physics();
+
+                modelStates.Remove(state);
+            }
+
+            userAssets.Add(lastNewLoadedModel);
+        }
+        
+        Debug.Log("allModelsLoadedFromStart set to true");
+
+        allModelsLoadedFromStart = true;
+        modelStates.Clear();
+        lastNewLoadedModels.Clear();
+        loadedInGameState = null;
     }
 
     private void cancelNewLoadedModel()
@@ -914,73 +1202,54 @@ public class NewRoomScript : MonoBehaviour {
     
     private void clearResultsUI()
     {
-        updateNumberOfSearchPages();
-        for (int i = 1; i <= numberOfSearchPages; i++)
-        {
-            Destroy(SearchResultsPanel.transform.Find("Page " + i).gameObject);
-        }
-    }
+        List<GameObject> objectsToDelete = new List<GameObject>();
 
-    private void updateResultsUI()
-    {
-        updateNumberOfSearchPages();
-        for (int i = 1; i <= numberOfSearchPages; i++)
-        {
-            Destroy(SearchResultsPanel.transform.Find("Page " + i).gameObject);
-        }
-
-        int numberOfPagesNeeded = (int)Mathf.Ceil((float)searchResults.Count / 4.0f);
-
-        int modelIndex = 0;
-        for (int i = 1; i <= numberOfPagesNeeded; i++)
-        {
-            GameObject page = Instantiate(new GameObject());
-            page.name = "Page " + i;
-            page.transform.SetParent(SearchResultsPanel.transform);
-            page.transform.localPosition = new Vector3(0.55f, -4.0f, 0.0f);
-            page.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
-            page.transform.localScale = new Vector3(200.0f, 200.0f, 1.0f);
-            for (int j = 1; j <= 4; j++)
-            {
-                if (modelIndex < searchResults.Count)
-                {
-                    Button item = Instantiate(SearchButtonPrefab);
-                    item.transform.SetParent(page.transform);
-
-                    float xPos = j % 2 == 0 ? 0.12f : -0.12f;
-                    float yPos = j > 2 ? -0.12f : 0.09f;
-
-                    item.gameObject.layer = 0;
-                    item.transform.localPosition = new Vector3(xPos, yPos, 0.0f);
-                    item.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
-                    item.transform.localScale = new Vector3(0.005f, 0.005f, 1.0f);
-
-                    item.transform.GetChild(0).gameObject.GetComponent<Text>().text = (modelIndex) + "";
-                    item.transform.GetChild(1).gameObject.GetComponent<Text>().text = searchResults.Hits[modelIndex].Asset.Name + "";
-
-                    modelIndex++;
-                }
-            }
-        }
-    }
-
-    private void updateNumberOfSearchPages()
-    {
-        numberOfSearchPages = 0;
         for (int i = 0; i < SearchResultsPanel.transform.childCount; i++)
         {
             Transform transform = SearchResultsPanel.transform.GetChild(i);
             if (transform.gameObject.name.Contains("Page"))
             {
-                numberOfSearchPages++;
+                objectsToDelete.Add(transform.gameObject);
             }
         }
 
-        if (numberOfSearchPages > 0)
+        for (int i = 0; i < objectsToDelete.Count; i++)
         {
-            //Subrat 2 because of the 2 buttons that say
-            // Last Page and Next Page
-            numberOfSearchPages -= 2;
+            Destroy(objectsToDelete[i]);
+        }
+    }
+
+    private void updateResultsUI()
+    {
+        int modelIndex = 0;
+
+        GameObject page = Instantiate(new GameObject());
+        page.name = "Page 1";
+        page.transform.SetParent(SearchResultsPanel.transform);
+        page.transform.localPosition = new Vector3(0.55f, -4.0f, 0.0f);
+        page.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+        page.transform.localScale = new Vector3(200.0f, 200.0f, 1.0f);
+        
+        for (int j = 1; j <= 4; j++)
+        {
+            if (modelIndex < searchResults.Count)
+            {
+                Button item = Instantiate(SearchButtonPrefab);
+                item.transform.SetParent(page.transform);
+
+                float xPos = j % 2 == 0 ? 0.12f : -0.12f;
+                float yPos = j > 2 ? -0.12f : 0.09f;
+
+                item.gameObject.layer = 0;
+                item.transform.localPosition = new Vector3(xPos, yPos, 0.0f);
+                item.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+                item.transform.localScale = new Vector3(0.005f, 0.005f, 1.0f);
+
+                item.transform.GetChild(0).gameObject.GetComponent<Text>().text = (modelIndex) + "";
+                item.transform.GetChild(1).gameObject.GetComponent<Text>().text = searchResults.Hits[modelIndex].Asset.Name + "";
+
+                modelIndex++;
+            }
         }
     }
 
@@ -1063,5 +1332,116 @@ public class NewRoomScript : MonoBehaviour {
             (maxPos * percentDecimal);
 
         musicVolumeSlider.transform.localPosition = newSliderPosition;
+    }
+
+    private void loadLevelOnStart()
+    {
+        roomSaveSlot = SaveLoadService.Instance.Slot;
+        if (roomSaveSlot == 3)
+        {
+            allModelsLoadedFromStart = true;
+
+            GameState state1 = null;
+            GameState state2 = null;
+            GameState state3 = null;
+
+            try
+            {
+                state1 = SaveLoadService.Instance.Load(0);
+            }
+            catch (Exception ex) { }
+
+            try
+            {
+                state2 = SaveLoadService.Instance.Load(1);
+            }
+            catch (Exception ex) { }
+
+            try
+            {
+                state3 = SaveLoadService.Instance.Load(2);
+            }
+            catch (Exception ex) { }
+
+            if (state1 != null)
+            {
+                string fullName = state1.roomName;
+                string inputName = fullName;
+                int lastSpaceIndex = inputName.LastIndexOf(" ");
+                inputName = inputName.Substring(0, lastSpaceIndex);
+                SaveSlot1ButtonText.GetComponent<Text>().text = "Slot 1: " + inputName;
+            }
+
+            if (state2 != null)
+            {
+                string fullName = state2.roomName;
+                string inputName = fullName;
+                int lastSpaceIndex = inputName.LastIndexOf(" ");
+                inputName = inputName.Substring(0, lastSpaceIndex);
+                SaveSlot2ButtonText.GetComponent<Text>().text = "Slot 2: " + inputName;
+            }
+
+            if (state3 != null)
+            {
+                string fullName = state3.roomName;
+                string inputName = fullName;
+                int lastSpaceIndex = inputName.LastIndexOf(" ");
+                inputName = inputName.Substring(0, lastSpaceIndex);
+                SaveSlot3ButtonText.GetComponent<Text>().text = "Slot 3: " + inputName;
+            }
+        }
+        else
+        {
+            GameState state = null;
+            try
+            {
+                state = SaveLoadService.Instance.Load(roomSaveSlot);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("Failed to load at slot " + roomSaveSlot + " ex:" + ex);
+            }
+
+            Debug.Log(SceneManager.GetActiveScene().name);
+            if (state != null && state.roomName.Contains(SceneManager.GetActiveScene().name))
+            {
+                loadedInGameState = state;
+                loadIndex = 0;
+
+                string inputName = state.roomName;
+                int lastSpaceIndex = inputName.LastIndexOf(" ");
+                inputName = inputName.Substring(0, lastSpaceIndex);
+
+                roomSaveName = inputName;
+                SaveInputField.text = inputName;
+
+                onStartLoadAtIndex(state.assets);
+            }
+            else
+            {
+                allModelsLoadedFromStart = true;
+            }
+        }
+    }
+
+    private void onStartLoadAtIndex(List<UserAssetState> states)
+    {
+        if (loadIndex >= states.Count())
+        {
+            return;
+        }
+
+        Debug.Log("loading at index " + loadIndex);
+        UserAssetState state = states[loadIndex];
+        modelStates.Add(state);
+
+        SearchService.Instance.DownloadModel(state, nm =>
+        {
+            downloadModelName = state.uuid;
+            ModelLoaderService.Instance.LoadModel(nm, modelDoneLoadingCallback);
+
+            loadIndex++;
+            onStartLoadAtIndex(states);
+        });
     }
 }

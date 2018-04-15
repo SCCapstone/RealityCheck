@@ -23,63 +23,91 @@ public sealed class SearchService: Singleton<SearchService> {
     private static string DOWNLOAD_URI = "https://storage.googleapis.com/realitycheck/";
     
     private FastZip fastZip = new FastZip();
-
-    private Dictionary<Search.Hit, NetModel> cachedModels = new Dictionary<Search.Hit, NetModel>();
-
     public Text debugText;
 
     protected SearchService() {}
 
     // Delete App Cache Folder
     public void Flush() {
-        cachedModels.Clear();
-
-        string path = Application.temporaryCachePath;
- 
-        DirectoryInfo di = new DirectoryInfo(path);
+        var path = Application.temporaryCachePath;
+        var di = new DirectoryInfo(path);
     
-        foreach (System.IO.FileInfo file in di.GetFiles()) file.Delete();
-        foreach (System.IO.DirectoryInfo dir in di.GetDirectories()) dir.Delete(true);
+        foreach (var file in di.GetFiles()) file.Delete();
+        foreach (var dir in di.GetDirectories()) dir.Delete(true);
     }
 
     // Send search request
-    public void Search(string query, Action<Search.SearchResult> callBack) {
-        try {
-            Dictionary<string,string> headers = new Dictionary<string, string>();
-            headers.Add("Content-Type", "application/x-protobuf");
-
-            var req = new Search.SearchRequest{
-                Query = query
+    public void Search(string query, Action<Search.SearchResult> callBack)
+    {
+        try
+        {
+            Dictionary<string, string> headers = new Dictionary<string, string>
+            {
+                { "Content-Type", "application/x-protobuf" }
             };
-            
+
+            var req = new Search.SearchRequest
+            {
+                Query = query,
+                ResultPerPage = 4,
+                PageNumber = 1
+            };
+
             WWW api = new WWW(SEARCH_URI, req.ToByteArray(), headers);
 
             StartCoroutine(SearchRequest(api, callBack));
-        } catch (UnityException ex) {
+        }
+        catch (UnityException ex)
+        {
             debugText.text = ex.Message;
             Debug.Log(ex.Message);
-	    }
+        }
+    }
+
+    public void Search(Search.SearchRequest req, Action<Search.SearchResult> callBack)
+    {
+        try
+        {
+            Dictionary<string, string> headers = new Dictionary<string, string>
+            {
+                { "Content-Type", "application/x-protobuf" }
+            };
+
+            WWW api = new WWW(SEARCH_URI, req.ToByteArray(), headers);
+
+            StartCoroutine(SearchRequest(api, callBack));
+        }
+        catch (UnityException ex)
+        {
+            debugText.text = ex.Message;
+            Debug.Log(ex.Message);
+        }
     }
 
     // Download model from server
-    public void DownloadModel(Search.Hit hit, Action<NetModel> callBack) {
+    public void DownloadModel(Search.Hit hit, Action<NetModel> callBack)
+    {
+        DownloadModel(hit.Asset.Filename, hit.Asset.Uuid, callBack);
+    }
 
-        //if (cachedModels.ContainsKey(hit))
-        //{
-        //    callBack(cachedModels[hit]);
-        //}
+    public void DownloadModel(UserAssetState ua, Action<NetModel> callBack)
+    {
+        DownloadModel(ua.uuid, ua.uuid, callBack);
+    }
 
-            try
-            {
-                var fp = DOWNLOAD_URI + hit.Asset.Filename;
-                StartCoroutine(DownloadRequest(new WWW(fp), fp, hit, callBack));
-            }
-            catch (UnityException ex)
-            {
-                debugText.text = ex.Message;
-                Debug.Log(ex.Message);
-            }
-        
+    public void DownloadModel(string filename, string uuid, Action<NetModel> callBack)
+    {
+        try
+        {
+
+            var fp = DOWNLOAD_URI + filename;
+            StartCoroutine(DownloadRequest(new WWW(fp), fp, filename, uuid, callBack));
+        }
+        catch (UnityException ex)
+        {
+            debugText.text = ex.Message;
+            Debug.Log(ex.Message);
+        }
     }
 
     // Send search query
@@ -120,38 +148,14 @@ public sealed class SearchService: Singleton<SearchService> {
 
     // Download the compressed model files from the server
     // Extract the files
-    private IEnumerator DownloadRequest(WWW www, string path, Search.Hit hit, Action<NetModel> callBack) {
+    private IEnumerator DownloadRequest(WWW www, string path, string file_uuid, string uuid, Action<NetModel> callBack) {
         yield return www;
 
         try {
 
             var nm = new NetModel();
 
-            //var files = hit.Asset.Archive.Files;
-
-            var files = new List<string>();
-            Debug.Log(hit.Asset);
-            for (int i=0; i<hit.Asset.Archive.Files.Count; i++) {
-                files.Add(hit.Asset.Archive.Files[i]);
-            }
-
-            var fbxList = files.Where(f => f.Count() > 4).Where(f => f.Substring(f.Length-4) == ".fbx").ToList();
-            var objList = files.Where(f => f.Count() > 4).Where(f => f.Substring(f.Length-4) == ".obj").ToList();
-
-            string loadFile = null;
-
-            // prefer fbx format over obj
-            if (objList.Any()) loadFile = objList[0];
-            if (fbxList.Any()) loadFile = fbxList[0];
-
-            Debug.Log(loadFile);
-
-            /*string noExt = hit.Asset.Filename.Substring(0, hit.Asset.Filename.Length-4);
-
-            string filePath = Application.temporaryCachePath + Path.DirectorySeparatorChar + hit.Asset.Filename;
-            string extractPath = Application.temporaryCachePath + Path.DirectorySeparatorChar + noExt;*/
-
-            string uuid = hit.Asset.Uuid;
+            // string uuid = hit.Asset.Uuid;
             string filePath = Application.temporaryCachePath + Path.DirectorySeparatorChar + uuid + ".zip";
             string extractPath = Application.temporaryCachePath + Path.DirectorySeparatorChar;
             
@@ -180,36 +184,19 @@ public sealed class SearchService: Singleton<SearchService> {
             
             
             Debug.Log("Found ... " + assetFile);
-            /*
-            try {
-                File.Move(extractPath + Path.DirectorySeparatorChar + noExt + "\\0.obj", extractPath + Path.DirectorySeparatorChar + "0.obj");
-                File.Move(extractPath + Path.DirectorySeparatorChar + noExt + "\\0.mtl", extractPath + Path.DirectorySeparatorChar + "0.mtl");
-            }
-            catch (UnityException ex)
-            {
-                debugText.text = ex.Message;
-                Debug.LogError(ex.Message);
-                Debug.Log(ex.Message);
-            }*/
 
 
             nm.file = assetFile.Replace("\\", "/");
-            //nm.file = Application.temporaryCachePath + Path.DirectorySeparatorChar + loadFile;
-            
 
-            //nm.obj = extractPath + Path.DirectorySeparatorChar + "0.obj";
-            //nm.mtl = extractPath + Path.DirectorySeparatorChar + "0.mtl";
             Debug.Log("DL: " + nm.file);
 
+            nm.file_uuid = file_uuid; // hit.Asset.Filename;
             nm.obj = extractPath + Path.DirectorySeparatorChar + "0.obj";
             nm.mtl = extractPath + Path.DirectorySeparatorChar + "0.mtl";
-            Debug.Log("DL: " + nm.obj);
 
-           /* if (!cachedModels.ContainsKey(hit))
-            {
-                cachedModels.Add(hit, nm);
-            }*/
-            
+            nm.uuid = uuid;
+            Debug.Log("IDS : " + nm.uuid + " " + nm.file_uuid);
+
             callBack(nm);
         } catch (UnityException ex) {
             debugText.text = ex.Message;

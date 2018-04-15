@@ -195,7 +195,9 @@ namespace Valve.VR.InteractionSystem
 			float angle = Mathf.Rad2Deg * angularVelocity.magnitude;
 			Vector3 axis = angularVelocity.normalized;
 			transform.rotation *= Quaternion.AngleAxis( angle * timeUntilFixedUpdate, axis );
-		}
+
+            GetComponent<userAsset>().Physics();
+        }
 
 
 		//-------------------------------------------------

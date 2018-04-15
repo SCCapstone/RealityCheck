@@ -7,8 +7,13 @@ using System;
 public class PropertyController : MonoBehaviour
 {
     public Text _Name;
+
     public GameObject MenuPanel;
     public GameObject SearchResultsPanel;
+    public GameObject SavePanel;
+    public GameObject TutorialPanel;
+    public GameObject VirtualKeyboardCanvas;
+
     public GameObject objectOptionsPanel;
     public GameObject positionArrowPanel;
     public GameObject rotationArrowPanel;
@@ -233,8 +238,6 @@ public class PropertyController : MonoBehaviour
                 }
                 else if (seen.collider.tag == "Check")
                 {
-                    
-
                     if (seen.collider.gameObject.name == "Gravity")
                     {
                         seen.collider.gameObject.GetComponent<Toggle>().isOn =
@@ -650,6 +653,11 @@ public class PropertyController : MonoBehaviour
 
     void selectModel()
     {
+        if (VirtualKeyboardCanvas.activeSelf)
+        {
+            return;
+        }
+
         RaycastHit seen;
 
         Vector3 rotation = transform.localEulerAngles;
@@ -671,7 +679,9 @@ public class PropertyController : MonoBehaviour
                 selected = seen.collider.gameObject.transform.parent.gameObject;
                 objectOptionsPanel.SetActive(true);
                 SearchResultsPanel.SetActive(false);
+                SavePanel.SetActive(false);
                 MenuPanel.SetActive(false);
+                TutorialPanel.SetActive(false);
 
                 pos = selected.transform.position;
                 rot = selected.transform.localEulerAngles;
