@@ -1321,6 +1321,7 @@ public class NewRoomScript : MonoBehaviour {
 
         SearchService.Instance.DownloadModel(state, nm =>
         {
+            downloadModelName = state.uuid;
             ModelLoaderService.Instance.LoadModel(nm, modelDoneLoadingCallback);
 
             loadIndex++;
