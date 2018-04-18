@@ -40,13 +40,22 @@ public class userAsset : MonoBehaviour {
         checkBounds ();
     }
 
-    public void Scale(Vector3 scale){
-        if (maintain) {
+    public void Scale(Vector3 scale)
+    {
+        if (maintain)
+        {
             maintainProportions (scale);
-        } else {
+        }
+        else
+        {
+            scale.x = Mathf.Max(scale.x, 0.1f);
+            scale.y = Mathf.Max(scale.y, 0.1f);
+            scale.z = Mathf.Max(scale.z, 0.1f);
+
             this.transform.localScale = scale;
         }
-        checkBounds ();
+
+        checkBounds();
     }
 
     public void Physics(){
@@ -79,26 +88,45 @@ public class userAsset : MonoBehaviour {
         }
     }
 
-    void maintainProportions(Vector3 scale){
-        if (this.transform.localScale.x != scale.x) {
+    void maintainProportions(Vector3 scale)
+    {
+        if (this.transform.localScale.x != scale.x)
+        {
             xToY = this.transform.localScale.x / this.transform.localScale.y;
             xToZ = this.transform.localScale.x / this.transform.localScale.z;
             scale.y = scale.x / xToY;
             scale.z = scale.x / xToZ;
+
+            scale.x = Mathf.Max(scale.x, 0.1f);
+            scale.y = Mathf.Max(scale.y, 0.1f);
+            scale.z = Mathf.Max(scale.z, 0.1f);
+
             this.transform.localScale = scale;
         }
-        else if (this.transform.localScale.y != scale.y) {
+        else if (this.transform.localScale.y != scale.y)
+        {
             yToX = this.transform.localScale.y / this.transform.localScale.x;
             yToZ = this.transform.localScale.y / this.transform.localScale.z;
             scale.x = scale.y / yToX;
             scale.z = scale.y / yToZ;
+
+            scale.x = Mathf.Max(scale.x, 0.1f);
+            scale.y = Mathf.Max(scale.y, 0.1f);
+            scale.z = Mathf.Max(scale.z, 0.1f);
+
             this.transform.localScale = scale;
         }
-        else if (this.transform.localScale.z != scale.z) {
+        else if (this.transform.localScale.z != scale.z)
+        {
             zToX = this.transform.localScale.z / this.transform.localScale.x;
             zToY = this.transform.localScale.z / this.transform.localScale.y;
             scale.x = scale.z / zToX;
             scale.y = scale.z / zToY;
+
+            scale.x = Mathf.Max(scale.x, 0.1f);
+            scale.y = Mathf.Max(scale.y, 0.1f);
+            scale.z = Mathf.Max(scale.z, 0.1f);
+
             this.transform.localScale = scale;
         }
     }

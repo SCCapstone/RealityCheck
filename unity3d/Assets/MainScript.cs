@@ -196,7 +196,7 @@ public class MainScript : MonoBehaviour
             || sphereBox.bounds.Contains(rayPos))
         {
             KnobGlowBox.SetActive(true);
-            if (RTriggerDown)
+            if (RTriggerDown || LTriggerDown)
             {
                 SaveLoadService.Instance.Slot = slotCount;
                 SceneManager.LoadScene("newBoxRoom", LoadSceneMode.Single);
@@ -211,7 +211,7 @@ public class MainScript : MonoBehaviour
             || sphereDemo.bounds.Contains(rayPos))
         {
             KnobGlowDemo.SetActive(true);
-            if (RTriggerDown)
+            if (RTriggerDown || LTriggerDown)
             {
                 SaveLoadService.Instance.Slot = slotCount;
                 SceneManager.LoadScene("newDemoRoom", LoadSceneMode.Single);
@@ -226,7 +226,7 @@ public class MainScript : MonoBehaviour
             || sphereOpen.bounds.Contains(rayPos))
         {
             KnobGlowOpen.SetActive(true);
-            if (RTriggerDown)
+            if (RTriggerDown || LTriggerDown)
             {
                 SaveLoadService.Instance.Slot = slotCount;
                 SceneManager.LoadScene("newOutsideRoom", LoadSceneMode.Single);
@@ -259,7 +259,7 @@ public class MainScript : MonoBehaviour
 
         if (boxSave1.bounds.Contains(rayPos))
         {
-            if (RTriggerDown)
+            if (RTriggerDown || LTriggerDown)
             {
                 loadSlot = 0;
                 roomName = saveSlot1Room;
@@ -267,7 +267,7 @@ public class MainScript : MonoBehaviour
         }
         else if (boxSave2.bounds.Contains(rayPos))
         {
-            if (RTriggerDown)
+            if (RTriggerDown || LTriggerDown)
             {
                 loadSlot = 1;
                 roomName = saveSlot2Room;
@@ -275,7 +275,7 @@ public class MainScript : MonoBehaviour
         }
         else if (boxSave3.bounds.Contains(rayPos))
         {
-            if (RTriggerDown)
+            if (RTriggerDown || LTriggerDown)
             {
                 loadSlot = 2;
                 roomName = saveSlot3Room;

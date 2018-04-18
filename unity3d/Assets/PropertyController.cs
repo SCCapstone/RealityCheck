@@ -74,7 +74,7 @@ public class PropertyController : MonoBehaviour
         RTriggerDown = getRightTriggerDown();
         LTriggerDown = getLeftTriggerDown();
 
-        if (RTriggerDown)
+        if (RTriggerDown || LTriggerDown)
             selectModel();
         else if ((Input.GetButtonDown("BButton") || Input.GetButtonDown("YButton")) && active)
             deSelectModel();
@@ -224,7 +224,7 @@ public class PropertyController : MonoBehaviour
         {
             rayHitPoint = seen.point;
 
-            if ((RTriggerDown))
+            if (RTriggerDown || LTriggerDown)
             {
                 if (seen.collider.tag == "Button")
                 {
@@ -589,7 +589,7 @@ public class PropertyController : MonoBehaviour
             ColorBlock cb = input.colors;
             if (CheckBoxCollision(input.GetComponent<BoxCollider>(), rayHitPoint))
             {
-                if (RTriggerDown)
+                if (RTriggerDown || LTriggerDown)
                 {
                     cb.normalColor = selectInput;
                 }
@@ -610,7 +610,7 @@ public class PropertyController : MonoBehaviour
             ColorBlock cb = currentButton.colors;
             if (CheckBoxCollision(currentButton.GetComponent<BoxCollider>(), rayHitPoint))
             {
-                if (RTriggerDown)
+                if (RTriggerDown || LTriggerDown)
                 {
                     cb.normalColor = selectButton;
                 }
@@ -633,7 +633,7 @@ public class PropertyController : MonoBehaviour
                 ColorBlock cb = toggle.colors;
                 if (CheckBoxCollision(toggle.GetComponent<BoxCollider>(), rayHitPoint))
                 {
-                    if (RTriggerDown)
+                    if (RTriggerDown || LTriggerDown)
                     {
                         cb.normalColor = selectInput;
                     }
@@ -690,19 +690,17 @@ public class PropertyController : MonoBehaviour
 
                 MaintainScale.isOn = model.Maintain;
                 ObeyGravity.isOn = model.Gravity;
-                _Name.text = "Name: " + seen.collider.name;
 
                 _Delete.onClick.AddListener(delegate
                 {
                     objectOptionsPanel.SetActive(false);
                     _DeleteConfirmation[0].SetActive(true);
-                    _DeleteConfirmation[1].GetComponent<Text>().text = model.name;
-                    _DeleteConfirmation[2].GetComponent<Button>().onClick.AddListener(delegate
+                    _DeleteConfirmation[1].GetComponent<Button>().onClick.AddListener(delegate
                     {
                         Destroy(selected);
                         _DeleteConfirmation[0].SetActive(false);
                     });
-                    _DeleteConfirmation[3].GetComponent<Button>().onClick.AddListener(delegate
+                    _DeleteConfirmation[2].GetComponent<Button>().onClick.AddListener(delegate
                     {
                         _DeleteConfirmation[0].SetActive(false);
                         objectOptionsPanel.SetActive(true);
