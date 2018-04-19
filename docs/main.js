@@ -146,27 +146,36 @@ function isMobile()
 
 function loaded() 
 {
-    if (!slideshowInitial)
+    if (slideshowActive)
     {
-        setImageLocation("400px", 0);
+        if (!slideshowInitial)
+        {
+            setImageLocation("400px", 0);
+
+            setTimeout(function() 
+            {
+                setImageLocation("0px", 1);
+            }, 1000);  
+        }
 
         setTimeout(function() 
         {
-            setImageLocation("0px", 1);
-        }, 1000);  
+            if (slideshowActive)
+            {
+                setImageLocation("-800px", 0);
+            }
+        }, 4000);  
+
+        setTimeout(function() 
+        {
+            if (slideshowActive)
+            {
+                screenImage.src = nextSlideshowImage;
+                slideshowInitial = false;
+                playScreenshotSlideshow();
+            } 
+        }, 5000);  
     }
-
-    setTimeout(function() 
-    {
-        setImageLocation("-800px", 0);
-    }, 4000);  
-
-    setTimeout(function() 
-    {
-        screenImage.src = nextSlideshowImage;
-        slideshowInitial = false;
-        playScreenshotSlideshow();
-    }, 5000);  
 }
 
 function playScreenshotSlideshow()
@@ -201,6 +210,7 @@ function toggleSlideshow()
             slideshowActive = true;
             slideshowInitial = true;
             playScreenshotSlideshow();
+            loaded();
         }, 5000);  
     }
 }
