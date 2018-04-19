@@ -13,8 +13,6 @@ var screenShotArray;
 var screenShotIndex;
 var slideshowActive = true;
 
-var baseImageUrl = "https://sccapstone.github.io/RealityCheck/docs/";
-
 function init()
 {
     backgroundImage = document.getElementById("backgroundImage");
@@ -221,17 +219,17 @@ function setUpScreenshots()
     screenShotIndex = 0;
     
     screenShotArray = 
-        [
-            baseImageUrl + "images/apartmentKitchen.png",
-            baseImageUrl + "images/apartmentLivingRoom.png",
-            baseImageUrl + "images/apartmentMasterBath.png",
-            baseImageUrl + "images/apartmentMasterBed.png",
-            baseImageUrl + "images/boxRoom.png",
-            baseImageUrl + "images/keyboard.png",
-            baseImageUrl + "images/mainRoomLobby.png",
-            baseImageUrl + "images/mainRoomMusic.png",
-            baseImageUrl + "images/newRooms.png",
-            baseImageUrl + "images/teleporting.png",
+    [
+        "images/apartmentKitchen.png",
+        "images/apartmentLivingRoom.png",
+        "images/apartmentMasterBath.png",
+        "images/apartmentMasterBed.png",
+        "images/boxRoom.png",
+        "images/keyboard.png",
+        "images/mainRoomLobby.png",
+        "images/mainRoomMusic.png",
+        "images/newRooms.png",
+        "images/teleporting.png",
     ];
 }
 
