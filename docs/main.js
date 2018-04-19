@@ -12,6 +12,8 @@ var secondaryColor;
 var screenShotArray;
 var screenShotIndex;
 var slideshowActive = true;
+var nextSlideshowImage;
+var slideshowInitial;
 
 function init()
 {
@@ -30,8 +32,12 @@ function init()
     primaryColor = [255, 255, 255];
     secondaryColor = [15, 39, 79];
     
+    screenImage.onload = loaded;
+
     setUpScreenshots();
-    playScreenshotSlideshow(true);
+
+    slideshowInitial = true;
+    playScreenshotSlideshow();
     
     onResize();
     setTimeout(onResize, 200); 
@@ -138,29 +144,37 @@ function isMobile()
     }
 }
 
-function playScreenshotSlideshow(initial)
+function loaded() 
+{
+    if (!slideshowInitial)
+    {
+        setImageLocation("400px", 0);
+        
+        setTimeout(function() 
+        {
+            setImageLocation("0px", 1);
+        }, 1000);  
+    }
+    
+    setTimeout(function() 
+    {
+        setImageLocation("-800px", 0);
+    }, 4000);  
+    
+    setTimeout(function() 
+    {
+        screenImage.src = nextSlideshowImage;
+        slideshowInitial = false;
+        playScreenshotSlideshow();
+    }, 5000);  
+}
+
+function playScreenshotSlideshow()
 {
 	if (slideshowActive)
 	{
-		if (!initial)
-		{
-			setImageLocation("400px", 0);
-		
-	    	screenShotIndex = (screenShotIndex + 1) % screenShotArray.length;
-	    	screenImage.src = screenShotArray[screenShotIndex];
-	    	
-	    	setTimeout(function() {
-	    		setImageLocation("0px", 1);
-	    	}, 1000);  
-	    }
-	    
-	    setTimeout(function() {
-    		setImageLocation("-800px", 0);
-    	}, 4000);  
-	    
-    	setTimeout(function() {
-    		playScreenshotSlideshow(false);
-    	}, 5000);  
+        screenShotIndex = (screenShotIndex + 1) % screenShotArray.length;
+        nextSlideshowImage = screenShotArray[screenShotIndex];
     } 
 }
 
@@ -184,7 +198,8 @@ function toggleSlideshow()
 		
 		setTimeout(function() {
 			slideshowActive = true;
-    		playScreenshotSlideshow(true);
+            slideshowInitial = true;
+    		playScreenshotSlideshow();
     	}, 5000);  
 	}
 }
