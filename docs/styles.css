@@ -69,6 +69,10 @@ div {
 	background-color: #aaa;
 }
 
+.pausePlayAnimation button:active {
+    background-color: #fff;
+}
+
 .pausePlayAnimation button img {
 	height: 1.5em; 
 	width: 1.5em; 
