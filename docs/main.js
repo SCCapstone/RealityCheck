@@ -23,22 +23,22 @@ function init()
     youtubeVideoBlock = document.getElementById("youtubeVideoBlock");
     titleBlock = document.getElementById("titleBlock");
     headsetImage = document.getElementById("headsetImage");
-    
+
     document.addEventListener('scroll', onScroll);
-    
+
     backgroundImage.style.opacity = "0.0";
     backgroundImage.style.filter = "alpha(opacity=0)"; /* For IE8 and earlier (from 0 to 100) */
-   
+
     primaryColor = [255, 255, 255];
     secondaryColor = [15, 39, 79];
-    
+
     screenImage.onload = loaded;
 
     setUpScreenshots();
 
     slideshowInitial = true;
     playScreenshotSlideshow();
-    
+
     onResize();
     setTimeout(onResize, 200); 
 }
@@ -48,12 +48,12 @@ function onResize()
     //default titleBlock min-width = 500px
     //dafault headsetImage width = 400px
     //default youtube video width and height: 560px, 315px
-    
+
     if (isMobile())
     {
         titleBlock.style.width = "90%";
         headsetImage.style.width = "90%";
-        
+
         youtubeVideo.style.width = "60vw";
         youtubeVideo.style.height = "33vw";
     }
@@ -61,51 +61,51 @@ function onResize()
     {
         titleBlock.style.width = "500px";
         headsetImage.style.width = "400px";
-        
+
         youtubeVideo.style.width = "560px";
         youtubeVideo.style.height = "315px";
     }
-    
+
     var windowHeight = window.innerHeight;
     var windowWidth = window.innerWidth;
-    
+
     var titleHeight = titleBlock.offsetHeight;
     var titleWidth = titleBlock.offsetWidth;
-    
+
     var youtubeHeight = youtubeVideoBlock.offsetHeight;
     var youtubeWidth = youtubeVideoBlock.offsetWidth;
-    
+
     if (windowWidth < (1150) || isMobile()) 
     {
-    	var firstBlockHeight = firstBlock.offsetHeight;
-    	var firstBlockWidth = firstBlock.offsetWidth;
-    	
-    	var windowHeight = window.innerHeight;
-    	var windowWidth = window.innerWidth;
-    	
-    	if ((titleHeight + youtubeHeight) > windowHeight)
-    	{
-    		windowHeight = titleHeight + youtubeHeight + 200;
-    		firstBlock.style.height = windowHeight + "px";
-    	}
-    	else
-    	{
-    		firstBlock.style.height = "100vh";
-    	}
-    	
-    	titleBlock.style.top = ((windowHeight - (titleHeight + youtubeHeight)) / 2) + "px";
-    	titleBlock.style.left = ((windowWidth - titleWidth) / 2) + "px";
-    	
-    	youtubeVideoBlock.style.top = (((windowHeight - (titleHeight + youtubeHeight)) / 2) + titleHeight + 20) + "px";
-    	youtubeVideoBlock.style.left = ((windowWidth - youtubeWidth) / 2) + "px";
+        var firstBlockHeight = firstBlock.offsetHeight;
+        var firstBlockWidth = firstBlock.offsetWidth;
+
+        var windowHeight = window.innerHeight;
+        var windowWidth = window.innerWidth;
+
+        if ((titleHeight + youtubeHeight) > windowHeight)
+        {
+            windowHeight = titleHeight + youtubeHeight + 200;
+            firstBlock.style.height = windowHeight + "px";
+        }
+        else
+        {
+            firstBlock.style.height = "100vh";
+        }
+
+        titleBlock.style.top = ((windowHeight - (titleHeight + youtubeHeight)) / 2) + "px";
+        titleBlock.style.left = ((windowWidth - titleWidth) / 2) + "px";
+
+        youtubeVideoBlock.style.top = (((windowHeight - (titleHeight + youtubeHeight)) / 2) + titleHeight + 20) + "px";
+        youtubeVideoBlock.style.left = ((windowWidth - youtubeWidth) / 2) + "px";
     }
     else
     {
-    	titleBlock.style.top = "25%";
-    	titleBlock.style.left = (windowWidth / 2 - titleWidth) + "px";
-    	
-    	youtubeVideoBlock.style.top = "25%";
-    	youtubeVideoBlock.style.left = (windowWidth / 2) + "px";
+        titleBlock.style.top = "25%";
+        titleBlock.style.left = (windowWidth / 2 - titleWidth) + "px";
+
+        youtubeVideoBlock.style.top = "25%";
+        youtubeVideoBlock.style.left = (windowWidth / 2) + "px";
     }
 }
 
@@ -114,13 +114,13 @@ function onScroll(event)
     var scrollPercentage = event.target.scrollingElement.scrollTop / screen.height;
     scrollPercentage = scrollPercentage < 1.0 ? scrollPercentage : 1.0;
     var alpha = scrollPercentage < 0.5 ? scrollPercentage : 0.5;
-    
+
     backgroundImage.style.opacity = alpha.toString();
     backgroundImage.style.filter = "alpha(opacity=" + (alpha * 100.0).toString() + ")";
-    
+
     primaryPercent = 1.0 - scrollPercentage;
     secondaryPercent = scrollPercentage;
-    
+
     var r = Math.round(primaryColor[0] * primaryPercent + secondaryColor[0] * secondaryPercent);
     var g = Math.round(primaryColor[1] * primaryPercent + secondaryColor[1] * secondaryPercent);
     var b = Math.round(primaryColor[2] * primaryPercent + secondaryColor[2] * secondaryPercent);
@@ -149,18 +149,18 @@ function loaded()
     if (!slideshowInitial)
     {
         setImageLocation("400px", 0);
-        
+
         setTimeout(function() 
         {
             setImageLocation("0px", 1);
         }, 1000);  
     }
-    
+
     setTimeout(function() 
     {
         setImageLocation("-800px", 0);
     }, 4000);  
-    
+
     setTimeout(function() 
     {
         screenImage.src = nextSlideshowImage;
@@ -171,8 +171,8 @@ function loaded()
 
 function playScreenshotSlideshow()
 {
-	if (slideshowActive)
-	{
+    if (slideshowActive)
+    {
         screenShotIndex = (screenShotIndex + 1) % screenShotArray.length;
         nextSlideshowImage = screenShotArray[screenShotIndex];
     } 
@@ -180,59 +180,62 @@ function playScreenshotSlideshow()
 
 function toggleSlideshow()
 {
-	if (slideshowActive)
-	{
-		slideshowActive = false;
-		document.getElementById("prevImageButton").style.display = "inline-block";
-		document.getElementById("nextImageButton").style.display = "inline-block";
-		document.getElementById("loadingImage").src = "images/play.png";
-			
-		screenshotImage.style.marginLeft = "0px";
-		screenshotImage.style.opacity = "1"; 
-	}
-	else
-	{
-		document.getElementById("prevImageButton").style.display = "none";
-		document.getElementById("nextImageButton").style.display = "none";
-		document.getElementById("loadingImage").src = "images/pause.ico";
-		
-		setTimeout(function() {
-			slideshowActive = true;
+    if (slideshowActive)
+    {
+        slideshowActive = false;
+        document.getElementById("prevImageButton").style.display = "inline-block";
+        document.getElementById("nextImageButton").style.display = "inline-block";
+        document.getElementById("loadingImage").src = "images/play.png";
+
+        screenshotImage.style.marginLeft = "0px";
+        screenshotImage.style.opacity = "1"; 
+    }
+    else
+    {
+        document.getElementById("prevImageButton").style.display = "none";
+        document.getElementById("nextImageButton").style.display = "none";
+        document.getElementById("loadingImage").src = "images/pause.ico";
+
+        setTimeout(function() 
+        {
+            slideshowActive = true;
             slideshowInitial = true;
-    		playScreenshotSlideshow();
-    	}, 5000);  
-	}
+            playScreenshotSlideshow();
+        }, 5000);  
+    }
 }
 
 function setImageLocation(margin, opacity) 
 {
-	if (slideshowActive)
-	{
-		screenshotImage.style.marginLeft = margin;
-		screenshotImage.style.opacity = opacity; 
-	}
+    if (slideshowActive)
+    {
+        screenshotImage.style.marginLeft = margin;
+        screenshotImage.style.opacity = opacity; 
+    }
 }
 
 function nextImage()
 {
-	screenShotIndex = (screenShotIndex + 1) % screenShotArray.length;
+    screenShotIndex = (screenShotIndex + 1) % screenShotArray.length;
+    nextSlideshowImage = screenShotArray[screenShotIndex];
     screenImage.src = screenShotArray[screenShotIndex];
 }
 
 function prevImage() 
 {
-	screenShotIndex -= 1;
-	if (screenShotIndex < 0)
-	{
-		screenShotIndex = screenShotArray.length - 1;
-	}
+    screenShotIndex -= 1;
+    if (screenShotIndex < 0)
+    {
+        screenShotIndex = screenShotArray.length - 1;
+    }
+    nextSlideshowImage = screenShotArray[screenShotIndex];
     screenImage.src = screenShotArray[screenShotIndex];
 }
 
 function setUpScreenshots()
 {
     screenShotIndex = 0;
-    
+
     screenShotArray = 
     [
         "images/apartmentKitchen.png",
