@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta content='width=device-width, initial-scale=1.0' name='viewport'>
+        <title>Reality Check</title>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+    </head>
+    <body onresize="onResize()">
+        <div align="center">
+            
+            <div style="display: block; background-color: rgba(255,255,255,0.8); box-shadow: 0px 0px 50px rgba(0,0,0,0.5);
+                        height: auto; min-height: 100vh; width: 100vw; position: relative" align="center" id="firstBlock">
+                        
+                <div style="width: 500px; max-width: 500px; text-align: left; padding: 20px; position: absolute"
+                	 id="titleBlock" align="center">
+                    <h1 style="color: #000; font-family: Garamond">
+                        VR Room Designer
+                    </h1>
+                    
+                    <p style="color: #aaa">
+                        By Reality Check
+                        <br/>
+                        <br/>
+                        <i style="color: #aaa">
+                            A virtual reality room design application where the user 
+                            is able to query 3D models using a voice interface.
+                        </i>
+                    </p>
+                    
+                    <div style="display: block; margin-top: 20px; width: 400px" id="headsetImage" align="center">
+                        <img src="images/oculusHeadset.png"
+                        style="width: 45%; z-index: -2; opacity: 0.5; filter: alpha(opacity=50); display: inline-block;" />
+                         <img src="images/viveHeadset.png"
+                        style="width: 45%; z-index: -2; opacity: 0.5; filter: alpha(opacity=50); display: inline-block;" />
+                    </div>
+                </div>
+                
+                <div style="position: absolute" id="youtubeVideoBlock" align="center">
+                    <iframe id="youtubeVideo" src="https://www.youtube.com/embed/_I8DWmTYyg8" 
+                        frameborder="0" gesture="media" allow="encrypted-media" allowfullscreen>
+                    </iframe>
+                </div>
+                    
+            </div>
+            <br/>
+            <br/>
+            
+            <img src="images/screenshots/boxRoomWindowCloseUp.png" id="backgroundImage" 
+                 style="position: fixed; top: 0px; left: 0px; width: 101%; height: 101%;
+                        z-index: -2; object-fit: cover;" />
+            
+            <div class="container">
+               
+                <br/>
+                <h1>Overview</h1>
+                <br/>
+                
+                <ul>
+                    <li>
+                        Design beautiful and detailed environments
+                    </li>
+                    <li>
+                        Designed for Oculus Rift and HTC Vive
+                    </li>
+                </ul>
+                
+            </div>
+            <div class="container">
+                
+                <br/>
+                <h2 style="display: inline-block; margin-right: 10px; margin-bottom: 10px">Screenshots</h2>
+                <br/>
+                
+                <div style="width: 100%; 
+                	height: 50vw; min-height: 200px; max-height: 370px;" align="center">
+                    <img height="100%" style="object-fit: cover; 
+                    	 width: 80vw; min-width: 300px; max-width: 600px;
+                    	 height: 45vw; min-height: 168px; max-height: 350px;" 
+                    	 class="image-animate-fading" id="screenshotImage"
+                    	 src="images/screenshots/apartmentKitchen.png">
+                </div>
+                
+                <div class="pausePlayAnimation" id="showSlideshowButtons" align="center">
+                	
+	                <button style="display: none;" id="prevImageButton" onclick="prevImage()">
+	                	<img src="images/skipBack.png">
+	                </button>
+	                <button id="pausePlayAnimationButton" onclick="toggleSlideshow()">
+	                	<img src="images/pause.ico" id="loadingImage">
+	                </button>
+	                <button style="display: none;" id="nextImageButton" onclick="nextImage()">
+	                	<img src="images/skipForward.png">
+	                </button>
+                
+                </div>
+                
+                <br/>
+                
+            </div>
+            <div class="container">
+                
+                <br/>
+                <h1> Controls </h1>
+                <br/>
+
+                <p align="center">
+                    <img style="width: 50vw; border: 15px solid #fff; border-radius: 20px" 
+                         src="https://docs.unity3d.com/uploads/Main/OculusControllersTouchControllers.png">
+                    <img style="width: 50vw; border: 15px solid #fff; border-radius: 20px" 
+                         src="https://docs.unity3d.com/uploads/Main/vive_controllers.png">
+                </p>
+                
+                <br/>
+                <h2>Start Room</h2>
+                <br/>
+                
+                <ul>
+                    <li>Press "Right Trigger" to interact with objects including picking up objects in the scene.</li>
+                    <li>Interact with the door knobs to create a new Box, Demo, or Outside room.</li>
+                    <li>Interact with one of the three Tvs in the room to load up a previously saved rooms.</li>
+                </ul>
+                
+                <br/>
+                <hr>
+                <br/>
+                <h2>New Rooms</h2>
+                <br/>
+                
+                <ul>
+                    <li>
+                        Press "Right Trigger" to interact with objects.
+                        <ul>
+                            <li>
+                                After selecting an object in the scene using the "Right Trigger", a properties panel will appear. From here the position, rotation, and scale of the selected model can be finely tuned. The physics of the model can be adjusted here. Toggling the "Obey Gravity" check box will control whether or not the model can be affected by outside forces such as gravity and other scene models. Here the object can be deleted as well.
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        Press "Right Trigger" or "Left Trigger" to pickup objects in the scene.
+                    </li>
+                    <li>
+                        To bring up the menu. press "Y" or "B" for Oculus Rift, or either of the top menu buttons for HTC Vive.
+                        <ul>
+                            <li>
+                                From the menu, you can either go back to the start up lobby, change the volume of the music, or add a new model to the scene.
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        Search Menu
+                        <ul>
+                            <li>
+                                Interact with the text field to bring up the virtual keyboard
+                            </li>
+                            <li>
+                                Interact with the mic button to start the voice recording. 
+                                This records for 5 seconds and then transcribes the voice recording into text. 
+                                The recording can be manually halted by simply pressing the mic button again.
+                            </li>
+                            <li>
+                                After the desired search text has been entered using the keyboard, 
+                                press the search icon to initiate the search algorithm, 
+                                and simply interact with one of the search results to load the respective model into the scene.
+                            </li>
+                            <li>
+                                If there are more than 4 search results, 
+                                interact with the next page and last page buttons to view more search results.
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        Tutorial Menu
+                        <ul>
+                            <li>
+                                Interact with one of the buttons to view the respective tutorial video.
+                            </li>
+                            <li>
+                                Press "Y" or "B" for Oculus Rift, or either of the top menu buttons for HTC Vive to cancel the video.
+                            </li>
+                        </ul>
+                        Save Menu
+                        <ul>
+                            <li>
+                                Interact with the text field to bring up the virtual keyboard and type the desired name of the save.
+                            </li>
+                            <li>
+                                Press the save button to save the current state of the room.
+                            </li>
+                            <li>
+                                If there are already 3 save slots, select one of the slots to override.
+                            </li>
+                        </ul>
+                    <li>
+                        To close the menu, press "Y" or "B" for Oculus Rift, or either of the top menu buttons for HTC Vive, or Interact with the close button in the top right corner of each of the panels to close the active panel.
+                    </li>
+                </ul>
+                
+                <br/>
+                
+            </div>
+            <div class="container">
+                
+                <br/>
+                <h1 style="display: inline-block; margin-right: 10px">About Reality Check</h1>
+                <br/>
+                
+                <br/>
+                <a href="https://github.com/SCCapstone/">
+                	University of South Carolina Capstone Github
+	                <img src="images/githubLogo.png">
+                </a>
+                <a href="https://github.com/SCCapstone/RealityCheck">
+                    Reality Check Github
+                    <img src="images/githubLogo.png">
+                </a>
+                
+                <br/>
+                <h2>Members</h2>
+                <br/>
+                
+    			<a href="https://github.com/pleuk15667">
+					Nattapon Donratanapat
+					<img src="images/githubLogo.png">
+				</a>
+    			<a href="https://github.com/BrandonAHunter">
+    				Brandon Hunter
+    				<img src="images/githubLogo.png">
+    			</a>
+    			<a href="https://github.com/rowles">
+    				Andrew Rowles
+    				<img src="images/githubLogo.png">
+    			</a>
+    			<a href="https://github.com/Shealeycr">
+    				Ryan Shealey
+    				<img src="images/githubLogo.png">
+    			</a>
+                                
+            </div>
+        </div>
+        
+    </body>
+</html>
+
+<script src="main.js"></script>
