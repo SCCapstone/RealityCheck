@@ -66,11 +66,11 @@ div {
 }
 
 .pausePlayAnimation button:hover {
-	background-color: #aaa;
+    background-color: #fff;
 }
 
 .pausePlayAnimation button:active {
-    background-color: #fff;
+    background-color: #aaa;
 }
 
 .pausePlayAnimation button img {
