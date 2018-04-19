@@ -220,16 +220,16 @@ function setUpScreenshots()
     
     screenShotArray = 
     [
-        "images/screenshots/apartmentKitchen.png",
-        "images/screenshots/apartmentLivingRoom.png",
-        "images/screenshots/apartmentMasterBath.png",
-        "images/screenshots/apartmentMasterBed.png",
-        "images/screenshots/boxRoom.png",
-        "images/screenshots/keyboard.png",
-        "images/screenshots/mainRoomLobby.png",
-        "images/screenshots/mainRoomMusic.png",
-        "images/screenshots/newRooms.png",
-        "images/screenshots/teleporting.png",
+        "images/apartmentKitchen.png",
+        "images/apartmentLivingRoom.png",
+        "images/apartmentMasterBath.png",
+        "images/apartmentMasterBed.png",
+        "images/boxRoom.png",
+        "images/keyboard.png",
+        "images/mainRoomLobby.png",
+        "images/mainRoomMusic.png",
+        "images/newRooms.png",
+        "images/teleporting.png",
     ];
 }
 
