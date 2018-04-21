@@ -161,50 +161,56 @@ public class MainScript : MonoBehaviour
 
         if (LTriggerDown || RTriggerDown)
         {
-            GameObject panels = GameObject.Find("PanelsToMove");
             Player player = SteamCameraRig.GetComponent<Player>();
 
             bool swap = false;
+            
+            Hand.HandType pointerType = pointerHand.GetComponent<Hand>().GuessCurrentHandType();
 
-            Hand.HandType leftType = leftHand.GetComponent<Hand>().GuessCurrentHandType();
-            Hand.HandType rightType = rightHand.GetComponent<Hand>().GuessCurrentHandType();
+            bool leftIsLeftIndex = false;
+
+            if (leftHand.GetComponent<Hand>().controller.index == SteamVR_Controller.GetDeviceIndex(SteamVR_Controller.DeviceRelation.Leftmost))
+            {
+                leftIsLeftIndex = true;
+            }
 
             if (RTriggerDown)
             {
-                if (leftType != Hand.HandType.Left)
+                if (pointerType != (leftIsLeftIndex ? Hand.HandType.Right : Hand.HandType.Left))
                 {
                     swap = true;
                 }
             }
-            else if (leftType != Hand.HandType.Right)
+            else if (pointerType != (leftIsLeftIndex ? Hand.HandType.Left : Hand.HandType.Right))
             {
                 swap = true;
             }
-
+            
             if (swap)
             {
-                var hand0 = player.hands[0];
-                var hand1 = player.hands[1];
-                player.hands[1] = hand0;
-                player.hands[0] = hand1;
+                GameObject nonpointerHand = null;
 
-                var hand1Model = leftHand;
-                var hand2Model = rightHand;
-                leftHand = hand2Model;
-                rightHand = hand1Model;
-
-                pointerHand = rightHand;
+                if (pointerHand == leftHand)
+                {
+                    pointerHand = rightHand;
+                    nonpointerHand = leftHand;
+                }
+                else
+                {
+                    pointerHand = leftHand;
+                    nonpointerHand = rightHand;
+                }
 
                 if (HandPanels != null)
                 {
-                    HandPanels.transform.parent = leftHand.transform;
+                    HandPanels.transform.parent = nonpointerHand.transform;
                     HandPanels.transform.localPosition = new Vector3(0, 0.25f, 0.15f);
                     HandPanels.transform.localRotation = Quaternion.Euler(30, 0, 0);
 
-                    PropertyController prop = leftHand.GetComponent<PropertyController>();
+                    PropertyController prop = nonpointerHand.GetComponent<PropertyController>();
 
                     System.Type type = prop.GetType();
-                    Component copy = rightHand.AddComponent(type);
+                    Component copy = pointerHand.AddComponent(type);
                     // Copied fields can be restricted with BindingFlags
                     System.Reflection.FieldInfo[] fields = type.GetFields();
                     foreach (System.Reflection.FieldInfo field in fields)
