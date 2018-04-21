@@ -28,6 +28,8 @@ public class PropertyController : MonoBehaviour
     public Button _Delete;
     public GameObject[] _DeleteConfirmation;
 
+    public Button Exit;
+
     private Vector3 pos;
     private Vector3 rot;
     private Vector3 scale;
@@ -66,6 +68,11 @@ public class PropertyController : MonoBehaviour
         positionArrowPanel.SetActive(false);
         rotationArrowPanel.SetActive(false);
         scaleArrowPanel.SetActive(false);
+
+        Exit.onClick.AddListener(delegate
+        {
+            deSelectModel();
+        });
     }
 
     // Update is called once per frame
