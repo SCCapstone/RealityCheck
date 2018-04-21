@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityStandardAssets.Characters.FirstPerson;
 using UnityEngine.SceneManagement;
+using Valve.VR.InteractionSystem;
 
 public class MainScript : MonoBehaviour
 {
@@ -29,6 +30,9 @@ public class MainScript : MonoBehaviour
 
     public GameObject rightHand;
     public GameObject leftHand;
+
+    public GameObject SteamCameraRig;
+    public GameObject HandPanels;
 
     public GameObject DoorKnobBox;
     public GameObject DoorKnobDemo;
@@ -121,6 +125,9 @@ public class MainScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        RTriggerDown = getRightTriggerDown();
+        LTriggerDown = getLeftTriggerDown();
+
         ModelLoaderService.Instance.Update();
 
         // press tab to show menu
@@ -151,20 +158,74 @@ public class MainScript : MonoBehaviour
             lineRenderer.SetPosition(0, pointerHand.transform.position);
             lineRenderer.SetPosition(1, hit.point);
         }
-        
+
+        if (LTriggerDown || RTriggerDown)
+        {
+            GameObject panels = GameObject.Find("PanelsToMove");
+            Player player = SteamCameraRig.GetComponent<Player>();
+
+            bool swap = false;
+
+            Hand.HandType leftType = leftHand.GetComponent<Hand>().GuessCurrentHandType();
+            Hand.HandType rightType = rightHand.GetComponent<Hand>().GuessCurrentHandType();
+
+            if (RTriggerDown)
+            {
+                if (leftType != Hand.HandType.Left)
+                {
+                    swap = true;
+                }
+            }
+            else if (leftType != Hand.HandType.Right)
+            {
+                swap = true;
+            }
+
+            if (swap)
+            {
+                var hand0 = player.hands[0];
+                var hand1 = player.hands[1];
+                player.hands[1] = hand0;
+                player.hands[0] = hand1;
+
+                var hand1Model = leftHand;
+                var hand2Model = rightHand;
+                leftHand = hand2Model;
+                rightHand = hand1Model;
+
+                pointerHand = rightHand;
+
+                if (HandPanels != null)
+                {
+                    HandPanels.transform.parent = leftHand.transform;
+                    HandPanels.transform.localPosition = new Vector3(0, 0.25f, 0.15f);
+                    HandPanels.transform.localRotation = Quaternion.Euler(30, 0, 0);
+
+                    PropertyController prop = leftHand.GetComponent<PropertyController>();
+
+                    System.Type type = prop.GetType();
+                    Component copy = rightHand.AddComponent(type);
+                    // Copied fields can be restricted with BindingFlags
+                    System.Reflection.FieldInfo[] fields = type.GetFields();
+                    foreach (System.Reflection.FieldInfo field in fields)
+                    {
+                        field.SetValue(copy, field.GetValue(prop));
+                    }
+                    Destroy(prop);
+                }
+            }
+        }
+
         if (SceneManager.GetActiveScene().name == "scene")
         {
             if (null == rayCastEndSphere)
             {
                 rayCastEndSphere = GameObject.Find("rayCastEndSphere");
             }
-
-            RTriggerDown = getRightTriggerDown();
-            LTriggerDown = getLeftTriggerDown();
-
+            
             checkDoorKnobs();
             checkPaintings();
-
+            
             if (needLoadFromStart)
             {
                 needLoadFromStart = false;
@@ -330,7 +391,7 @@ public class MainScript : MonoBehaviour
             string inputName = fullName;
             int lastSpaceIndex = inputName.LastIndexOf(" ");
             inputName = inputName.Substring(0, lastSpaceIndex);
-            Save1NameText.GetComponent<TextMesh>().text = inputName;
+            Save1NameText.GetComponent<Text>().text = inputName;
             Save1NameText.name = fullName;
 
             slotCount++;
@@ -355,7 +416,7 @@ public class MainScript : MonoBehaviour
             string inputName = fullName;
             int lastSpaceIndex = inputName.LastIndexOf(" ");
             inputName = inputName.Substring(0, lastSpaceIndex);
-            Save2NameText.GetComponent<TextMesh>().text = inputName;
+            Save2NameText.GetComponent<Text>().text = inputName;
             Save2NameText.name = fullName;
 
             slotCount++;
@@ -380,7 +441,7 @@ public class MainScript : MonoBehaviour
             string inputName = fullName;
             int lastSpaceIndex = inputName.LastIndexOf(" ");
             inputName = inputName.Substring(0, lastSpaceIndex);
-            Save3NameText.GetComponent<TextMesh>().text = inputName;
+            Save3NameText.GetComponent<Text>().text = inputName;
             Save3NameText.name = fullName;
 
             slotCount++;

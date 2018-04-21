@@ -566,6 +566,7 @@ public class NewRoomScript : MonoBehaviour {
                             BoxCollider boxCollider = searchResult.gameObject.GetComponent<BoxCollider>();
                             if (boxCollider != null && CheckBoxCollision(boxCollider, rayCastEndSphere.transform.position) && !MainButtonsHoveredOver)
                             {
+                                MainButtonsHoveredOver = true;
                                 searchButtonHover = searchResult.GetChild(0).gameObject.GetComponent<Text>().text;
                                 if (RTriggerDown || LTriggerDown)
                                 {
@@ -765,6 +766,11 @@ public class NewRoomScript : MonoBehaviour {
             else
             {
                 keyboardInputField.text += hoveredKey.ToLower();
+
+                if (keyboardSource == "SaveNameChange" && keyboardInputField.text.Length > 20)
+                {
+                    keyboardInputField.text = keyboardInputField.text.Substring(0, 20);
+                }
             }
         }
     }
@@ -945,8 +951,9 @@ public class NewRoomScript : MonoBehaviour {
 
     private void downloadModelAtIndex(int searchIndex)
     {
-        if (searchIndex < searchResults.Count && searchIndex >= 0)
+        if (!isLoadingInNewModel && searchIndex < searchResults.Count && searchIndex >= 0)
         {
+            isLoadingInNewModel = true;
             downloadModelName = searchResults.Hits[searchIndex].Asset.Filename;//searchResults.Hits[searchIndex].Asset.Name;
             SearchService.Instance.DownloadModel(searchResults.Hits[searchIndex], nm =>
             {
@@ -1281,6 +1288,11 @@ public class NewRoomScript : MonoBehaviour {
                 else
                 {
                     keyboardInputField.text += " " + text;
+                }
+
+                if (keyboardSource == "SaveNameChange" && keyboardInputField.text.Length > 20)
+                {
+                    keyboardInputField.text = keyboardInputField.text.Substring(0, 20);
                 }
             });
         }
