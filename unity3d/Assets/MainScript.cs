@@ -80,7 +80,9 @@ public class MainScript : MonoBehaviour
     private double triggerTime = 5.0;
     private bool RTriggerDown;
     private bool LTriggerDown;
-    
+
+    private bool leftIsLeftIndex;
+
     // Use this for initialization
     void Start()
 	{
@@ -121,7 +123,7 @@ public class MainScript : MonoBehaviour
 			});
 		});*/
     }
-
+    
     // Update is called once per frame
     void Update()
     {
@@ -163,25 +165,18 @@ public class MainScript : MonoBehaviour
         {
             Player player = SteamCameraRig.GetComponent<Player>();
 
+            Debug.Log("Left is left: " + leftIsLeftIndex);
+
             bool swap = false;
-            
-            Hand.HandType pointerType = pointerHand.GetComponent<Hand>().GuessCurrentHandType();
-
-            bool leftIsLeftIndex = false;
-
-            if (leftHand.GetComponent<Hand>().controller.index == SteamVR_Controller.GetDeviceIndex(SteamVR_Controller.DeviceRelation.Leftmost))
-            {
-                leftIsLeftIndex = true;
-            }
 
             if (RTriggerDown)
             {
-                if (pointerType != (leftIsLeftIndex ? Hand.HandType.Right : Hand.HandType.Left))
+                if (pointerHand != (leftIsLeftIndex ? rightHand : leftHand))
                 {
                     swap = true;
                 }
             }
-            else if (pointerType != (leftIsLeftIndex ? Hand.HandType.Left : Hand.HandType.Right))
+            else if (pointerHand != (leftIsLeftIndex ? leftHand : rightHand))
             {
                 swap = true;
             }
@@ -223,18 +218,23 @@ public class MainScript : MonoBehaviour
         }
 
         if (SceneManager.GetActiveScene().name == "scene")
-        {
-            if (null == rayCastEndSphere)
-            {
-                rayCastEndSphere = GameObject.Find("rayCastEndSphere");
-            }
-            
+        {            
             checkDoorKnobs();
             checkPaintings();
-            
-            if (needLoadFromStart)
+        }
+
+        if (needLoadFromStart && leftHand.GetComponent<Hand>().controller != null)
+        {
+            needLoadFromStart = false;
+            leftIsLeftIndex = false;
+
+            if (leftHand.GetComponent<Hand>().controller.index == SteamVR_Controller.GetDeviceIndex(SteamVR_Controller.DeviceRelation.First))
             {
-                needLoadFromStart = false;
+                leftIsLeftIndex = true;
+            }
+
+            if (SceneManager.GetActiveScene().name == "scene")
+            {
                 loadSaves();
             }
         }

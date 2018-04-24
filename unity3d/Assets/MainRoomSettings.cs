@@ -33,7 +33,7 @@ public class MainRoomSettings : MonoBehaviour
             rayCastEndSphere = GameObject.Find("rayCastEndSphere");
         }
         
-        if (Input.GetAxisRaw("RightTrigger") > 0.2f || Input.GetAxisRaw("LeftTrigger") > 0.2f)
+        if (rayCastEndSphere != null && (Input.GetAxisRaw("RightTrigger") > 0.2f || Input.GetAxisRaw("LeftTrigger") > 0.2f))
         {
             BoxCollider areaCollider = musicVolumeSliderArea.GetComponent<BoxCollider>();
             if (CheckBoxCollision(areaCollider, rayCastEndSphere.transform.position))
