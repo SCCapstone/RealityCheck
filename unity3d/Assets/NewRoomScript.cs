@@ -59,7 +59,7 @@ public class NewRoomScript : MonoBehaviour {
 
     private double LDownTime;
     private double RDownTime;
-    private double triggerTime = 5.0;
+    private double triggerTime = 5.0; // 5 milliseconds
     private bool RTriggerDown;
     private bool LTriggerDown;
 
@@ -111,7 +111,15 @@ public class NewRoomScript : MonoBehaviour {
     private bool needLoadFromStart = true;
     private bool isLoadingFromStart = true;
 
-    // Use this for initialization
+    /// <summary>
+    /// This class is the powerhouse of the application.
+    /// Everything in each of the design rooms excepted the 
+    /// properties panels is managed through this class.
+    /// 
+    /// Main menu, searching, keyboard input, music volume, tutorial videos, 
+    /// saving, and exiting to the start room. 
+    /// </summary>
+    
     void Start ()
     {
         modelStates = new List<UserAssetState>();
@@ -153,16 +161,23 @@ public class NewRoomScript : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
+        // Gather the raycast end sphere to check where the pointer terminates.
+        // This will be used later on to update UI and change the color of
+        // the sphere.
         if (rayCastEndSphere == null)
         {
             rayCastEndSphere = GameObject.Find("rayCastEndSphere");
         }
 
+        // Gather the line render of the raycast. This will be used later
+        // to change the color of the line.
         if (rayCastLineRenderer == null)
         {
             rayCastLineRenderer = GameObject.Find("_GameMaster").GetComponent<LineRenderer>();
         }
-
+        
+        // Update the color of the bottons and find which 
+        // button is hovered over in the active panel.
         if (VirtualKeyboardCanvas.activeSelf)
         {
             findHoverKey();
@@ -185,10 +200,14 @@ public class NewRoomScript : MonoBehaviour {
             findSaveHoverButton();
         }
 
+        // Update trigger input
         RTriggerDown = getRightTriggerDown();
         LTriggerDown = getLeftTriggerDown();
         bool keyButtonOverride = false;
 
+        // This is used to check if a key is held down.
+        // This is used to delete multiple characters while the trigger is held
+        // while using the keyboard
         if (Input.GetAxisRaw("RightTrigger") > 0.2f || Input.GetAxisRaw("LeftTrigger") > 0.2f)
         {
             if (NowMilliseconds() - keyDownStartTime > keyHoldTime)
@@ -201,21 +220,28 @@ public class NewRoomScript : MonoBehaviour {
             keyDownStartTime = 0;
         }
 
+        // If the player is loading in a new model, sync the position
+        // of the model with where the raycast is pointing
         if (isLoadingInNewModel)
         {
             syncNewModelPosition();
         }
-
+        
+        // If either of the triggers are pressed, activate the respective
+        // button or event based on where the raycaster is pointing
         if (RTriggerDown || LTriggerDown)
         {
             if (isLoadingInNewModel)
             {
                 if (lastNewLoadedModels.Count != 0)
                 {
+                    // Now that the model has been loaded in and the player 
+                    // has decided where to place it, add all the required
+                    // scripts and a rigidbody to it.
                     StartCoroutine(placeNewLoadedModel());
                 }
             }
-            if (VirtualKeyboardCanvas.activeSelf && hoveredKey != "")
+            else if (VirtualKeyboardCanvas.activeSelf && hoveredKey != "")
             {
                 keyDownStartTime = NowMilliseconds();
                 activateKeyboard();
@@ -237,6 +263,8 @@ public class NewRoomScript : MonoBehaviour {
                 activateSavePanel();
             }
         }
+        // If the back key is held on the keyboard, remove a 
+        // character every 0.2 seconds
         else if (keyButtonOverride && VirtualKeyboardCanvas.activeSelf && hoveredKey == "Back")
         {
             if (NowMilliseconds() - keyLastStepTime > keyStepTime)
@@ -245,6 +273,9 @@ public class NewRoomScript : MonoBehaviour {
                 activateKeyboard();
             }
         }
+        // If either of the top menu buttons are pressed, cancel 
+        // loading a model close all menus or open the menu panel
+        // depending on the current event
         else if (Input.GetButtonDown("YButton") || Input.GetButtonDown("BButton")) //Also Start button for Vive
         {
             if (isLoadingInNewModel)
@@ -282,6 +313,9 @@ public class NewRoomScript : MonoBehaviour {
                 }
             }
         }
+        // If a tutorial video was selected, only show the
+        // panel required to show that video until the video
+        // is finished.
         else if (videoIsPlaying)
         {
             for (int i = 0; i < videos.Length; i++)
@@ -293,6 +327,8 @@ public class NewRoomScript : MonoBehaviour {
             }
         }
 
+        // Once all neccessary scripts and assests are loaded in, load in
+        // the selected save slot if the save slot exists.
         if (!allModelsLoadedFromStart)
         {
             if (needLoadFromStart)
@@ -302,6 +338,12 @@ public class NewRoomScript : MonoBehaviour {
             }
             else if (!isLoadingFromStart)
             {
+                // Once all models from load are loaded in
+                // Add in their rigidbodies.
+                // This delay enforces models to stay in place and
+                // not be effected by physics. That way stacked models
+                // do not fall over while models below then
+                // are waiting to be loaded in. 
                 allModelsLoadedFromStart = true;
                 StartCoroutine(addRigidBodiesToStartUpModels());
             }
@@ -377,6 +419,7 @@ public class NewRoomScript : MonoBehaviour {
                     System.DateTimeKind.Utc)).TotalMilliseconds;
     }
 
+    // find if the raycaster is accurately colliding with the box collider
     private bool CheckBoxCollision(BoxCollider collider, Vector3 point)
     {
         Vector3 posToCheck = point;
@@ -389,6 +432,8 @@ public class NewRoomScript : MonoBehaviour {
         return !collider.Raycast(inputRay, out rHit, offset.magnitude * 1.1f);
     }
 
+    // Find what button is hovered over in the main menu
+    // Update the colors on the buttons
     private void findMenuHoverButton()
     {
         menuHoverButton = "";
@@ -420,6 +465,8 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // Find what button is hovered over in the tutorial menu
+    // Update the colors on the buttons
     private void findTutorialHoverButton()
     {
         tutorialHoverButton = "";
@@ -451,6 +498,8 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // Find what button is hovered over on the keyboard
+    // Update the colors on the buttons
     private void findHoverKey()
     {
         if (voiceRecordingInProgress)
@@ -495,6 +544,8 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // Find what button or input is hovered over in the search menu
+    // Update the colors on the buttons
     private void findSearchHoverButton()
     {
         //Go through each of the children of the search results panel
@@ -589,6 +640,8 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // Find what button or input is hovered over in the save menu
+    // Update the colors on the buttons
     private void findSaveHoverButton()
     {
         SaveSlot1Button.SetActive(SaveInstructions.activeSelf);
@@ -645,6 +698,8 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // If a button was selected in the main menu,
+    // activate its respective event.
     private void activateMenu()
     {
         if (menuHoverButton == "Exit To Lobby")
@@ -672,6 +727,8 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // If a button was selected in the tutorial menu,
+    // activate its respective event.
     private void activateTutorial()
     {
         if (tutorialHoverButton == "Teleport")
@@ -722,6 +779,8 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // If a button was selected on the keyboard,
+    // activate its respective event.
     private void activateKeyboard()
     {
         if (voiceRecordingInProgress)
@@ -750,6 +809,8 @@ public class NewRoomScript : MonoBehaviour {
             }
             else if (hoveredKey == "Done")
             {
+                // Find with panel called upon the keyboard
+                // and return the final string result
                 if (keyboardSource == "NewSearch")
                 {
                     updateSearchInput();
@@ -767,6 +828,8 @@ public class NewRoomScript : MonoBehaviour {
             {
                 keyboardInputField.text += hoveredKey.ToLower();
 
+                // Cut off any characters after the 20th character. This
+                // enforces a limit of 20 characters for a save name.
                 if (keyboardSource == "SaveNameChange" && keyboardInputField.text.Length > 20)
                 {
                     keyboardInputField.text = keyboardInputField.text.Substring(0, 20);
@@ -775,6 +838,8 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // If a button or input was selected in the search menu,
+    // activate its respective event.
     private void activateSeachResults()
     {
         if (searchButtonHover == "New")
@@ -825,6 +890,8 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // If a button or input was selected in the save menu,
+    // activate its respective event.
     private void activateSavePanel()
     {
         if (saveHoverButton == "SaveNameChange")
@@ -838,6 +905,11 @@ public class NewRoomScript : MonoBehaviour {
         }
         else if (saveHoverButton == "Save Room")
         {
+            // If the room loaded in with the save slot index as 3, then
+            // all 3 slots contain a save slot and the current room
+            // may only be saved by overriding a save slot.
+            // Display the slot selection instructions is this is the case.
+            // Else save the current state of the scene to the respective save slot.
             if (roomSaveSlot == 3)
             {
                 SaveInstructions.SetActive(true);
@@ -850,6 +922,8 @@ public class NewRoomScript : MonoBehaviour {
                     roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
             }
         }
+        // If slot 1 (aka index 0) was selected. Override the current state of the scene
+        // to slot index 0.
         else if (saveHoverButton.Contains("Slot 1:"))
         {
             SaveInstructions.SetActive(false);
@@ -860,6 +934,8 @@ public class NewRoomScript : MonoBehaviour {
             StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
                     roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
         }
+        // If slot 2 (aka index 1) was selected. Override the current state of the scene
+        // to slot index 1.
         else if (saveHoverButton.Contains("Slot 2:"))
         {
             SaveInstructions.SetActive(false);
@@ -870,6 +946,8 @@ public class NewRoomScript : MonoBehaviour {
             StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
                     roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
         }
+        // If slot 3 (aka index 2) was selected. Override the current state of the scene
+        // to slot index 2.
         else if (saveHoverButton.Contains("Slot 3:"))
         {
             SaveInstructions.SetActive(false);
@@ -886,6 +964,11 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // When the keyboard is called upon, this method must be
+    // called before as to update the position of the keyboard UI.
+    // This forces the keyboard to be placed in front of where
+    // the player is facing a faces to keyboard to point towards
+    // the player.
     private void updateKeyboardPosition()
     {
         Vector3 playerRot = LocalPlayer.transform.localRotation.eulerAngles;
@@ -906,6 +989,9 @@ public class NewRoomScript : MonoBehaviour {
         VirtualKeyboardCanvas.transform.localPosition = newPos;
     }
 
+    // Gather the text from the keyboard and assign it
+    // to the text box for the search input
+    // and close the keyboard.
     private void updateSearchInput()
     {
         SearchResultsInputField.text = keyboardInputField.text;
@@ -914,6 +1000,9 @@ public class NewRoomScript : MonoBehaviour {
         VirtualKeyboardCanvas.SetActive(false);
     }
 
+    // Gather the text from the keyboard and assign it
+    // to the text box for the save name input
+    // and close the keyboard.
     private void updateSaveInput()
     {
         SaveInputField.text = keyboardInputField.text;
@@ -922,6 +1011,13 @@ public class NewRoomScript : MonoBehaviour {
         VirtualKeyboardCanvas.SetActive(false);
     }
 
+    // Clear all UI related to any old search results.
+    // Gather the input string query from the search menu,
+    // perform the search, find how many pages are needed to display
+    // the search results. The max number of search results per page
+    // is 4. Then update the search results UI to represent each of
+    // of the search results as well as delegate the button events
+    // for each of the search results.
     private void PerformSearch()
     {
         clearResultsUI();
@@ -949,12 +1045,79 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // Clear any and all pages and their data from the search results menu
+    private void clearResultsUI()
+    {
+        List<GameObject> objectsToDelete = new List<GameObject>();
+
+        for (int i = 0; i < SearchResultsPanel.transform.childCount; i++)
+        {
+            Transform transform = SearchResultsPanel.transform.GetChild(i);
+            if (transform.gameObject.name.Contains("Page"))
+            {
+                objectsToDelete.Add(transform.gameObject);
+            }
+        }
+
+        for (int i = 0; i < objectsToDelete.Count; i++)
+        {
+            Destroy(objectsToDelete[i]);
+        }
+    }
+
+    // For each page, place it on the search results page
+    // with the correct transformation. Then, for each search
+    // results on each page, instaniate the SearchButtonPrefab prefab
+    // for each button and assign the correct transformation to it.
+    // Finally change the text in the button to match the name
+    // of the model mathcing the search result.
+    private void updateResultsUI()
+    {
+        int modelIndex = 0;
+
+        GameObject page = Instantiate(new GameObject());
+        page.name = "Page 1";
+        page.transform.SetParent(SearchResultsPanel.transform);
+        page.transform.localPosition = new Vector3(0.55f, -4.0f, 0.0f);
+        page.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+        page.transform.localScale = new Vector3(200.0f, 200.0f, 1.0f);
+
+        for (int j = 1; j <= 4; j++)
+        {
+            if (modelIndex < searchResults.Count)
+            {
+                Button item = Instantiate(SearchButtonPrefab);
+                item.transform.SetParent(page.transform);
+
+                float xPos = j % 2 == 0 ? 0.12f : -0.12f;
+                float yPos = j > 2 ? -0.12f : 0.09f;
+
+                item.gameObject.layer = 0;
+                item.transform.localPosition = new Vector3(xPos, yPos, 0.0f);
+                item.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+                item.transform.localScale = new Vector3(0.005f, 0.005f, 1.0f);
+
+                // Assign the search index name in the first child of the button.
+                // This child is hidden and is used to match the button
+                // to the search result index later on.
+                item.transform.GetChild(0).gameObject.GetComponent<Text>().text = (modelIndex) + "";
+                item.transform.GetChild(1).gameObject.GetComponent<Text>().text = searchResults.Hits[modelIndex].Asset.Name + "";
+
+                modelIndex++;
+            }
+        }
+    }
+
+    // Given the search index, download the data for the model from the database.
+    // Then change the color of the laser pointer to green to show the player
+    // that they are in model placement mode.
     private void downloadModelAtIndex(int searchIndex)
     {
+        // Only le the user download a model if one is not already trying to load.
         if (!isLoadingInNewModel && searchIndex < searchResults.Count && searchIndex >= 0)
         {
             isLoadingInNewModel = true;
-            downloadModelName = searchResults.Hits[searchIndex].Asset.Filename;//searchResults.Hits[searchIndex].Asset.Name;
+            downloadModelName = searchResults.Hits[searchIndex].Asset.Filename;
             SearchService.Instance.DownloadModel(searchResults.Hits[searchIndex], nm =>
             {
                 SearchResultsPanel.SetActive(false);
@@ -964,16 +1127,29 @@ public class NewRoomScript : MonoBehaviour {
                 rayCastLineRenderer.startColor = Color.green;
                 rayCastLineRenderer.endColor = Color.green;
 
+                // Once the data is downloaded, parse the information into a useable Unity model,
+                // Then call the callback to set up the bounding box for it.
                 ModelLoaderService.Instance.LoadModel(nm, modelDoneLoadingCallback);
             });
         }
     }
 
+    // This is the callback for when a model is done being parsed
+    // from the model loader service.
     public void modelDoneLoadingCallback(GameObject lastLoadedModel)
     {
         finishUpModelLoad(lastLoadedModel);
     }
 
+    // This method scales the the loaded in game object
+    // to an arbitrary uniform height, and forces the game object to
+    // be placed where the bottom of the model is on the floor.
+    // If also adds a fully encapsulated bounding box to the game object.
+    // Finally, if this method was called from the result of a model
+    // being loaded from a save file, this model is
+    // restored with the transform it was saved with.
+    // If the model came back from the ModelLoaderService as null,
+    // then the loading event is canceled.
     public void finishUpModelLoad(GameObject lastLoadedModel)
     {
         if (lastLoadedModel != null)
@@ -1040,6 +1216,9 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
     
+    // When a mode is loaded in, set its layer to Ignore Raycast
+    // until the model is placed. This way the raycaster does not
+    // collide with it and affect the placement event.
     private void setGameObjectLayer(GameObject model, int layer)
     {
         model.layer = layer;
@@ -1053,6 +1232,31 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // For whatever reason the newly loaded model was canceled
+    // reset the laser pointer to blue, and destroy any data related to the
+    // newly loaded in model.
+    private void cancelNewLoadedModel()
+    {
+        isLoadingInNewModel = false;
+        loadingCircle.SetActive(false);
+        rayCastEndSphere.GetComponent<MeshRenderer>().material.color = Color.blue;
+        rayCastLineRenderer.startColor = Color.blue;
+        rayCastLineRenderer.endColor = Color.blue;
+
+        if (lastNewLoadedModels.Count != 0)
+        {
+            Destroy(lastNewLoadedModels[0]);
+        }
+
+        lastNewLoadedModels.Clear();
+        //SearchService.Instance.Flush();
+    }
+
+    // When the player where to place the model after
+    // loading it from the database, sync the location
+    // of the model with where the user is pointing
+    // the laser pointer. Also update the location
+    // of the loading circle game object.
     private void syncNewModelPosition()
     {
         Vector3 rayCastPos = rayCastEndSphere.transform.position;
@@ -1070,6 +1274,17 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // After a model is loaded from the database, and the
+    // player has decided where they would like to place the
+    // model, this method is called to add the required scripts
+    // and a rigidbody. These scripts include SteamVR's 
+    // VelocityEstimator, Interactable, and Throwable scripts.
+    // Also add the userAsset script to be used later for saving
+    // and altering the transform of the object through the properties
+    // panel. This method returns an IEnumerator because there must
+    // be a pause for adding the rigidbody or else the model
+    // could potentially be moved or spin before the model is placed.
+    // Finally set its layer back to default to allow raycasting.
     private IEnumerator placeNewLoadedModel()
     {
         if (lastNewLoadedModels.Count != 0)
@@ -1084,7 +1299,6 @@ public class NewRoomScript : MonoBehaviour {
             
             lastNewLoadedModel.AddComponent<Valve.VR.InteractionSystem.VelocityEstimator>();
             lastNewLoadedModel.AddComponent<Valve.VR.InteractionSystem.Interactable>();
-            //parentObject.AddComponent<Valve.VR.InteractionSystem.InteractableHoverEvents>();
             lastNewLoadedModel.AddComponent<Valve.VR.InteractionSystem.Throwable>();
 
             Valve.VR.InteractionSystem.Throwable throwable = lastNewLoadedModel.GetComponent<Valve.VR.InteractionSystem.Throwable>();
@@ -1092,9 +1306,7 @@ public class NewRoomScript : MonoBehaviour {
             throwable.onDetachFromHand = new UnityEngine.Events.UnityEvent();
 
             lastNewLoadedModel.AddComponent<userAsset>(); 
-
-            //parentObject.AddComponent<Rigidbody>(); // Add gravity rules for physics
-
+            
             lastNewLoadedModel.transform.GetChild(0).gameObject.GetComponent<BoxCollider>().enabled = true;
 
             if (lastNewLoadedModel.GetComponent<Rigidbody>() == null)
@@ -1123,6 +1335,16 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // Once all models from load are loaded in
+    // Add in their rigidbodies.
+    // This delay enforces models to stay in place and
+    // not be effected by physics. That way stacked models
+    // do not fall over while models below then
+    // are waiting to be loaded in.
+    // This method returns an IEnumerator because there must
+    // be a pause for adding the rigidbody or else the model
+    // could potentially be moved or spin before the model is placed.
+    // Finally set its layer back to default to allow raycasting.
     private IEnumerator addRigidBodiesToStartUpModels()
     {
         for (int i = 0; i < lastNewLoadedModels.Count; i++)
@@ -1131,7 +1353,6 @@ public class NewRoomScript : MonoBehaviour {
 
             lastNewLoadedModel.AddComponent<Valve.VR.InteractionSystem.VelocityEstimator>();
             lastNewLoadedModel.AddComponent<Valve.VR.InteractionSystem.Interactable>();
-            //parentObject.AddComponent<Valve.VR.InteractionSystem.InteractableHoverEvents>();
             lastNewLoadedModel.AddComponent<Valve.VR.InteractionSystem.Throwable>();
             
             Valve.VR.InteractionSystem.Throwable throwable = lastNewLoadedModel.GetComponent<Valve.VR.InteractionSystem.Throwable>();
@@ -1139,9 +1360,7 @@ public class NewRoomScript : MonoBehaviour {
             throwable.onDetachFromHand = new UnityEngine.Events.UnityEvent();
 
             lastNewLoadedModel.AddComponent<userAsset>();
-
-            //parentObject.AddComponent<Rigidbody>(); // Add gravity rules for physics
-
+            
             lastNewLoadedModel.transform.GetChild(0).gameObject.GetComponent<BoxCollider>().enabled = true;
 
             if (lastNewLoadedModel.GetComponent<Rigidbody>() == null)
@@ -1189,77 +1408,14 @@ public class NewRoomScript : MonoBehaviour {
         lastNewLoadedModels.Clear();
         loadedInGameState = null;
     }
-
-    private void cancelNewLoadedModel()
-    {
-        isLoadingInNewModel = false;
-        loadingCircle.SetActive(false);
-        rayCastEndSphere.GetComponent<MeshRenderer>().material.color = Color.blue;
-        rayCastLineRenderer.startColor = Color.blue;
-        rayCastLineRenderer.endColor = Color.blue;
-
-        if (lastNewLoadedModels.Count != 0)
-        {
-            Destroy(lastNewLoadedModels[0]);
-        }
-
-        lastNewLoadedModels.Clear();
-        //SearchService.Instance.Flush();
-    }
     
-    private void clearResultsUI()
-    {
-        List<GameObject> objectsToDelete = new List<GameObject>();
-
-        for (int i = 0; i < SearchResultsPanel.transform.childCount; i++)
-        {
-            Transform transform = SearchResultsPanel.transform.GetChild(i);
-            if (transform.gameObject.name.Contains("Page"))
-            {
-                objectsToDelete.Add(transform.gameObject);
-            }
-        }
-
-        for (int i = 0; i < objectsToDelete.Count; i++)
-        {
-            Destroy(objectsToDelete[i]);
-        }
-    }
-
-    private void updateResultsUI()
-    {
-        int modelIndex = 0;
-
-        GameObject page = Instantiate(new GameObject());
-        page.name = "Page 1";
-        page.transform.SetParent(SearchResultsPanel.transform);
-        page.transform.localPosition = new Vector3(0.55f, -4.0f, 0.0f);
-        page.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
-        page.transform.localScale = new Vector3(200.0f, 200.0f, 1.0f);
-        
-        for (int j = 1; j <= 4; j++)
-        {
-            if (modelIndex < searchResults.Count)
-            {
-                Button item = Instantiate(SearchButtonPrefab);
-                item.transform.SetParent(page.transform);
-
-                float xPos = j % 2 == 0 ? 0.12f : -0.12f;
-                float yPos = j > 2 ? -0.12f : 0.09f;
-
-                item.gameObject.layer = 0;
-                item.transform.localPosition = new Vector3(xPos, yPos, 0.0f);
-                item.transform.localRotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
-                item.transform.localScale = new Vector3(0.005f, 0.005f, 1.0f);
-
-                item.transform.GetChild(0).gameObject.GetComponent<Text>().text = (modelIndex) + "";
-                item.transform.GetChild(1).gameObject.GetComponent<Text>().text = searchResults.Hits[modelIndex].Asset.Name + "";
-
-                modelIndex++;
-            }
-        }
-    }
-
+    // If a voice recording is active, hault it, and
+    // transcribe the recording. The transcribe function
+    // converts the voice recording into text and
+    // updates the keyboard as seen in the callback
+    // function in the else statement.
+    // If the recording services times out after
+    // 5 seconds, the callback is called after transcribe.
     private void toggleVoiceRecording()
     {
         if (recordingService.IsRecording())
@@ -1290,6 +1446,8 @@ public class NewRoomScript : MonoBehaviour {
                     keyboardInputField.text += " " + text;
                 }
 
+                // Force the total character count to be 20. This forces the 
+                // save slot name to be less than or equal to 20 characters.
                 if (keyboardSource == "SaveNameChange" && keyboardInputField.text.Length > 20)
                 {
                     keyboardInputField.text = keyboardInputField.text.Substring(0, 20);
@@ -1298,6 +1456,9 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
     
+    // If the player is poiting at the music slider and
+    // holding either of the triggers, updated the slider
+    // and the music volume based on the raycaster.
     private void updateMusicSlider()
     {
         if (Input.GetAxisRaw("RightTrigger") > 0.2f || Input.GetAxisRaw("LeftTrigger") > 0.2f)
@@ -1326,10 +1487,13 @@ public class NewRoomScript : MonoBehaviour {
             }
         }
     }
-    
+
+    // Updates the location of the position of the slider based on the
+    // passed in percentage value.
+    // Takes in a value from 0 to 100
     private void updateSliderFromPercentage(float percentage)
     {
-        //Takes in a value from 0 to 100
+        // Enfore the value to be between 0 and 100
         percentage = Mathf.Clamp(percentage, 0.0f, 100.0f);
         MainRoomSettings.musicVolume = percentage;
 
@@ -1346,6 +1510,17 @@ public class NewRoomScript : MonoBehaviour {
         musicVolumeSlider.transform.localPosition = newSliderPosition;
     }
 
+    // If the user loaded in a new room even though 3 save slots
+    // have been taken up, don't load any models from any save slot.
+    // Load in the names of the save slots to be used later
+    // to help the user decide which save slot to override.
+    // Then update the save panel based on these names
+    //
+    // Else if the user loaded in one of the 3 three slots,
+    // load in all data from the save slot except the image
+    // related to it.
+    // Each GameState contains a list of models that were saved
+    // in the design as well as their transforms.
     private void loadLevelOnStart()
     {
         roomSaveSlot = SaveLoadService.Instance.Slot;
@@ -1436,6 +1611,10 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    // Recursively load in one model at a time to ensure
+    // maximum correctness for each model. This method takes in a
+    // list of UserAssetStates and loads in the lest model in line.
+    // Then creates a callback for the model to be loaded in.
     private void onStartLoadAtIndex(List<UserAssetState> states)
     {
         if (loadIndex >= states.Count())
