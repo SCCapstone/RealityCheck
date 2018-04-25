@@ -82,7 +82,7 @@ public class MainScript : MonoBehaviour
     private bool leftIsLeftIndex;
 
     private Vector3 rayHitPoint;
-
+    
     private Color normalButton = new Color(0.3f, 0.3f, 0.3f);
     private Color highlightButton = new Color(0.6f, 0.6f, 0.6f);
     private Color selectButton = new Color(0.6f, 0.6f, 10f);
@@ -386,7 +386,7 @@ public class MainScript : MonoBehaviour
                         }
                     }
                 }
-
+                
                 updateButtonColors(blackCover.transform);
                 if (buttonPressed)
                 {
@@ -444,7 +444,7 @@ public class MainScript : MonoBehaviour
         {
             Button currentButton = element.GetComponent<Button>();
             ColorBlock cb = currentButton.colors;
-            if (CheckBoxCollision(currentButton.GetComponent<BoxCollider>(), rayHitPoint))
+            if (currentButton.GetComponent<BoxCollider>().bounds.Contains(rayHitPoint))
             {
                 if (RTriggerDown || LTriggerDown)
                 {
@@ -461,19 +461,6 @@ public class MainScript : MonoBehaviour
             }
             currentButton.colors = cb;
         }
-    }
-
-    // find if the raycaster is accurately colliding with the box collider
-    private bool CheckBoxCollision(BoxCollider collider, Vector3 point)
-    {
-        Vector3 posToCheck = point;
-        Vector3 offset = collider.bounds.center - posToCheck;
-        posToCheck = point + offset * 0.25f;
-        offset = collider.bounds.center - posToCheck;
-        Ray inputRay = new Ray(posToCheck, offset.normalized);
-        RaycastHit rHit;
-
-        return !collider.Raycast(inputRay, out rHit, offset.magnitude * 1.1f);
     }
 
     // Attempt to load all 3 save slots and find their names and image data.
