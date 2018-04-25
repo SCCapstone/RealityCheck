@@ -16,11 +16,19 @@ from common import singleton_object, Singleton, Paginator
 
 @singleton_object
 class SearchService(metaclass=Singleton):
+    """
+    Handle search operations of Lucene index
+    """
 
     MAX_RESULTS = 100000
     DEF_PAGE_SIZE = 100
 
     def open(self, dir_path: str) -> None:
+        """
+        Open index searcher
+        :param dir_path:
+        :return:
+        """
         self.store = SimpleFSDirectory(Paths.get(dir_path))
         self.analyzer = StandardAnalyzer()
         self.searcher = IndexSearcher(DirectoryReader.open(self.store))
@@ -29,6 +37,11 @@ class SearchService(metaclass=Singleton):
         self.timer = Timer()
 
     def search(self, search_request: searchpb.SearchRequest) -> searchpb.SearchResult:
+        """
+        Given a search query, search and encode results to protobuf
+        :param search_request: Search Request
+        :return: Search Result
+        """
         assert search_request is not None
         assert search_request.query is not None
         assert len(search_request.query) > 0
@@ -64,7 +77,6 @@ class SearchService(metaclass=Singleton):
             h = res.hits.add()
             h.score = hit.score
 
-            #asset = AssetFactory.from_document(self.searcher.doc(hit.doc))
             h.asset.CopyFrom(AssetFactory.from_document(self.searcher.doc(hit.doc)))
 
             if res.max_score is 0.0 or h.score > res.max_score:

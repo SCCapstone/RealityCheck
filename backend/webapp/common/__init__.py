@@ -41,6 +41,7 @@ class Singleton(type):
         else:
             return isinstance(instance.__class__, mcs)
 
+
 def singleton_object(cls):
     """Class decorator that transforms (and replaces) a class definition (which
     must have a Singleton metaclass) with the actual singleton object. Ensures

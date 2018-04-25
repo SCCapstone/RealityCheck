@@ -1,23 +1,20 @@
 import base64
+import datetime
+import enum
 import json
 import logging
 
+import generated.search_pb2 as searchpb
 import lucene
 import requests
 from flask import Flask, request, send_file, jsonify, render_template, abort
+from flask_mongoengine import MongoEngine
 from google.protobuf import json_format
-
-import generated.search_pb2 as searchpb
 from search import DocumentFactory
 from search.indexer import IndexService
 from search.searcher import SearchService
 
-from flask_mongoengine import MongoEngine
-import enum
-import datetime
-import os
 import consul
-
 
 lucene.initVM()
 app = Flask(__name__)
@@ -31,8 +28,10 @@ consul_service = consul.Consul(host='consul')
 db = MongoEngine(app)
 
 
-
 class ArchiveMetadata(db.EmbeddedDocument):
+    """
+    Describes metadata of model zip
+    """
     bytes = db.IntField()
     files = db.ListField(default=[])
     name = db.StringField(max_length=255)
@@ -57,6 +56,9 @@ class JobStatus(enum.Enum):
 
 
 class CrawlJob(db.Document):
+    """
+    Crawling job for workers
+    """
     source = db.StringField(max_length=300, required=True)
     uri = db.StringField(max_length=3000, required=True)
     status = db.StringField(max_length=20, required=True)
@@ -64,6 +66,9 @@ class CrawlJob(db.Document):
 
 
 class CrawlAsset(db.Document):
+    """
+    Data extracted from crawlers
+    """
     name = db.StringField(max_length=255)
     description = db.StringField()
     archive = db.EmbeddedDocumentField('ArchiveMetadata')
@@ -82,6 +87,9 @@ class Tag(db.EmbeddedDocument):
 
 
 class Asset(db.Document):
+    """
+    Describes model
+    """
     name = db.StringField(max_length=255)
     description = db.StringField(max_length=1000)
     filename = db.StringField(max_length=255)
@@ -93,10 +101,13 @@ class Asset(db.Document):
     timestamp = db.DateTimeField(default=datetime.datetime.now())
 
 
-
-
 @app.route('/api/v1/search', methods=['POST'])
 def search():
+    """
+    Search endpoint, supports both json and protobuf
+
+    :return: Search Results
+    """
     if request.headers['Content-Type'] == 'application/x-protobuf':
         payload = request.stream.read()
         search_request = searchpb.SearchRequest()
@@ -112,17 +123,12 @@ def search():
         return jsonify(json_out)
 
 
-@app.route('/api/v1/files/<string:fname>')
-def return_files_tut(fname: str):
-    try:
-        return send_file('models/%s' % fname,
-                         attachment_filename=fname)
-    except Exception as e:
-        return str(e)
-
-
 @app.route('/api/v1/transcribe', methods=['POST'])
 def transcribe():
+    """
+    Transcribes b64 encoded Wav file into text using Google Speech API
+    :return: Transcription
+    """
     index, gcloud_key = consul_service.kv.get('gkey')
     gspeech_uri = "https://speech.googleapis.com/v1/speech:recognize?key=%s" % gcloud_key
 
@@ -146,6 +152,12 @@ def transcribe():
 
 @app.route('/api/v2/reindex')
 def reindex():
+    """
+    Deletes search index and reindex all models
+    :return:
+    """
+    whitelist_flag = int(request.args.get('flag', '0')) == 1
+
     import hashlib
     import time
     name = '%s.index-dir' % hashlib.md5(str(time.time()).encode())
@@ -153,10 +165,9 @@ def reindex():
     indexer.open(name)
 
     def ii(d):
-        log.error(d)
         return DocumentFactory.from_dict(d)
 
-    docs = map(lambda d: ii(d), load_docs())
+    docs = map(lambda d: ii(d), load_docs(whitelist_flag))
     indexer.add_documents(docs)
     indexer.commit()
     indexer.close()
@@ -167,6 +178,11 @@ def reindex():
 
 
 def pagination(res):
+    """
+    Helper method for paginating mongo db objects
+    :param res: mongo object
+    :return:
+    """
     page_nb = int(request.args.get('page', default=1))
     items_per_page = int(request.args.get('limit', default=2000))
 
@@ -333,8 +349,13 @@ def crawl_to_asset2(crawl_dict: dict):
     return a
 
 
-def load_docs() -> list:
-    return json.loads(Asset.objects.filter(allow_indexing=True).to_json())
+def load_docs(whitelisted: bool=True) -> list:
+    if whitelisted:
+        docs = json.loads(Asset.objects.filter(allow_indexing=True).to_json())
+    else:
+        docs = json.loads(Asset.objects.to_json())
+
+    return docs
 
 
 if __name__ == '__main__':
