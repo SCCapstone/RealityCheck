@@ -43,7 +43,7 @@ public class PropertyController : MonoBehaviour
 
     private double LDownTime;
     private double RDownTime;
-    private double triggerTime = 5; // 10 milliseconds
+    private double triggerTime = 5; // 5 milliseconds
     private bool RTriggerDown;
     private bool LTriggerDown;
 
@@ -676,7 +676,8 @@ public class PropertyController : MonoBehaviour
         if (Physics.Raycast(raydirection, out seen))
         {
             Debug.Log(seen.collider.name);
-            if (seen.collider.gameObject.transform.parent.gameObject.GetComponent<userAsset>() != null)
+            if (seen.collider.gameObject.transform.parent != null &&
+                seen.collider.gameObject.transform.parent.gameObject.GetComponent<userAsset>() != null)
             {
                 if (active)
                 {

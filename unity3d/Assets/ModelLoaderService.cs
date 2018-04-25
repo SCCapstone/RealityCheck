@@ -7,8 +7,6 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using TriLib;
-//using UnityEditor.PackageManager;
-
 
 public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
 
@@ -23,9 +21,7 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
     Action<GameObject> processFinishedCallBack;
 
     private AssetLoaderOptions assetLoaderOptions;
-
-
-
+    
     protected ModelLoaderService()
     {
         loaders = new List<OBJThread>();
@@ -40,58 +36,44 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
         assetLoaderOptions.DontLoadAnimations = true;
     }
 
-
     public void LoadModel(NetModel nm, Action<GameObject> callBack)
     {
         StartCoroutine(loadModel(nm, callBack));
-        /*
-        processFinishedCallBack = callBack;
-        loaders.Add(new OBJThread());
-        loaders[loaders.Count - 1].BumpedSpecular = BumpedSpecular;
-        loaders[loaders.Count - 1].BumpedDiffuse = BumpedDiffuse;
-        loaders[loaders.Count - 1].Standard = Standard;
-        loaders[loaders.Count - 1].LoadLocal(nm.obj);*/
     }
 
     private IEnumerator loadModel(NetModel nm, Action<GameObject> callBack)
     {
         using (var assetLoader = new AssetLoader())
         {
+            GameObject assetGameObject = null;
+
             try
             {
-                GameObject assetGameObject = assetLoader.LoadFromFile(nm.file, assetLoaderOptions);
+                assetGameObject = assetLoader.LoadFromFile(nm.file, assetLoaderOptions);
                 if (assetGameObject != null)
                 {
                     assetGameObject.name = nm.file_uuid; //nm.uuid;
                     Debug.Log("MLS name: " + assetGameObject.name);
-                    callBack(assetGameObject);
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError("NOPE!!! ex " + e);
+                Debug.LogError("Failed to load model from AssetLoaded. ex: " + e);
+                assetGameObject = null;
             }
             
+            callBack(assetGameObject);
+
             yield return null;
         }
     }
 
     public void Update()
     {
-        /*
-        if (loaders != null) {
-            for (int i = 0; i < loaders.Count; i++)
-			{
-				loaders[i].Update();
 
-				if (loaders[i].AllJobsDone)
-				{
-					processModel(loaders[i]);
-					i--;
-				}
-			}
-        }*/
     }
+
+#region Deprecated
 
     private void processModel(OBJThread loader)
 	{
@@ -250,4 +232,6 @@ public sealed class ModelLoaderService: Singleton<ModelLoaderService> {
         Destroy(parentOfObjectsToCombine);
 		return resultGO;
 	}
+
+#endregion
 }
