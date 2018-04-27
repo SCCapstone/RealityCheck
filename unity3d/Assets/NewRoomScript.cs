@@ -120,6 +120,7 @@ public class NewRoomScript : MonoBehaviour {
     /// saving, and exiting to the start room. 
     /// </summary>
     
+    //initalizes everything at start
     void Start ()
     {
         modelStates = new List<UserAssetState>();
@@ -350,6 +351,7 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    //gets rather or not the right trigger is down
     private bool getRightTriggerDown()
     {
         float pressure = Input.GetAxisRaw("RightTrigger");
@@ -381,6 +383,7 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    //gets rather or not the left triger is down
     private bool getLeftTriggerDown()
     {
         float pressure = Input.GetAxisRaw("LeftTrigger");
@@ -412,6 +415,7 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    //current milli seconds that have passes
     private double NowMilliseconds()
     {
         return (System.DateTime.UtcNow -
