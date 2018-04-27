@@ -120,6 +120,7 @@ public class NewRoomScript : MonoBehaviour {
     /// saving, and exiting to the start room. 
     /// </summary>
     
+    //initalizes everything at start
     void Start ()
     {
         modelStates = new List<UserAssetState>();
@@ -350,6 +351,7 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    //gets rather or not the right trigger is down
     private bool getRightTriggerDown()
     {
         float pressure = Input.GetAxisRaw("RightTrigger");
@@ -381,6 +383,7 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    //gets rather or not the left triger is down
     private bool getLeftTriggerDown()
     {
         float pressure = Input.GetAxisRaw("LeftTrigger");
@@ -412,6 +415,7 @@ public class NewRoomScript : MonoBehaviour {
         }
     }
 
+    //current milli seconds that have passes
     private double NowMilliseconds()
     {
         return (System.DateTime.UtcNow -
@@ -1181,13 +1185,14 @@ public class NewRoomScript : MonoBehaviour {
             }
 
             float diff = bounds.min.y * newScale;
-
-            lastLoadedModel.transform.position = new Vector3(0, Mathf.Abs(diff), 0);
+            
             lastLoadedModel.GetComponent<BoxCollider>().enabled = false;
 
             GameObject parentObject = new GameObject();
             parentObject.name = downloadModelName;//" parent";
             lastLoadedModel.transform.parent = parentObject.transform;
+            parentObject.transform.position = new Vector3(0, Mathf.Abs(diff), 0);
+            
             setGameObjectLayer(parentObject, 2);
             
             if (modelStates.Count != 0)
