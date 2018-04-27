@@ -1185,13 +1185,14 @@ public class NewRoomScript : MonoBehaviour {
             }
 
             float diff = bounds.min.y * newScale;
-
-            lastLoadedModel.transform.position = new Vector3(0, Mathf.Abs(diff), 0);
+            
             lastLoadedModel.GetComponent<BoxCollider>().enabled = false;
 
             GameObject parentObject = new GameObject();
             parentObject.name = downloadModelName;//" parent";
             lastLoadedModel.transform.parent = parentObject.transform;
+            parentObject.transform.position = new Vector3(0, Mathf.Abs(diff), 0);
+            
             setGameObjectLayer(parentObject, 2);
             
             if (modelStates.Count != 0)
