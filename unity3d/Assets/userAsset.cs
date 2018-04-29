@@ -5,41 +5,68 @@ using UnityEngine.UI;
 
 public class userAsset : MonoBehaviour {
 
-    public float xToY = 1.0f;
-    public float xToZ = 1.0f;
-    public float yToX = 1.0f;
-    public float yToZ = 1.0f;
-    public float zToX = 1.0f;
-    public float zToY = 1.0f;
+    //Variables used for maintaining scale
+    private float xToY = 1.0f;
+    private float xToZ = 1.0f;
+    private float yToX = 1.0f;
+    private float yToZ = 1.0f;
+    private float zToX = 1.0f;
+    private float zToY = 1.0f;
+
+    //holds all the diffrent snaps
     private int[] rotationSnap = { 1, 5, 10, 15, 30, 45, 90 };
 
+    //Properties of the Model
     private int rotationSnapIndex = 0;
     private bool maintain = true;
     private bool gravity = true;
 
+    //the player gameobject
+    private GameObject player;
 
+    //Assign the player object once the model has spawned
+    private void Start()
+    {
+        player = GameObject.Find("[CameraRig]");    
+    }
+
+    //Checks if the model is out of bounds each frame
+    private void Update()
+    {
+        if(this.gameObject.transform.localPosition.y < -4)
+        {
+            this.gameObject.transform.localPosition = new Vector3(player.transform.localPosition.x, 2,
+                player.transform.localPosition.z);
+        }
+    }
+
+    //assignes rather it maintains proportions
     public bool Maintain
     {
         get { return maintain; }
         set { maintain = value; }
     }
 
+    //assigns rather it obeys gravity
     public bool Gravity
     {
         get { return gravity; }
         set { gravity = value; }
     }
 
+    //changes the position of the model
     public void Position(Vector3 pos){
         this.transform.position = pos;
         checkBounds ();
     }
 
+    //changes the rotation of the model
     public void Rotation(Vector3 rotation){
         this.transform.localEulerAngles = rotation;
         checkBounds ();
     }
 
+    //changes the scale of the model
     public void Scale(Vector3 scale)
     {
         if (maintain)
@@ -58,6 +85,7 @@ public class userAsset : MonoBehaviour {
         checkBounds();
     }
 
+    //Assignes the phisics of the model
     public void Physics(){
         if (gravity)
         {
@@ -71,6 +99,7 @@ public class userAsset : MonoBehaviour {
         }
     }
 
+    //checks the bounds of the model
     void checkBounds(){
         Quaternion currentRotation = this.gameObject.transform.rotation;
         this.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
@@ -88,6 +117,7 @@ public class userAsset : MonoBehaviour {
         }
     }
 
+    //scales the model keeping its proportions
     void maintainProportions(Vector3 scale)
     {
         if (this.transform.localScale.x != scale.x)
@@ -131,6 +161,7 @@ public class userAsset : MonoBehaviour {
         }
     }
 
+    //increases the rotaiomn snap
     public void RotationSnapInc()
     {
         Debug.Log("SnapRotIndex: " + rotationSnapIndex);
@@ -138,6 +169,7 @@ public class userAsset : MonoBehaviour {
         rotationSnapIndex++;
     }
 
+    //decreases the rotation snap
     public void RotationSnapDec()
     {
         Debug.Log("SnapRotIndex: " + rotationSnapIndex);
@@ -145,6 +177,7 @@ public class userAsset : MonoBehaviour {
             rotationSnapIndex--;
     }
 
+    //gets the rotation snap
     public int GetRotationSnap()
     {
         return rotationSnap[rotationSnapIndex];

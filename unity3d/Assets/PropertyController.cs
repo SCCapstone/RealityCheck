@@ -8,16 +8,24 @@ public class PropertyController : MonoBehaviour
 {
     public Text _Name;
 
+    //panels that need to be controlled
+    #region Panels
+
     public GameObject MenuPanel;
     public GameObject SearchResultsPanel;
     public GameObject SavePanel;
     public GameObject TutorialPanel;
     public GameObject VirtualKeyboardCanvas;
-
     public GameObject objectOptionsPanel;
     public GameObject positionArrowPanel;
     public GameObject rotationArrowPanel;
     public GameObject scaleArrowPanel;
+
+    #endregion
+
+    //Buttons and other inputs
+    #region inputs
+
     public InputField[] _Position;
     public InputField[] _Rotation;
     public Button[] _RotSnapButtons;
@@ -27,8 +35,12 @@ public class PropertyController : MonoBehaviour
     public Toggle ObeyGravity;
     public Button _Delete;
     public GameObject[] _DeleteConfirmation;
-
     public Button Exit;
+
+    #endregion
+
+    //properties of selected model
+    #region Properties of Models
 
     private Vector3 pos;
     private Vector3 rot;
@@ -38,21 +50,30 @@ public class PropertyController : MonoBehaviour
     private GameObject selected;
     private string inputSelected;
 
+    #endregion
+
+    //trigger held properties
+    #region Triggers
+
     private bool RTriggerHeld;
     private bool LTriggerHeld;
-
     private double LDownTime;
     private double RDownTime;
     private double triggerTime = 5; // 5 milliseconds
     private bool RTriggerDown;
     private bool LTriggerDown;
 
+    #endregion
+
+    //raycaster
     private Vector3 rayHitPoint;
 
+    //button colors
     private Color normalButton = new Color(0.3f, 0.3f, 0.3f);
     private Color highlightButton = new Color(0.6f, 0.6f, 0.6f);
     private Color selectButton = new Color(0.6f, 0.6f, 10f);
 
+    //other input colors
     private Color normalInput = new Color(1.0f, 1.0f, 1.0f);
     private Color highlightInput = new Color(0.8f, 0.8f, 0.8f);
     private Color selectInput = new Color(0.6f, 0.6f, 10f);
@@ -81,10 +102,13 @@ public class PropertyController : MonoBehaviour
         RTriggerDown = getRightTriggerDown();
         LTriggerDown = getLeftTriggerDown();
 
+        //selects model
         if (RTriggerDown || LTriggerDown)
             selectModel();
+        //deslects model
         else if ((Input.GetButtonDown("BButton") || Input.GetButtonDown("YButton")) && active)
             deSelectModel();
+        //updates selected model
         if (selected != null)
         {
             updateButtonColors(objectOptionsPanel.transform);
@@ -92,6 +116,7 @@ public class PropertyController : MonoBehaviour
         }
     }
 
+    //updates the feilds that are displayed to the user
     void updateFields(GameObject Object)
     {
         pos = Object.transform.position;
@@ -99,6 +124,7 @@ public class PropertyController : MonoBehaviour
         scale = Object.transform.localScale;
         model = Object.GetComponent<userAsset>();
 
+        //finds which input feild is selected
         if (inputSelected == "xPosition")
         {
             _Position[0].gameObject.GetComponent<Image>().color = new Color(0.61f, 0.66f, 0.79f, 1);
@@ -172,6 +198,7 @@ public class PropertyController : MonoBehaviour
             mapControls(scaleArrowPanel, 2, "scale");
         }
 
+        //updates all input feilds displayed unless its selected
         if (inputSelected != "xPosition")
         {
             _Position[0].text = Object.transform.position.x.ToString("0.00");
@@ -233,16 +260,19 @@ public class PropertyController : MonoBehaviour
 
             if (RTriggerDown || LTriggerDown)
             {
+                //invocks the buttons functions
                 if (seen.collider.tag == "Button")
                 {
                     seen.collider.gameObject.GetComponent<Button>().onClick.Invoke();
                     _RotationSnap.text = model.GetRotationSnap() + "°";
                 }
+                //sets the selcted input
                 else if (seen.collider.tag == "Input")
                 {
                     inputSelected = seen.collider.name;
                     Debug.Log(inputSelected);
                 }
+                //toggles check box
                 else if (seen.collider.tag == "Check")
                 {
                     if (seen.collider.gameObject.name == "Gravity")
@@ -266,6 +296,7 @@ public class PropertyController : MonoBehaviour
         }
     }
 
+    //sets the on click functions of each button
     void mapControls(GameObject panel, int index, string type)
     {
         pos = selected.transform.position;
@@ -274,6 +305,7 @@ public class PropertyController : MonoBehaviour
         model = selected.GetComponent<userAsset>();
         Button[] buttons = panel.transform.GetComponentsInChildren<Button>();
 
+        //removes all previous onclick functions on each button
         for (int i = 0; i < buttons.Length; i++)
         {
             buttons[i].onClick.RemoveAllListeners();
@@ -564,6 +596,7 @@ public class PropertyController : MonoBehaviour
         }
     }
 
+    //checks collision of objects
     private bool CheckBoxCollision(BoxCollider collider, Vector3 point)
     {
         Vector3 posToCheck = point;
@@ -576,6 +609,7 @@ public class PropertyController : MonoBehaviour
         return !collider.Raycast(inputRay, out rHit, offset.magnitude * 1.1f);
     }
 
+    //changes the colors of each button
     private void updateButtonColors(Transform parent)
     {
         for (int i = 0; i < parent.childCount; i++)
@@ -586,6 +620,7 @@ public class PropertyController : MonoBehaviour
         }
     }
 
+    //changes the colors of the buttons of the children
     private void updateButtonColorsInChildren(Transform parent)
     {
         GameObject element = parent.gameObject;
@@ -658,6 +693,7 @@ public class PropertyController : MonoBehaviour
         }
     }
 
+    //selects the model and opens up properties panel
     void selectModel()
     {
         if (VirtualKeyboardCanvas.activeSelf)
@@ -773,6 +809,7 @@ public class PropertyController : MonoBehaviour
         }
     }
 
+    //deselects the model and closes properties panel
     public void deSelectModel()
     {
         selected = null;
@@ -797,6 +834,7 @@ public class PropertyController : MonoBehaviour
         _RotSnapButtons[1].onClick.RemoveAllListeners();
     }
 
+    //finds if right trigger is down
     private bool getRightTriggerDown()
     {
         float pressure = Input.GetAxisRaw("RightTrigger");
@@ -828,6 +866,7 @@ public class PropertyController : MonoBehaviour
         }
     }
 
+    //finds if left trigger is down
     private bool getLeftTriggerDown()
     {
         float pressure = Input.GetAxisRaw("LeftTrigger");
@@ -859,6 +898,7 @@ public class PropertyController : MonoBehaviour
         }
     }
 
+    //current milli seconds that have passes
     private double NowMilliseconds()
     {
         return (System.DateTime.UtcNow -
