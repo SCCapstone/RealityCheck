@@ -7,12 +7,23 @@ using System.Collections;
 
 public class SaveLoadService : Singleton<SaveLoadService>
 {
+    private static string SAVE_FOLDER = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + Path.DirectorySeparatorChar + "RealityCheck" + Path.DirectorySeparatorChar;
     private int slot = 0;
 
     // Use this for initialization
     void Start()
     {
-
+        try
+        {
+            if (!Directory.Exists(SAVE_FOLDER))
+            {
+                Directory.CreateDirectory(SAVE_FOLDER);
+            }
+        }
+        catch (IOException ex)
+        {
+            Debug.Log(ex);
+        }
     }
 
     // Update is called once per frame
@@ -29,12 +40,12 @@ public class SaveLoadService : Singleton<SaveLoadService>
 
     private string FilePath()
     {
-        return Application.persistentDataPath + Path.DirectorySeparatorChar + "save" + slot + ".json";
+        return SAVE_FOLDER + "save" + slot + ".json";
     }
 
     public IEnumerator Save(int roomId, string roomName, List<GameObject> userAssets)
     {
-        var screenshotFn = Application.persistentDataPath + Path.DirectorySeparatorChar + "save" + slot + ".png";
+        var screenshotFn = SAVE_FOLDER + "save" + slot + ".png";
 
         if (File.Exists(screenshotFn))
         {
@@ -43,7 +54,8 @@ public class SaveLoadService : Singleton<SaveLoadService>
 
         ScreenCapture.CaptureScreenshot(screenshotFn);
         
-        //Wait for 4 frames
+        // Wait for 10 frames
+        // ScreenCapture is async
         for (int i = 0; i < 10; i++)
         {
             yield return null;
@@ -113,7 +125,7 @@ public class SaveLoadService : Singleton<SaveLoadService>
 
     public List<GameState> Saves()
     {
-        var jsonFiles = Directory.GetFiles(Application.persistentDataPath + Path.DirectorySeparatorChar, "*.json", SearchOption.AllDirectories).ToList();
+        var jsonFiles = Directory.GetFiles(SAVE_FOLDER, "*.json", SearchOption.AllDirectories).ToList();
         var saveFiles = jsonFiles.Where(f => f.Contains("save")).ToList();
         
         return saveFiles.Select(s => Load(s)).ToList(); ;
