@@ -1,7 +1,7 @@
 
 import lucene
 from java.nio.file import Paths
-from org.apache.lucene.analysis.standard import StandardAnalyzer
+from org.apache.lucene.analysis.en import EnglishAnalyzer
 from org.apache.lucene.index import DirectoryReader, IndexOptions, IndexWriter, IndexWriterConfig
 from org.apache.lucene.queryparser.classic import QueryParserBase, MultiFieldQueryParser
 from org.apache.lucene.search import IndexSearcher
@@ -30,7 +30,7 @@ class SearchService(metaclass=Singleton):
         :return:
         """
         self.store = SimpleFSDirectory(Paths.get(dir_path))
-        self.analyzer = StandardAnalyzer()
+        self.analyzer = EnglishAnalyzer()
         self.searcher = IndexSearcher(DirectoryReader.open(self.store))
         self.parser = MultiFieldQueryParser(["name", "tags"], self.analyzer)
         self.parser.setDefaultOperator(QueryParserBase.OR_OPERATOR)
