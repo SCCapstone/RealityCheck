@@ -1,13 +1,10 @@
+import json
 import logging
 import time
 
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-import os
-import json
 import requests
 from kafka import KafkaProducer
-
+from selenium import webdriver
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -12,7 +12,15 @@ from common import singleton_object, Singleton
 
 @singleton_object
 class IndexService(metaclass=Singleton):
+    """
+    Handles search indexing of models
+    """
+
     def open(self, dir_path: str) -> None:
+        """
+        Open new Lucene index
+        :param dir_path:
+        """
         try:
             shutil.rmtree(dir_path)
         except:
@@ -25,6 +33,11 @@ class IndexService(metaclass=Singleton):
         self.writer = IndexWriter(self.store, config)
 
     def add_documents(self, docs):
+        """
+        Add a document to index
+        :param docs:
+        :return:
+        """
         for d in docs:
             self.writer.addDocument(d)
 
@@ -32,7 +45,15 @@ class IndexService(metaclass=Singleton):
         return self.writer.numDocs()
 
     def commit(self):
+        """
+        Commit the index to disk
+        :return:
+        """
         self.writer.commit()
 
     def close(self):
+        """
+        Close the writer
+        :return:
+        """
         self.writer.close()

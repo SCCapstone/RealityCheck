@@ -1,27 +1,25 @@
-import logging
-import time
-
-import redis
-from pymongo import MongoClient
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-import os
-import uuid
-from gridfs import GridFS
-import json
-from google.cloud import storage
-import sys
-import six
-import pathlib
 import glob
-import libarchive.public
 import hashlib
-import shutil
-import zipfile
-import magic
-import requests
-from kafka import KafkaConsumer
+import json
+import logging
+import os
+import pathlib
 import random
+import shutil
+import sys
+import time
+import uuid
+import zipfile
+
+import libarchive.public
+import magic
+import redis
+import requests
+import six
+from google.cloud import storage
+from kafka import KafkaConsumer
+from selenium import webdriver
+
 import consul
 
 mime = magic.Magic(mime=True)
