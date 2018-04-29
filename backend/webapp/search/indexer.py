@@ -2,7 +2,7 @@ import shutil
 
 import lucene
 from java.nio.file import Paths
-from org.apache.lucene.analysis.standard import StandardAnalyzer
+from org.apache.lucene.analysis.en import EnglishAnalyzer
 from org.apache.lucene.document import Document, Field, FieldType
 from org.apache.lucene.index import DirectoryReader, IndexOptions, IndexWriter, IndexWriterConfig
 from org.apache.lucene.store import SimpleFSDirectory
@@ -27,7 +27,7 @@ class IndexService(metaclass=Singleton):
             pass
 
         self.store = SimpleFSDirectory(Paths.get(dir_path))
-        self.analyzer = StandardAnalyzer()
+        self.analyzer = EnglishAnalyzer()
         config = IndexWriterConfig(self.analyzer)
         config.setOpenMode(IndexWriterConfig.OpenMode.CREATE)
         self.writer = IndexWriter(self.store, config)
