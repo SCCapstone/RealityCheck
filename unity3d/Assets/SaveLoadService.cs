@@ -43,7 +43,7 @@ public class SaveLoadService : Singleton<SaveLoadService>
         return SAVE_FOLDER + "save" + slot + ".json";
     }
 
-    public IEnumerator Save(int roomId, string roomName, List<GameObject> userAssets)
+    public void Save(int roomId, string roomName, List<GameObject> userAssets)
     {
         var screenshotFn = SAVE_FOLDER + "save" + slot + ".png";
 
@@ -54,13 +54,6 @@ public class SaveLoadService : Singleton<SaveLoadService>
 
         ScreenCapture.CaptureScreenshot(screenshotFn);
         
-        // Wait for 10 frames
-        // ScreenCapture is async
-        for (int i = 0; i < 10; i++)
-        {
-            yield return null;
-        }
-        
         var states = userAssets.Where(ua => ua != null).Select(ua => UserAssetState.FromGameObject(ua));
         var game = new GameState
         {
@@ -68,10 +61,7 @@ public class SaveLoadService : Singleton<SaveLoadService>
         };
         
         game.roomName = roomName;
-        game.screenshotPNG = GameState.Img2B64(screenshotFn);
         
-        //FileUtil.DeleteFileOrDirectory(screenshotFn);
-
         foreach (var s in states)
         {
             game.Add(s);

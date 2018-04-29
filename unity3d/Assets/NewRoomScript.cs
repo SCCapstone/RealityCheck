@@ -922,8 +922,8 @@ public class NewRoomScript : MonoBehaviour {
             {
                 SavePanel.SetActive(false);
                 roomSaveName = SaveInputField.text;
-                StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
-                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
+                SaveLoadService.Instance.Save(roomSaveSlot,
+                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets);
             }
         }
         // If slot 1 (aka index 0) was selected. Override the current state of the scene
@@ -935,8 +935,7 @@ public class NewRoomScript : MonoBehaviour {
             SaveLoadService.Instance.Slot = 0;
             roomSaveName = SaveInputField.text;
             SaveSlot1ButtonText.GetComponent<Text>().text = "Slot 1: " + roomSaveName;
-            StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
-                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
+            SaveLoadService.Instance.Save(roomSaveSlot, roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets);
         }
         // If slot 2 (aka index 1) was selected. Override the current state of the scene
         // to slot index 1.
@@ -947,8 +946,8 @@ public class NewRoomScript : MonoBehaviour {
             SaveLoadService.Instance.Slot = 1;
             roomSaveName = SaveInputField.text;
             SaveSlot2ButtonText.GetComponent<Text>().text = "Slot 2: " + roomSaveName;
-            StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
-                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
+            SaveLoadService.Instance.Save(roomSaveSlot,
+                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets);
         }
         // If slot 3 (aka index 2) was selected. Override the current state of the scene
         // to slot index 2.
@@ -959,8 +958,8 @@ public class NewRoomScript : MonoBehaviour {
             SaveLoadService.Instance.Slot = 2;
             roomSaveName = SaveInputField.text;
             SaveSlot3ButtonText.GetComponent<Text>().text = "Slot 3: " + roomSaveName;
-            StartCoroutine(SaveLoadService.Instance.Save(roomSaveSlot,
-                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets));
+            SaveLoadService.Instance.Save(roomSaveSlot,
+                    roomSaveName + " " + SceneManager.GetActiveScene().name, userAssets);
         }
         else if (saveHoverButton == "Close")
         {

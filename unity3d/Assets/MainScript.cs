@@ -119,7 +119,8 @@ public class MainScript : MonoBehaviour
         //Assign the pointer hand to the default right hand
         pointerHand = rightHand;
 
-        savingDirectory = Application.persistentDataPath + Path.DirectorySeparatorChar;
+        //savingDirectory = Application.persistentDataPath + Path.DirectorySeparatorChar;
+        savingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + Path.DirectorySeparatorChar + "RealityCheck" + Path.DirectorySeparatorChar;
 
         // If this is the starting room, load in the save files neccessary
         // for the loading UI.
